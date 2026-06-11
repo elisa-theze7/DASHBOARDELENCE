@@ -308,9 +308,10 @@ function liveCA(mi,v){
   if(s){s.textContent=ca>0?fmtN(salaire):'—';s.className='mbloc-val '+(salaire>=0?'gr':'re');}
 }
 function updateCA(mi,v){
+  _caEditing=true;
   S.ca[mi]=parseFloat(v)||0;
-  // Sync to projects: auto-add CA if there's a facturé project this month
-  save();renderAll();
+  if(_caSaveTimeout) clearTimeout(_caSaveTimeout);
+  _caSaveTimeout=setTimeout(()=>{save();renderAll();_caEditing=false;},800);
 }
 function updatePonct(mi,v){S.depPonctMens[mi]=parseFloat(v)||0;save();renderMoisDetail();renderAnnuel();renderStats();}
 
@@ -428,7 +429,16 @@ function addProj(){
   save();renderAll();
   ['p-name','p-client','p-amount'].forEach(id=>document.getElementById(id).value='');
 }
-function delProj(i){S.projects.splice(i,1);save();renderProjList();renderStats();}
+function delProj(i){
+  const p=S.projects[i];
+  // Retire le montant du CA si projet était facturé
+  if(p&&p.status==='facture'&&p.amount>0){
+    const mi=MOIS.indexOf(p.month);
+    if(mi>=0) S.ca[mi]=Math.max(0,(S.ca[mi]||0)-p.amount);
+  }
+  S.projects.splice(i,1);
+  save();renderAll();
+}
 
 function renderStats(){
   const el=document.getElementById('stats-strip');
@@ -447,15 +457,18 @@ function renderStats(){
 
 function renderAll(){renderMonthNav();renderMoisDetail();renderChart();renderDep();renderProjList();renderStats();}
 
+// Flag anti-boucle Firebase
+let _caEditing=false;
+let _caSaveTimeout=null;
+
 // Écoute Firebase CA en temps réel
 dbCA.ref(FB_CA_PATH).on('value',snap=>{
   const fbData=snap.val();
-  if(fbData&&fbData.ca){
+  if(fbData&&fbData.ca&&!_caEditing){
     Object.keys(fbData).forEach(k=>{S[k]=fbData[k];});
     try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
     renderAll();
-  } else if(S&&S.ca){
-    // Première fois : pousse les données locales
+  } else if(!fbData&&S&&S.ca){
     dbCA.ref(FB_CA_PATH).set(JSON.parse(JSON.stringify(S)));
   }
 });

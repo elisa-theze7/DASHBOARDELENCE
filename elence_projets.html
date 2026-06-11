@@ -221,17 +221,23 @@ function saveCore(c){
   db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(c))).catch(e=>console.warn('Firebase:',e));
 }
 
-// Écoute Firebase en temps réel — source de vérité
+// Flag pour éviter les re-renders pendant l'édition
+let _isEditing = false;
+let _saveTimeout = null;
+
+// Écoute Firebase en temps réel — ne re-render que si pas en train d'éditer
 db.ref(FIREBASE_PATH).on('value',snap=>{
   const fbData=snap.val();
   if(fbData&&fbData.projects){
     _coreCache = sanitizeCore(JSON.parse(JSON.stringify(fbData)));
     try{localStorage.setItem(CORE_KEY,JSON.stringify(_coreCache));}catch(e){}
     renderList();
-    const ui=getUI();
-    if(ui.activeId) renderFiche();
+    // Ne re-render la fiche QUE si on n'est pas en train d'éditer
+    if(!_isEditing){
+      const ui=getUI();
+      if(ui.activeId) renderFiche();
+    }
   } else {
-    // Firebase vide : pousse le localStorage s'il a des données
     let local=null;
     try{local=JSON.parse(localStorage.getItem(CORE_KEY));}catch(e){}
     if(!local) ['elence_planner_v4','elence_planner_v3'].forEach(k=>{
@@ -300,7 +306,7 @@ function renderList(){
   }).join('');
 }
 
-function openFiche(id){const UI=getUI();UI.activeId=id;saveUI(UI);renderList();renderFiche();}
+function openFiche(id){_isEditing=false;if(_saveTimeout){clearTimeout(_saveTimeout);_saveTimeout=null;}const UI=getUI();UI.activeId=id;saveUI(UI);renderList();renderFiche();}
 
 function renderFiche(){
   const UI=getUI();
@@ -332,15 +338,9 @@ function renderFiche(){
             <div class="info-field"><div class="if-label">Client</div><input class="if-input" type="text" value="${p.client||''}" onchange="updateField('client',this.value)" placeholder="—"></div>
             <div class="info-field"><div class="if-label">Adresse</div><input class="if-input" type="text" value="${p.adresse||''}" onchange="updateField('adresse',this.value)" placeholder="—"></div>
             <div class="info-field"><div class="if-label">Deadline</div><input class="if-input" type="date" value="${p.deadline||''}" onchange="updateField('deadline',this.value)"></div>
-            <div class="info-field">
-              <div class="if-label">Montant devis (€)</div>
+            <div class="info-field" style="grid-column:1/-1">
+              <div class="if-label">Montant total devis (€)</div>
               <input class="if-input" type="number" value="${p.montant||''}" onchange="updateField('montant',parseFloat(this.value)||0)" placeholder="0">
-            </div>
-            <div class="info-field">
-              <div class="if-label">Mois de facturation</div>
-              <select class="if-select" onchange="updateField('monthFacture',parseInt(this.value))">
-                ${MOIS_LIST.map((m,i)=>`<option value="${i}" ${(p.monthFacture||0)===i?'selected':''}>${m}</option>`).join('')}
-              </select>
             </div>
             <div class="info-field">
               <div class="if-label">Statut</div>
@@ -372,6 +372,31 @@ function renderFiche(){
             <input type="text" id="step-inp" placeholder="Nouvelle étape…" onkeydown="if(event.key==='Enter')addStep()">
             <button class="step-add-btn" onclick="addStep()">+ Ajouter</button>
           </div>
+          <div class="section-label" style="margin-top:1.25rem">Acomptes & facturation</div>
+          <div id="acomptes-list">
+            ${(p.acomptes||[]).map((a,ai)=>`
+              <div style="display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--border)">
+                <span style="font-size:12px;color:var(--text-mid);flex:1">${a.label}</span>
+                <span style="font-size:12px;color:var(--text-mid)">${MOIS_LIST[a.mois]||''}</span>
+                <span style="font-size:13px;font-family:DM Serif Display,serif;color:${a.paye?'var(--teal)':'var(--orange)'};min-width:70px;text-align:right">${Number(a.montant).toLocaleString('fr-FR')}€</span>
+                <span style="font-size:10px;padding:2px 6px;border-radius:20px;background:${a.paye?'var(--teal-light)':'var(--sand)'};color:${a.paye?'#2A9088':'var(--text-light)'};">${a.paye?'Payé':'En attente'}</span>
+                <button onclick="toggleAcompte(${ai})" style="font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--border-strong);background:transparent;cursor:pointer;font-family:DM Sans,sans-serif">${a.paye?'↩':'✓'}</button>
+                <button onclick="delAcompte(${ai})" style="font-size:12px;color:var(--text-light);background:none;border:none;cursor:pointer">×</button>
+              </div>`).join('')}
+          </div>
+          <div style="display:flex;gap:5px;margin-top:7px;flex-wrap:wrap">
+            <input type="text" id="ac-label" placeholder="Ex: Acompte 30%" style="flex:2;min-width:80px;font-size:12px;font-family:DM Sans,sans-serif;padding:5px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none">
+            <input type="number" id="ac-montant" placeholder="€" style="width:70px;font-size:12px;font-family:DM Sans,sans-serif;padding:5px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none">
+            <select id="ac-mois" style="font-size:12px;font-family:DM Sans,sans-serif;padding:5px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none">
+              ${MOIS_LIST.map((m,i)=>`<option value="${i}" ${i===new Date().getMonth()?'selected':''}>${m}</option>`).join('')}
+            </select>
+            <button onclick="addAcompte()" style="padding:5px 10px;font-size:12px;cursor:pointer;border:none;border-radius:var(--radius-sm);background:var(--orange);color:white;font-family:DM Sans,sans-serif">+ Acompte</button>
+          </div>
+          <div style="margin-top:8px;font-size:12px;color:var(--text-mid)">
+            Total payé : <strong style="color:var(--teal)">${(p.acomptes||[]).filter(a=>a.paye).reduce((s,a)=>s+a.montant,0).toLocaleString('fr-FR')}€</strong>
+            ${p.montant?` / Reste : <strong style="color:var(--orange)">${(p.montant-(p.acomptes||[]).filter(a=>a.paye).reduce((s,a)=>s+a.montant,0)).toLocaleString('fr-FR')}€</strong>`:''}
+          </div>
+
           <div class="section-label" style="margin-top:1.25rem">Notes libres</div>
           <textarea class="notes-area" id="notes-area" placeholder="Notes, idées, références, contacts…" onchange="updateField('notes',this.value)">${p.notes||''}</textarea>
         </div>
@@ -412,17 +437,25 @@ function renderFiche(){
 }
 
 function updateField(key,val){
+  _isEditing=true;
+  const ui=getUI();
   const core=getCore();
-  const p=core.projects.find(p=>p.id===UI.activeId);
+  const p=core.projects.find(p=>p.id===ui.activeId);
   if(!p) return;
   p[key]=val;
-  saveCore(core);
-  if(key==='status'||key==='deadline'||key==='name') renderList();
+  // Sauvegarde avec debounce pour éviter trop d'écritures Firebase
+  if(_saveTimeout) clearTimeout(_saveTimeout);
+  _saveTimeout=setTimeout(()=>{
+    saveCore(core);
+    _isEditing=false;
+    if(key==='status'||key==='deadline'||key==='name') renderList();
+  }, 800);
 }
 
 function updateStatusField(val){
+  const ui=getUI();
   const core=getCore();
-  const p=core.projects.find(p=>p.id===UI.activeId);
+  const p=core.projects.find(p=>p.id===ui.activeId);
   if(!p) return;
   const old=p.status;
   p.status=val;
@@ -487,6 +520,63 @@ function delDoc(di){
   p.docs.splice(di,1);saveCore(core);renderFiche();
 }
 
+function addAcompte(){
+  const label=document.getElementById('ac-label').value.trim();
+  const montant=parseFloat(document.getElementById('ac-montant').value)||0;
+  const mois=parseInt(document.getElementById('ac-mois').value);
+  if(!label||!montant) return;
+  const ui=getUI();
+  const core=getCore();
+  const p=core.projects.find(p=>p.id===ui.activeId);
+  if(!p) return;
+  if(!p.acomptes) p.acomptes=[];
+  p.acomptes.push({label,montant,mois,paye:false,id:genId()});
+  saveCore(core);renderFiche();
+}
+function toggleAcompte(ai){
+  const ui=getUI();
+  const core=getCore();
+  const p=core.projects.find(p=>p.id===ui.activeId);
+  if(!p||!p.acomptes[ai]) return;
+  const a=p.acomptes[ai];
+  const wasPaye=a.paye;
+  a.paye=!a.paye;
+  // Sync vers CA
+  try{
+    let caState=JSON.parse(localStorage.getItem('elence_ca_v4'));
+    if(!caState) caState={ca:Array(12).fill(0),projects:[]};
+    if(!caState.ca) caState.ca=Array(12).fill(0);
+    if(a.paye){
+      // Ajoute au CA du mois
+      caState.ca[a.mois]=(caState.ca[a.mois]||0)+a.montant;
+    } else {
+      // Retire du CA du mois
+      caState.ca[a.mois]=Math.max(0,(caState.ca[a.mois]||0)-a.montant);
+    }
+    localStorage.setItem('elence_ca_v4',JSON.stringify(caState));
+    firebase.database().ref('elence_ca').set(caState);
+  }catch(e){}
+  saveCore(core);renderFiche();
+}
+function delAcompte(ai){
+  const ui=getUI();
+  const core=getCore();
+  const p=core.projects.find(p=>p.id===ui.activeId);
+  if(!p||!p.acomptes[ai]) return;
+  const a=p.acomptes[ai];
+  // Si payé, retire du CA
+  if(a.paye){
+    try{
+      let caState=JSON.parse(localStorage.getItem('elence_ca_v4'));
+      if(caState&&caState.ca) caState.ca[a.mois]=Math.max(0,(caState.ca[a.mois]||0)-a.montant);
+      localStorage.setItem('elence_ca_v4',JSON.stringify(caState));
+      firebase.database().ref('elence_ca').set(caState);
+    }catch(e){}
+  }
+  p.acomptes.splice(ai,1);
+  saveCore(core);renderFiche();
+}
+
 function openModal(){document.getElementById('modal-overlay').classList.add('open');}
 function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
 function saveNewProject(){
@@ -511,7 +601,7 @@ function delProject(id){
   const core=getCore();
   core.projects=core.projects.filter(p=>p.id!==id);
   saveCore(core);
-  UI.activeId=null;saveUI();
+  const ui=getUI();ui.activeId=null;saveUI(ui);
   renderList();
   document.getElementById('fiche-zone').innerHTML='<div class="empty-state"><h2>Projet supprimé</h2><p style="font-size:13px">Sélectionne un autre projet.</p></div>';
 }
