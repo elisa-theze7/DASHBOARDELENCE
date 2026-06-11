@@ -188,6 +188,9 @@ const db=firebase.database();
 
 function genId(){return 'p_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);}
 
+// Cache local des données Firebase
+let _coreCache = null;
+
 function sanitizeCore(c){
   if(!c) c={};
   if(!c.projects) c.projects=[];
@@ -204,24 +207,39 @@ function sanitizeCore(c){
 }
 
 function getCore(){
+  // Priorité : cache Firebase > localStorage
+  if(_coreCache) return sanitizeCore(JSON.parse(JSON.stringify(_coreCache)));
   let c=null;
   try{c=JSON.parse(localStorage.getItem(CORE_KEY));}catch(e){}
   return sanitizeCore(c||{});
 }
 function saveCore(c){
+  _coreCache = JSON.parse(JSON.stringify(c));
   try{localStorage.setItem(CORE_KEY,JSON.stringify(c));}catch(e){}
   db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(c))).catch(e=>console.warn('Firebase:',e));
 }
 
-// Écoute Firebase en temps réel
+// Écoute Firebase en temps réel — source de vérité
 db.ref(FIREBASE_PATH).on('value',snap=>{
   const fbData=snap.val();
   if(fbData&&fbData.projects){
-    const merged=sanitizeCore(fbData);
-    try{localStorage.setItem(CORE_KEY,JSON.stringify(merged));}catch(e){}
+    _coreCache = sanitizeCore(JSON.parse(JSON.stringify(fbData)));
+    try{localStorage.setItem(CORE_KEY,JSON.stringify(_coreCache));}catch(e){}
     renderList();
     const ui=getUI();
     if(ui.activeId) renderFiche();
+  } else {
+    // Firebase vide : pousse le localStorage s'il a des données
+    let local=null;
+    try{local=JSON.parse(localStorage.getItem(CORE_KEY));}catch(e){}
+    if(!local) ['elence_planner_v4','elence_planner_v3'].forEach(k=>{
+      if(!local) try{const d=JSON.parse(localStorage.getItem(k));if(d&&d.projects&&d.projects.length>0)local=d;}catch(e){}
+    });
+    if(local&&local.projects&&local.projects.length>0){
+      _coreCache=sanitizeCore(local);
+      db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(_coreCache)));
+    }
+    renderList();
   }
 });
 
