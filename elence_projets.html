@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Élence — Mes projets</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--orange:#E8622A;--orange-light:#FDF0E9;--teal:#3BBFAD;--teal-light:#E4F7F5;--purple:#7C6FCD;--purple-light:#F3F0FF;--cream:#FAF8F5;--sand:#F0EDE7;--text:#2A2420;--text-mid:#7A6E68;--text-light:#B0A49C;--white:#fff;--border:rgba(42,36,32,.10);--border-strong:rgba(42,36,32,.18);--radius:14px;--radius-sm:8px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh}
+header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;gap:12px}
+.logo{font-family:'DM Serif Display',serif;font-size:20px;color:var(--orange);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.logo span{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:300;color:var(--text-mid);letter-spacing:.12em;text-transform:uppercase}
+.nav-links{display:flex;gap:5px}
+.nav-btn{padding:5px 12px;font-size:12px;font-family:'DM Sans',sans-serif;border:1px solid var(--border-strong);border-radius:20px;background:transparent;color:var(--text-mid);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.nav-btn:hover{background:var(--sand)}.nav-btn.active{background:var(--purple);color:white;border-color:var(--purple)}
+.page{max-width:1100px;margin:0 auto;padding:2rem 1.5rem 5rem}
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:280px 1fr;gap:1.5rem;align-items:start}
+/* SIDEBAR */
+.sidebar{display:flex;flex-direction:column;gap:8px}
+.proj-item{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.proj-item:hover{border-left-color:var(--orange-mid);background:var(--orange-light)}
+.proj-item.active{border-left-color:var(--orange);background:var(--orange-light)}
+.proj-item-name{font-size:13px;font-weight:500}
+.proj-item-meta{font-size:11px;color:var(--text-light);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap}
+.spill{font-size:10px;padding:1px 6px;border-radius:20px}
+.s-conc{background:var(--orange-light);color:var(--orange)}.s-att{background:#FFF8E1;color:#B07D00}.s-fab{background:var(--teal-light);color:#2A9088}.s-fact{background:#FEF2F2;color:#C0392B}.s-done{background:var(--sand);color:var(--text-light)}
+.dlp{font-size:10px;padding:1px 6px;border-radius:20px}
+.dl-ok{background:var(--sand);color:var(--text-mid)}.dl-warn{background:#FFF8E1;color:#B07D00}.dl-late{background:#FEF2F2;color:#C0392B}
+.filter-bar{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
+.fb{padding:4px 10px;font-size:11px;font-family:'DM Sans',sans-serif;border:1px solid var(--border-strong);border-radius:20px;background:transparent;color:var(--text-mid);cursor:pointer}
+.fb:hover{background:var(--sand)}.fb.active{background:var(--orange);color:white;border-color:var(--orange)}
+.btn-new-proj{width:100%;padding:8px;font-size:13px;font-family:'DM Sans',sans-serif;border:1.5px dashed var(--border-strong);border-radius:var(--radius-sm);background:transparent;color:var(--text-mid);cursor:pointer;transition:all .15s;margin-bottom:4px}
+.btn-new-proj:hover{border-color:var(--orange);color:var(--orange);background:var(--orange-light)}
+/* FICHE PROJET */
+.fiche{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.fiche-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:var(--orange-light)}
+.fiche-title{font-family:'DM Serif Display',serif;font-size:24px;color:var(--text);margin-bottom:.5rem}
+.fiche-meta-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.fiche-body{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.fiche-col{padding:1.25rem 1.5rem;border-right:1px solid var(--border)}
+.fiche-col:last-child{border-right:none}
+.section-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.09em;color:var(--text-light);margin-bottom:8px;margin-top:16px}
+.section-label:first-child{margin-top:0}
+/* INFOS GRID */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.info-field{display:flex;flex-direction:column;gap:3px}
+.if-label{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.07em}
+.if-val{font-size:13px;color:var(--text)}
+.if-input{font-size:13px;font-family:'DM Sans',sans-serif;padding:5px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none;width:100%}
+.if-input:focus{border-color:var(--orange);background:white}
+.if-select{font-size:13px;font-family:'DM Sans',sans-serif;padding:5px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none;width:100%}
+/* ÉTAPES */
+.step-row{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border)}
+.step-row:last-child{border-bottom:none}
+.scb{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--border-strong);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:transparent;transition:all .15s}
+.scb.done{background:var(--teal);border-color:var(--teal)}.scb.done::after{content:'✓';font-size:8px;color:white}
+.stxt{flex:1;font-size:13px;color:var(--text-mid);cursor:pointer}
+.stxt.done{text-decoration:line-through;color:var(--text-light)}
+.sdel{font-size:12px;color:var(--text-light);cursor:pointer;background:none;border:none;opacity:0;transition:opacity .15s}
+.step-row:hover .sdel{opacity:1}
+.step-add{display:flex;gap:5px;margin-top:7px}
+.step-add input{flex:1;font-size:12px;font-family:'DM Sans',sans-serif;padding:5px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none}
+.step-add input:focus{border-color:var(--orange)}
+.step-add-btn{padding:5px 10px;font-size:12px;cursor:pointer;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--white);color:var(--text-mid);font-family:'DM Sans',sans-serif}
+.step-add-btn:hover{background:var(--orange-light);border-color:var(--orange);color:var(--orange)}
+/* NOTES */
+.notes-area{width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none;resize:vertical;min-height:140px;line-height:1.7}
+.notes-area:focus{border-color:var(--orange);background:white}
+/* JOURNAL */
+.journal-entry{background:var(--sand);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:7px}
+.je-date{font-size:10px;color:var(--text-light);margin-bottom:3px}
+.je-text{font-size:13px;color:var(--text);line-height:1.6}
+.je-del{float:right;font-size:12px;color:var(--text-light);cursor:pointer;background:none;border:none;margin-top:-2px}
+.je-del:hover{color:#E74C3C}
+.journal-add{display:flex;gap:6px;margin-top:6px}
+.journal-add textarea{flex:1;font-size:12px;font-family:'DM Sans',sans-serif;padding:6px 9px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none;resize:none;height:56px}
+.journal-add textarea:focus{border-color:var(--teal);background:white}
+.journal-add-btn{padding:6px 12px;font-size:12px;cursor:pointer;border:none;border-radius:var(--radius-sm);background:var(--teal);color:white;font-family:'DM Sans',sans-serif;align-self:flex-end;transition:background .15s}
+.journal-add-btn:hover{background:#2ea898}
+/* PROGRESS */
+.prog-bg{background:var(--sand);border-radius:5px;height:5px;margin-top:6px}
+.prog-fill{height:5px;border-radius:5px;background:var(--teal);transition:width .3s}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(42,36,32,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:var(--radius);padding:1.5rem;width:100%;max-width:480px;border:1px solid var(--border)}
+.modal h3{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:1rem}
+.mf{margin-bottom:10px}
+.mf label{font-size:11px;color:var(--text-mid);letter-spacing:.07em;text-transform:uppercase;display:block;margin-bottom:3px}
+.mf input,.mf select,.mf textarea{width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:7px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none}
+.mf input:focus,.mf select:focus,.mf textarea:focus{border-color:var(--orange);background:white}
+.mf textarea{height:70px;resize:vertical}
+.mfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.btn-cancel{padding:7px 16px;font-size:13px;font-family:'DM Sans',sans-serif;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:transparent;color:var(--text-mid);cursor:pointer}
+.btn-save{padding:7px 18px;font-size:13px;font-family:'DM Sans',sans-serif;border:none;border-radius:var(--radius-sm);background:var(--orange);color:white;cursor:pointer;font-weight:500}
+.btn-save:hover{background:#C9501F}
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--text-light)}
+.empty-state h2{font-family:'DM Serif Display',serif;font-size:22px;color:var(--text-mid);margin-bottom:.5rem}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.fiche-body{grid-template-columns:1fr}header{padding:0 1rem}.page{padding:1rem .875rem 4rem}}
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h3>Nouveau projet</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="mf" style="grid-column:1/-1"><label>Nom du projet</label><input type="text" id="m-name" placeholder="Ex : Rénovation salon — Dupont"></div>
+      <div class="mf"><label>Type</label><select id="m-type"><option value="freelance">Archi intérieure</option><option value="atelier">Fabrication atelier</option></select></div>
+      <div class="mf"><label>Statut</label><select id="m-status"><option value="conc">En conception</option><option value="att">En attente</option><option value="fab">Fabrication</option><option value="fact">À facturer</option><option value="done">Terminé</option></select></div>
+      <div class="mf"><label>Client</label><input type="text" id="m-client" placeholder="Nom"></div>
+      <div class="mf"><label>Deadline</label><input type="date" id="m-deadline"></div>
+      <div class="mf"><label>Montant devis (€)</label><input type="number" id="m-montant" placeholder="0"></div>
+      <div class="mf"><label>Adresse du projet</label><input type="text" id="m-adresse" placeholder="Ville, commune"></div>
+    </div>
+    <div class="mf"><label>Étapes (une par ligne)</label><textarea id="m-notes" placeholder="Relevé de côtes&#10;Plans AutoCAD&#10;Rendu 3D"></textarea></div>
+    <div class="mfoot"><button class="btn-cancel" onclick="closeModal()">Annuler</button><button class="btn-save" onclick="saveNewProject()">Créer</button></div>
+  </div>
+</div>
+
+<header>
+  <div class="logo">Élence <span>mes projets</span></div>
+  <div class="nav-links">
+    <a href="elence_planning.html" class="nav-btn">Planning</a>
+    <a href="elence_ca.html" class="nav-btn">CA 2026</a>
+    <a href="elence_devis_archi.html" class="nav-btn">Devis archi</a>
+    <a href="elence_devis_atelier.html" class="nav-btn">Devis atelier</a>
+    <a href="elence_projets.html" class="nav-btn active">Mes projets</a>
+  </div>
+</header>
+
+<div class="page">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;gap:8px;flex-wrap:wrap">
+    <div>
+      <h1 style="font-family:'DM Serif Display',serif;font-size:28px;font-weight:normal">Mes projets</h1>
+      <p style="font-size:13px;color:var(--text-mid);margin-top:3px">Fiches projet, notes, journal, suivi des étapes</p>
+    </div>
+    <button class="btn-save" onclick="openModal()" style="padding:8px 20px;border-radius:20px">+ Nouveau projet</button>
+  </div>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="filter-bar">
+        <button class="fb active" id="f-all" onclick="setFilter('all')">Tous</button>
+        <button class="fb" id="f-freelance" onclick="setFilter('freelance')">Archi</button>
+        <button class="fb" id="f-atelier" onclick="setFilter('atelier')">Atelier</button>
+        <button class="fb" id="f-done" onclick="setFilter('done')">Terminés</button>
+      </div>
+      <div id="proj-list"></div>
+    </div>
+    <!-- FICHE -->
+    <div id="fiche-zone">
+      <div class="empty-state">
+        <h2>Sélectionne un projet</h2>
+        <p style="font-size:13px">Clique sur un projet dans la liste pour afficher sa fiche complète.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY_PROJ='elence_projets_v1';
+const CORE_KEY='elence_core';
+const STATUS_MAP={conc:{label:'En conception',cls:'s-conc'},att:{label:'En attente',cls:'s-att'},fab:{label:'Fabrication',cls:'s-fab'},fact:{label:'À facturer',cls:'s-fact'},done:{label:'Terminé',cls:'s-done'}};
+const TYPE_LBL={freelance:'Archi intérieure',atelier:'Fabrication atelier'};
+const MOIS_LIST=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+// ── CORE PARTAGÉ : lit/écrit dans elence_core ──
+function genId(){return 'p_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);}
+
+function coreLoad(){
+  let c=null;
+  try{c=JSON.parse(localStorage.getItem(CORE_KEY));}catch(e){}
+  // Migration depuis anciennes clés planning
+  if(!c||!c.projects||c.projects.length===0){
+    let old=null;
+    ['elence_planner_v4','elence_planner_v3','elence_planner_v2'].forEach(k=>{
+      if(!old) try{const d=JSON.parse(localStorage.getItem(k));if(d&&d.projects&&d.projects.length>0)old=d;}catch(e){}
+    });
+    if(old){
+      if(!c) c={};
+      // Fusionne les projets migrés (sans écraser ceux déjà dans core)
+      const existing=(c.projects||[]).map(p=>p.name);
+      const toMerge=(old.projects||[]).filter(p=>!existing.includes(p.name));
+      c.projects=[...(c.projects||[]),...toMerge];
+      c.tasks=c.tasks||old.tasks||{today:[],week:[],month:[],perso:[]};
+      c.admin=c.admin||old.admin||{};
+    }
+  }
+  if(!c) c={};
+  if(!c.projects) c.projects=[];
+  // Assigne un id à chaque projet qui n'en a pas
+  let dirty=false;
+  c.projects.forEach(p=>{
+    if(!p.id){p.id=genId();dirty=true;}
+    if(!p.steps) p.steps=[];
+    if(!p.journal) p.journal=[];
+    if(!p.docs) p.docs=[];
+    if(!p.notes) p.notes='';
+    if(p.monthFacture===undefined) p.monthFacture=new Date().getMonth();
+  });
+  if(dirty) try{localStorage.setItem(CORE_KEY,JSON.stringify(c));}catch(e){}
+  return c;
+}
+function coreSave(c){try{localStorage.setItem(CORE_KEY,JSON.stringify(c));}catch(e){}}
+
+// État local (UI uniquement : quel projet est ouvert, filtre)
+let UI={activeId:null,filter:'all'};
+try{const u=JSON.parse(localStorage.getItem(KEY_PROJ));if(u){UI.activeId=u.activeId||null;UI.filter=u.filter||'all';}}catch(e){}
+function saveUI(){try{localStorage.setItem(KEY_PROJ,JSON.stringify(UI));}catch(e){}}
+
+function getCore(){return coreLoad();}
+function saveCore(c){coreSave(c);}
+
+// ── SYNC PROJET FACTURÉ → CA ──
+function syncToCA(p, oldStatus, core){
+  if(p.status==='fact' && oldStatus!=='fact' && p.montant>0){
+    const mi=p.monthFacture!==undefined?p.monthFacture:new Date().getMonth();
+    try{
+      let caState=JSON.parse(localStorage.getItem('elence_ca_v4'));
+      if(!caState) caState={ca:Array(12).fill(0),projects:[],depPonctMens:Array(12).fill(0)};
+      if(!caState.ca) caState.ca=Array(12).fill(0);
+      if(!caState.projects) caState.projects=[];
+      caState.ca[mi]=(caState.ca[mi]||0)+p.montant;
+      const already=caState.projects.some(pp=>pp.projId===p.id);
+      if(!already) caState.projects.push({name:p.name,type:p.type==='atelier'?'atelier':'archi',client:p.client||'',amount:p.montant,month:MOIS_LIST[mi],status:'facture',projId:p.id});
+      localStorage.setItem('elence_ca_v4',JSON.stringify(caState));
+    }catch(e){}
+  }
+}
+
+function dlPill(dl){
+  if(!dl) return '';
+  const d=new Date(dl+'T00:00:00'),now=new Date();now.setHours(0,0,0,0);
+  const diff=Math.round((d-now)/86400000);
+  const fmt=d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+  if(diff<0) return '<span class="dlp dl-late">retard</span>';
+  if(diff<=4) return '<span class="dlp dl-warn">'+diff+'j</span>';
+  return '<span class="dlp dl-ok">'+fmt+'</span>';
+}
+
+function setFilter(f){
+  UI.filter=f;saveUI();
+  ['all','freelance','atelier','done'].forEach(k=>{
+    const el=document.getElementById('f-'+k);
+    if(el) el.className='fb'+(k===f?' active':'');
+  });
+  renderList();
+}
+
+function renderList(){
+  const core=getCore();
+  const el=document.getElementById('proj-list');
+  let projs=core.projects;
+  if(UI.filter==='freelance') projs=projs.filter(p=>p.type==='freelance'&&p.status!=='done');
+  else if(UI.filter==='atelier') projs=projs.filter(p=>p.type==='atelier'&&p.status!=='done');
+  else if(UI.filter==='done') projs=projs.filter(p=>p.status==='done');
+  else projs=projs.filter(p=>p.status!=='done');
+
+  if(!projs.length){el.innerHTML='<div style="font-size:12px;color:var(--text-light);font-style:italic;padding:8px 0">Aucun projet — crée-en un !</div>';return;}
+  el.innerHTML=projs.map(p=>{
+    const sm=STATUS_MAP[p.status]||STATUS_MAP.conc;
+    const steps=p.steps||[];
+    const prog=steps.length>0?Math.round(steps.filter(s=>s.done).length/steps.length*100):0;
+    return `<div class="proj-item ${UI.activeId===p.id?'active':''}" onclick="openFiche('${p.id}')">
+      <div class="proj-item-name">${p.name}</div>
+      <div class="proj-item-meta">
+        <span class="spill ${sm.cls}">${sm.label}</span>
+        ${dlPill(p.deadline)}
+        ${p.client?`<span style="font-size:10px;color:var(--text-light)">${p.client}</span>`:''}
+        ${p.montant?`<span style="font-size:10px;color:var(--teal);font-weight:500">${Number(p.montant).toLocaleString('fr-FR')}€</span>`:''}
+      </div>
+      ${steps.length>0?`<div class="prog-bg"><div class="prog-fill" style="width:${prog}%"></div></div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function openFiche(id){UI.activeId=id;saveUI();renderList();renderFiche();}
+
+function renderFiche(){
+  const core=getCore();
+  const p=core.projects.find(p=>p.id===UI.activeId);
+  if(!p){document.getElementById('fiche-zone').innerHTML='<div class="empty-state"><h2>Sélectionne un projet</h2><p style="font-size:13px">Clique dans la liste à gauche.</p></div>';return;}
+  const sm=STATUS_MAP[p.status]||STATUS_MAP.conc;
+  const steps=p.steps||[];
+  const journal=p.journal||[];
+  const prog=steps.length>0?Math.round(steps.filter(s=>s.done).length/steps.length*100):0;
+
+  document.getElementById('fiche-zone').innerHTML=`
+    <div class="fiche">
+      <div class="fiche-header">
+        <div class="fiche-title" contenteditable="true" onblur="updateField('name',this.textContent.trim())">${p.name}</div>
+        <div class="fiche-meta-row">
+          <span class="spill ${sm.cls}">${sm.label}</span>
+          ${dlPill(p.deadline)}
+          <span style="font-size:11px;color:var(--text-mid)">${TYPE_LBL[p.type]||p.type}</span>
+          ${steps.length>0?`<span style="font-size:11px;color:var(--text-mid)">${steps.filter(s=>s.done).length}/${steps.length} étapes (${prog}%)</span>`:''}
+          <button onclick="delProject('${p.id}')" style="margin-left:auto;font-size:11px;padding:3px 10px;border:1px solid var(--border-strong);border-radius:20px;background:transparent;color:var(--text-light);cursor:pointer">Supprimer</button>
+        </div>
+        ${steps.length>0?`<div class="prog-bg" style="margin-top:8px"><div class="prog-fill" style="width:${prog}%"></div></div>`:''}
+      </div>
+      <div class="fiche-body">
+        <div class="fiche-col">
+          <div class="section-label">Informations</div>
+          <div class="info-grid">
+            <div class="info-field"><div class="if-label">Client</div><input class="if-input" type="text" value="${p.client||''}" onchange="updateField('client',this.value)" placeholder="—"></div>
+            <div class="info-field"><div class="if-label">Adresse</div><input class="if-input" type="text" value="${p.adresse||''}" onchange="updateField('adresse',this.value)" placeholder="—"></div>
+            <div class="info-field"><div class="if-label">Deadline</div><input class="if-input" type="date" value="${p.deadline||''}" onchange="updateField('deadline',this.value)"></div>
+            <div class="info-field">
+              <div class="if-label">Montant devis (€)</div>
+              <input class="if-input" type="number" value="${p.montant||''}" onchange="updateField('montant',parseFloat(this.value)||0)" placeholder="0">
+            </div>
+            <div class="info-field">
+              <div class="if-label">Mois de facturation</div>
+              <select class="if-select" onchange="updateField('monthFacture',parseInt(this.value))">
+                ${MOIS_LIST.map((m,i)=>`<option value="${i}" ${(p.monthFacture||0)===i?'selected':''}>${m}</option>`).join('')}
+              </select>
+            </div>
+            <div class="info-field">
+              <div class="if-label">Statut</div>
+              <select class="if-select" onchange="updateStatusField(this.value)">
+                ${Object.entries(STATUS_MAP).map(([k,v])=>`<option value="${k}" ${p.status===k?'selected':''}>${v.label}</option>`).join('')}
+              </select>
+            </div>
+            <div class="info-field">
+              <div class="if-label">Type</div>
+              <select class="if-select" onchange="updateField('type',this.value)">
+                <option value="freelance" ${p.type==='freelance'?'selected':''}>Archi intérieure</option>
+                <option value="atelier" ${p.type==='atelier'?'selected':''}>Fabrication atelier</option>
+              </select>
+            </div>
+            <div class="info-field">
+              <div class="if-label">Lien devis / facture</div>
+              <input class="if-input" type="text" value="${p.devisUrl||''}" onchange="updateField('devisUrl',this.value)" placeholder="Chemin ou URL">
+            </div>
+          </div>
+          <div class="section-label" style="margin-top:1.25rem">Étapes du projet</div>
+          <div id="steps-list">
+            ${steps.map((s,si)=>`<div class="step-row">
+              <div class="scb ${s.done?'done':''}" onclick="toggleStep(${si})"></div>
+              <span class="stxt ${s.done?'done':''}" onclick="toggleStep(${si})">${s.text}</span>
+              <button class="sdel" onclick="delStep(${si})">×</button>
+            </div>`).join('')}
+          </div>
+          <div class="step-add">
+            <input type="text" id="step-inp" placeholder="Nouvelle étape…" onkeydown="if(event.key==='Enter')addStep()">
+            <button class="step-add-btn" onclick="addStep()">+ Ajouter</button>
+          </div>
+          <div class="section-label" style="margin-top:1.25rem">Notes libres</div>
+          <textarea class="notes-area" id="notes-area" placeholder="Notes, idées, références, contacts…" onchange="updateField('notes',this.value)">${p.notes||''}</textarea>
+        </div>
+        <div class="fiche-col">
+          <div class="section-label">Journal de projet</div>
+          <div id="journal-list">
+            ${journal.length?journal.map((e,ei)=>`<div class="journal-entry">
+              <button class="je-del" onclick="delJournal(${ei})">×</button>
+              <div class="je-date">${e.date}</div>
+              <div class="je-text">${e.text.replace(/\n/g,'<br>')}</div>
+            </div>`).join(''):'<div style="font-size:12px;color:var(--text-light);font-style:italic;margin-bottom:8px">Aucune entrée — note tes retours client, RDV, avancements…</div>'}
+          </div>
+          <div class="journal-add">
+            <textarea id="journal-inp" placeholder="Nouvelle entrée…"></textarea>
+            <button class="journal-add-btn" onclick="addJournal()">Ajouter</button>
+          </div>
+          <div class="section-label" style="margin-top:1.5rem">Documents & liens</div>
+          <div id="docs-list">
+            ${(p.docs||[]).map((d,di)=>`<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border)">
+              <a href="${d.url}" target="_blank" style="flex:1;font-size:13px;color:var(--orange);text-decoration:none">${d.name}</a>
+              <button onclick="delDoc(${di})" style="font-size:12px;color:var(--text-light);background:none;border:none;cursor:pointer">×</button>
+            </div>`).join('')}
+          </div>
+          <div style="display:flex;gap:5px;margin-top:7px">
+            <input type="text" id="doc-name" placeholder="Nom" style="flex:1;font-size:12px;font-family:DM Sans,sans-serif;padding:5px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none">
+            <input type="text" id="doc-url" placeholder="URL ou chemin" style="flex:2;font-size:12px;font-family:DM Sans,sans-serif;padding:5px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none">
+            <button onclick="addDoc()" style="padding:5px 10px;font-size:12px;cursor:pointer;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--white);color:var(--text-mid);font-family:DM Sans,sans-serif">+</button>
+          </div>
+          <div style="margin-top:1.25rem;padding:10px 12px;background:var(--orange-light);border-radius:var(--radius-sm);font-size:12px;color:var(--text-mid)">
+            <strong style="color:var(--text)">Liens rapides :</strong><br>
+            <a href="elence_devis_archi.html" style="color:var(--orange);text-decoration:none">→ Créer un devis archi</a><br>
+            <a href="elence_devis_atelier.html" style="color:var(--teal);text-decoration:none">→ Chiffrage atelier</a><br>
+            <a href="elence_ca.html" style="color:var(--text-mid);text-decoration:none">→ Suivi CA</a>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function updateField(key,val){
+  const core=getCore();
+  const p=core.projects.find(p=>p.id===UI.activeId);
+  if(!p) return;
+  p[key]=val;
+  saveCore(core);
+  if(key==='status'||key==='deadline'||key==='name') renderList();
+}
+
+function updateStatusField(val){
+  const core=getCore();
+  const p=core.projects.find(p=>p.id===UI.activeId);
+  if(!p) return;
+  const old=p.status;
+  p.status=val;
+  syncToCA(p,old,core);
+  saveCore(core);
+  renderList();renderFiche();
+}
+
+function toggleStep(si){
+  const core=getCore();
+  const p=core.projects.find(p=>p.id===UI.activeId);
+  if(!p) return;
+  p.steps[si].done=!p.steps[si].done;
+  saveCore(core);
+  renderFiche();renderList();
+}
+function delStep(si){
+  const core=getCore();
+  const p=core.projects.find(p=>p.id===UI.activeId);
+  if(!p) return;
+  p.steps.splice(si,1);saveCore(core);renderFiche();
+}
+function addStep(){
+  const inp=document.getElementById('step-inp');if(!inp||!inp.value.trim())return;
+  const core=getCore();
+  const p=core.projects.find(p=>p.id===UI.activeId);
+  if(!p) return;
+  p.steps.push({text:inp.value.trim(),done:false});
+  inp.value='';saveCore(core);renderFiche();
+}
+function addJournal(){
+  const inp=document.getElementById('journal-inp');if(!inp||!inp.value.trim())return;
+  const core=getCore();
+  const p=core.projects.find(p=>p.id===UI.activeId);
+  if(!p) return;
+  if(!p.journal) p.journal=[];
+  p.journal.unshift({text:inp.value.trim(),date:new Date().toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long',year:'numeric'})});
+  inp.value='';saveCore(core);renderFiche();
+}
+function delJournal(ei){
+  const core=getCore();
+  const p=core.projects.find(p=>p.id===UI.activeId);
+  if(!p) return;
+  p.journal.splice(ei,1);saveCore(core);renderFiche();
+}
+function addDoc(){
+  const n=document.getElementById('doc-name').value.trim();
+  const u=document.getElementById('doc-url').value.trim();
+  if(!n) return;
+  const core=getCore();
+  const p=core.projects.find(p=>p.id===UI.activeId);
+  if(!p) return;
+  if(!p.docs) p.docs=[];
+  p.docs.push({name:n,url:u||'#'});
+  document.getElementById('doc-name').value='';document.getElementById('doc-url').value='';
+  saveCore(core);renderFiche();
+}
+function delDoc(di){
+  const core=getCore();
+  const p=core.projects.find(p=>p.id===UI.activeId);
+  if(!p) return;
+  p.docs.splice(di,1);saveCore(core);renderFiche();
+}
+
+function openModal(){document.getElementById('modal-overlay').classList.add('open');}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+function saveNewProject(){
+  const name=document.getElementById('m-name').value.trim();if(!name)return;
+  const notesRaw=document.getElementById('m-notes').value.trim();
+  const steps=notesRaw?notesRaw.split('\n').filter(l=>l.trim()).map(l=>({text:l.trim(),done:false})):[];
+  const core=getCore();
+  const p={id:genId(),name,type:document.getElementById('m-type').value,status:document.getElementById('m-status').value,
+    client:document.getElementById('m-client').value.trim(),deadline:document.getElementById('m-deadline').value,
+    montant:parseFloat(document.getElementById('m-montant').value)||0,
+    monthFacture:new Date().getMonth(),
+    adresse:document.getElementById('m-adresse').value.trim(),
+    steps,notes:'',journal:[],docs:[],createdAt:Date.now()};
+  core.projects.push(p);
+  saveCore(core);
+  UI.activeId=p.id;saveUI();
+  closeModal();renderList();renderFiche();
+  ['m-name','m-client','m-notes','m-deadline','m-montant','m-adresse'].forEach(id=>document.getElementById(id).value='');
+}
+function delProject(id){
+  if(!confirm('Supprimer définitivement ce projet ?')) return;
+  const core=getCore();
+  core.projects=core.projects.filter(p=>p.id!==id);
+  saveCore(core);
+  UI.activeId=null;saveUI();
+  renderList();
+  document.getElementById('fiche-zone').innerHTML='<div class="empty-state"><h2>Projet supprimé</h2><p style="font-size:13px">Sélectionne un autre projet.</p></div>';
+}
+
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+renderList();
+if(UI.activeId) renderFiche();
+</script>
+</body>
+</html>

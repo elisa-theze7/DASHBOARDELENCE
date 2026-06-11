@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Élence — Chiffrage Atelier</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--orange:#E8622A;--orange-light:#FDF0E9;--teal:#3BBFAD;--teal-light:#E4F7F5;--cream:#FAF8F5;--sand:#F0EDE7;--text:#2A2420;--text-mid:#7A6E68;--text-light:#B0A49C;--white:#FFFFFF;--border:rgba(42,36,32,0.10);--border-strong:rgba(42,36,32,0.18);--radius:14px;--radius-sm:8px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh}
+header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
+.logo{font-family:'DM Serif Display',serif;font-size:20px;color:var(--orange);display:flex;align-items:center;gap:8px}
+.logo span{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:300;color:var(--text-mid);letter-spacing:0.12em;text-transform:uppercase}
+.nav-links{display:flex;gap:6px}
+.nav-btn{padding:6px 14px;font-size:12px;font-family:'DM Sans',sans-serif;border:1px solid var(--border-strong);border-radius:20px;background:transparent;color:var(--text-mid);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.nav-btn:hover{background:var(--sand)}.nav-btn.active{background:var(--teal);color:white;border-color:var(--teal)}
+.page{max-width:900px;margin:0 auto;padding:2rem 1.5rem 4rem}
+.section{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem}
+.section.orange{border-top:2.5px solid var(--orange)}.section.teal{border-top:2.5px solid var(--teal)}.section.neutral{border-top:2.5px solid var(--text-light)}
+.section-head{padding:.875rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--teal-light)}
+.section-title{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text-mid);display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}.dot-teal{background:var(--teal)}.dot-orange{background:var(--orange)}.dot-sand{background:var(--text-light)}
+.section-body{padding:.875rem 1.25rem 1.25rem}
+.field-row{display:grid;gap:10px;margin-bottom:12px}
+.field-row.cols2{grid-template-columns:1fr 1fr}.field-row.cols3{grid-template-columns:1fr 1fr 1fr}.field-row.cols4{grid-template-columns:1fr 1fr 1fr 1fr}
+.field label{font-size:11px;color:var(--text-mid);letter-spacing:.07em;text-transform:uppercase;display:block;margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:8px 11px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal);background:white}
+.field textarea{height:60px;resize:vertical}
+.mat-table{width:100%;border-collapse:collapse;margin-bottom:8px}
+.mat-table th{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--text-light);padding:7px 8px;text-align:left;border-bottom:1px solid var(--border)}
+.mat-table td{padding:7px 8px;border-bottom:1px solid var(--border);font-size:13px}
+.mat-table tr:last-child td{border-bottom:none}
+.mat-table input{width:100%;font-size:12px;font-family:'DM Sans',sans-serif;padding:4px 6px;border:1px solid var(--border-strong);border-radius:4px;background:var(--cream);color:var(--text);outline:none}
+.mat-table input:focus{border-color:var(--teal)}
+.mat-table select{font-size:12px;font-family:'DM Sans',sans-serif;padding:4px 5px;border:1px solid var(--border-strong);border-radius:4px;background:var(--cream);color:var(--text)}
+.del-row{font-size:13px;color:var(--text-light);cursor:pointer;background:none;border:none;padding:0 4px}
+.del-row:hover{color:#E74C3C}
+.btn-add-row{font-size:12px;font-family:'DM Sans',sans-serif;padding:5px 12px;border:1px dashed var(--border-strong);border-radius:var(--radius-sm);background:transparent;color:var(--text-mid);cursor:pointer;transition:all .15s;margin-bottom:10px}
+.btn-add-row:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-light)}
+.result-box{background:var(--teal-light);border:1.5px solid var(--teal);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-top:1rem}
+.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
+.result-item{display:flex;flex-direction:column;gap:3px}
+.result-label{font-size:11px;color:var(--text-mid);letter-spacing:.07em;text-transform:uppercase}
+.result-val{font-size:22px;font-family:'DM Serif Display',serif;color:var(--text)}
+.result-val.main{font-size:28px;color:var(--teal);font-weight:normal}
+.result-val.orange{color:var(--orange)}
+.result-breakdown{font-size:12px;color:var(--text-mid);margin-top:4px;line-height:1.8;background:rgba(255,255,255,0.6);border-radius:var(--radius-sm);padding:10px 12px}
+.marge-bar-bg{background:var(--white);border-radius:6px;height:10px;margin-top:8px}
+.marge-bar-fill{height:10px;border-radius:6px;background:var(--teal);transition:width .4s}
+.btn-print{padding:8px 20px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--teal);color:white;border:none;border-radius:20px;cursor:pointer;font-weight:500}
+.btn-print:hover{background:#2ea898}
+.btn-reset{padding:8px 16px;font-size:13px;font-family:'DM Sans',sans-serif;background:transparent;color:var(--text-mid);border:1px solid var(--border-strong);border-radius:20px;cursor:pointer}
+.coeff-info{font-size:12px;color:var(--text-light);font-style:italic;margin-top:4px}
+.saved-devis{display:flex;flex-direction:column;gap:8px}
+.saved-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.saved-info{flex:1}.saved-name{font-size:13px;font-weight:500}.saved-meta{font-size:11px;color:var(--text-light)}
+.saved-price{font-family:'DM Serif Display',serif;font-size:16px;color:var(--teal)}
+.saved-del{font-size:14px;color:var(--text-light);cursor:pointer;background:none;border:none}
+.saved-del:hover{color:#E74C3C}
+@media print{header,.btn-print,.btn-reset,.btn-add-row,.del-row,.saved-devis,.section.neutral{display:none}.result-box{background:white;border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Élence <span>chiffrage atelier</span></div>
+  <div class="nav-links">
+    <a href="elence_planning.html" class="nav-btn">Planning</a>
+    <a href="elence_ca.html" class="nav-btn">CA 2026</a>
+    <a href="elence_devis_archi.html" class="nav-btn">Devis archi</a>
+    <a href="elence_devis_atelier.html" class="nav-btn active">Devis atelier</a>
+  </div>
+</header>
+
+<div class="page">
+  <div style="margin-bottom:1.5rem">
+    <h1 style="font-family:'DM Serif Display',serif;font-size:28px;font-weight:normal;color:var(--text)">Chiffrage fabrication atelier</h1>
+    <p style="font-size:13px;color:var(--text-mid);margin-top:4px">Calcule le prix de revient + marge pour tes pièces sur mesure</p>
+  </div>
+
+  <!-- INFOS CLIENT -->
+  <div class="section teal">
+    <div class="section-head"><div class="section-title"><span class="dot dot-teal"></span>Informations</div></div>
+    <div class="section-body">
+      <div class="field-row cols3">
+        <div class="field"><label>Client</label><input type="text" id="a-client" placeholder="Nom du client" oninput="calc()"></div>
+        <div class="field"><label>Nom de la pièce</label><input type="text" id="a-piece" placeholder="Ex : Meuble TV sur mesure" oninput="calc()"></div>
+        <div class="field"><label>Date devis</label><input type="date" id="a-date" oninput="calc()"></div>
+      </div>
+      <div class="field-row cols2">
+        <div class="field"><label>Description / notes</label><textarea id="a-desc" placeholder="Dimensions, finitions, contraintes particulières…" oninput="calc()"></textarea></div>
+        <div class="field">
+          <label>Taux horaire atelier (€/h)</label>
+          <input type="number" id="a-taux" value="35" min="1" oninput="calc()">
+          <div class="coeff-info">Taux de charge (matières → prix vente) : <input type="number" id="a-coeff" value="1.8" step="0.1" min="1" style="width:55px;display:inline;padding:2px 5px;font-size:12px;border:1px solid var(--border-strong);border-radius:4px;background:var(--cream)"> ×</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MATIÈRES -->
+  <div class="section teal">
+    <div class="section-head"><div class="section-title"><span class="dot dot-teal"></span>Matières premières</div></div>
+    <div class="section-body">
+      <table class="mat-table">
+        <thead><tr>
+          <th>Désignation</th><th>Matériau</th><th>Qté</th><th>Unité</th><th>Prix unit. (€)</th><th>Total</th><th></th>
+        </tr></thead>
+        <tbody id="mat-tbody"></tbody>
+      </table>
+      <button class="btn-add-row" onclick="addMat()">+ Ajouter une matière</button>
+    </div>
+  </div>
+
+  <!-- MAIN D'ŒUVRE -->
+  <div class="section teal">
+    <div class="section-head"><div class="section-title"><span class="dot dot-teal"></span>Main d'œuvre & opérations</div></div>
+    <div class="section-body">
+      <table class="mat-table">
+        <thead><tr>
+          <th>Opération</th><th>Heures (h)</th><th>Taux (€/h)</th><th>Total</th><th></th>
+        </tr></thead>
+        <tbody id="mo-tbody"></tbody>
+      </table>
+      <button class="btn-add-row" onclick="addMO()">+ Ajouter une opération</button>
+    </div>
+  </div>
+
+  <!-- FRAIS DIVERS -->
+  <div class="section teal">
+    <div class="section-head"><div class="section-title"><span class="dot dot-teal"></span>Frais divers</div></div>
+    <div class="section-body">
+      <table class="mat-table">
+        <thead><tr><th>Poste</th><th>Montant (€)</th><th></th></tr></thead>
+        <tbody id="frais-tbody"></tbody>
+      </table>
+      <button class="btn-add-row" onclick="addFrais()">+ Ajouter un frais</button>
+    </div>
+  </div>
+
+  <!-- RÉSULTAT -->
+  <div class="result-box" id="result-box">
+    <div class="result-grid">
+      <div class="result-item"><div class="result-label">Prix de revient</div><div class="result-val" id="r-revient">—</div></div>
+      <div class="result-item"><div class="result-label">Marge appliquée</div><div class="result-val orange" id="r-marge">—</div></div>
+      <div class="result-item"><div class="result-label">Prix de vente HT</div><div class="result-val main" id="r-vente">—</div></div>
+    </div>
+    <div class="marge-bar-bg"><div class="marge-bar-fill" id="marge-bar" style="width:0%"></div></div>
+    <div class="result-breakdown" id="r-breakdown"></div>
+    <div style="display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap;align-items:center">
+      <div class="field" style="margin:0">
+        <label style="font-size:11px;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em">Remise client (%)</label>
+        <input type="number" id="remise" value="0" min="0" max="50" style="width:80px;font-size:13px;padding:6px 9px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream)" oninput="calc()">
+      </div>
+      <div style="margin-top:18px;display:flex;gap:8px">
+        <button class="btn-print" onclick="saveDevis()">Enregistrer ce devis</button>
+        <button class="btn-reset" onclick="resetForm()">Nouveau chiffrage</button>
+        <button class="btn-print" style="background:var(--orange)" onclick="window.print()">Imprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEVIS SAUVEGARDÉS -->
+  <div class="section neutral" style="margin-top:1.5rem">
+    <div class="section-head"><div class="section-title"><span class="dot dot-sand"></span>Devis enregistrés</div></div>
+    <div class="section-body"><div class="saved-devis" id="saved-list"></div></div>
+  </div>
+</div>
+
+<script>
+const KEY_AT = 'elence_atelier_v1';
+let state;
+try{state=JSON.parse(localStorage.getItem(KEY_AT))||null;}catch(e){state=null;}
+if(!state) state={matieres:[],mo:[],frais:[],saved:[]};
+
+function save(){try{localStorage.setItem(KEY_AT,JSON.stringify(state));}catch(e){}}
+function fmt(v){return Number(v).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+'€';}
+
+function addMat(){
+  state.matieres.push({name:'',mat:'Bois',qty:1,unit:'ml',prix:0});
+  save();renderMat();calc();
+}
+function delMat(i){state.matieres.splice(i,1);save();renderMat();calc();}
+function renderMat(){
+  const units=['ml','m²','m³','pce','kg','l'];
+  const mats=['Bois','Panneau','Métal','Verre','Quincaillerie','Tissu','Résine','Autre'];
+  document.getElementById('mat-tbody').innerHTML=state.matieres.map((m,i)=>`<tr>
+    <td><input value="${m.name}" placeholder="Ex: Chêne massif" onchange="state.matieres[${i}].name=this.value;save();calc()"></td>
+    <td><select onchange="state.matieres[${i}].mat=this.value;save();calc()">${mats.map(x=>`<option ${m.mat===x?'selected':''}>${x}</option>`).join('')}</select></td>
+    <td><input type="number" value="${m.qty}" min="0" step="0.01" style="width:70px" onchange="state.matieres[${i}].qty=parseFloat(this.value)||0;save();calc()"></td>
+    <td><select onchange="state.matieres[${i}].unit=this.value;save()">${units.map(x=>`<option ${m.unit===x?'selected':''}>${x}</option>`).join('')}</select></td>
+    <td><input type="number" value="${m.prix}" min="0" step="0.01" style="width:80px" onchange="state.matieres[${i}].prix=parseFloat(this.value)||0;save();calc()"></td>
+    <td style="font-weight:500">${fmt(m.qty*m.prix)}</td>
+    <td><button class="del-row" onclick="delMat(${i})">×</button></td>
+  </tr>`).join('');
+}
+
+function addMO(){
+  const taux=parseFloat(document.getElementById('a-taux').value)||35;
+  state.mo.push({name:'',heures:1,taux});save();renderMO();calc();
+}
+function delMO(i){state.mo.splice(i,1);save();renderMO();calc();}
+function renderMO(){
+  document.getElementById('mo-tbody').innerHTML=state.mo.map((m,i)=>`<tr>
+    <td><input value="${m.name}" placeholder="Ex: Débit, assemblage…" onchange="state.mo[${i}].name=this.value;save()"></td>
+    <td><input type="number" value="${m.heures}" min="0" step="0.25" style="width:70px" onchange="state.mo[${i}].heures=parseFloat(this.value)||0;save();calc()"></td>
+    <td><input type="number" value="${m.taux}" min="0" style="width:70px" onchange="state.mo[${i}].taux=parseFloat(this.value)||0;save();calc()"></td>
+    <td style="font-weight:500">${fmt(m.heures*m.taux)}</td>
+    <td><button class="del-row" onclick="delMO(${i})">×</button></td>
+  </tr>`).join('');
+}
+
+function addFrais(){state.frais.push({name:'',montant:0});save();renderFrais();calc();}
+function delFrais(i){state.frais.splice(i,1);save();renderFrais();calc();}
+function renderFrais(){
+  document.getElementById('frais-tbody').innerHTML=state.frais.map((f,i)=>`<tr>
+    <td><input value="${f.name}" placeholder="Ex: Livraison, sous-traitance…" onchange="state.frais[${i}].name=this.value;save()"></td>
+    <td><input type="number" value="${f.montant}" min="0" step="0.01" style="width:100px" onchange="state.frais[${i}].montant=parseFloat(this.value)||0;save();calc()"></td>
+    <td><button class="del-row" onclick="delFrais(${i})">×</button></td>
+  </tr>`).join('');
+}
+
+function calc(){
+  const coeff=parseFloat(document.getElementById('a-coeff').value)||1.8;
+  const remise=parseFloat(document.getElementById('remise').value)||0;
+  const totalMat=state.matieres.reduce((s,m)=>s+m.qty*m.prix,0);
+  const totalMO=state.mo.reduce((s,m)=>s+m.heures*m.taux,0);
+  const totalFrais=state.frais.reduce((s,f)=>s+f.montant,0);
+  const revient=totalMat+totalMO+totalFrais;
+  const venteAvantRemise=totalMat*coeff+totalMO+totalFrais;
+  const marge=venteAvantRemise-totalMat-totalMO-totalFrais;
+  const remiseMontant=venteAvantRemise*remise/100;
+  const venteFinal=venteAvantRemise-remiseMontant;
+  const margePct=revient>0?Math.round((venteFinal-revient)/revient*100):0;
+  document.getElementById('r-revient').textContent=revient>0?fmt(revient):'—';
+  document.getElementById('r-marge').textContent=marge>0?fmt(marge):'—';
+  document.getElementById('r-vente').textContent=venteFinal>0?fmt(venteFinal):'—';
+  document.getElementById('marge-bar').style.width=Math.min(margePct,100)+'%';
+  document.getElementById('r-breakdown').innerHTML=revient>0?`
+    Matières : <strong>${fmt(totalMat)}</strong> × ${coeff} = ${fmt(totalMat*coeff)} · Main d'œuvre : <strong>${fmt(totalMO)}</strong> · Frais : <strong>${fmt(totalFrais)}</strong><br>
+    Prix de vente HT : <strong>${fmt(venteFinal)}</strong>${remise>0?` (remise ${remise}% = −${fmt(remiseMontant)})`:''}  ·  Prix TTC (20%) : <strong>${fmt(venteFinal*1.2)}</strong><br>
+    Marge brute : <strong>${fmt(venteFinal-revient)}</strong> (${margePct}% sur le prix de vente)`:'Remplis les lignes ci-dessus pour obtenir le chiffrage.';
+}
+
+function saveDevis(){
+  const client=document.getElementById('a-client').value||'Sans nom';
+  const piece=document.getElementById('a-piece').value||'Pièce';
+  const coeff=parseFloat(document.getElementById('a-coeff').value)||1.8;
+  const remise=parseFloat(document.getElementById('remise').value)||0;
+  const totalMat=state.matieres.reduce((s,m)=>s+m.qty*m.prix,0);
+  const totalMO=state.mo.reduce((s,m)=>s+m.heures*m.taux,0);
+  const totalFrais=state.frais.reduce((s,f)=>s+f.montant,0);
+  const vente=(totalMat*coeff+totalMO+totalFrais)*(1-remise/100);
+  state.saved.push({client,piece,vente:Math.round(vente*100)/100,date:new Date().toLocaleDateString('fr-FR'),matieres:[...state.matieres],mo:[...state.mo],frais:[...state.frais]});
+  save();renderSaved();alert('Devis enregistré !');
+}
+function delSaved(i){state.saved.splice(i,1);save();renderSaved();}
+function renderSaved(){
+  const el=document.getElementById('saved-list');
+  if(!state.saved.length){el.innerHTML='<div style="font-size:12px;color:var(--text-light);font-style:italic">Aucun devis enregistré</div>';return;}
+  el.innerHTML=state.saved.map((d,i)=>`<div class="saved-card">
+    <div class="saved-info"><div class="saved-name">${d.piece} — ${d.client}</div><div class="saved-meta">${d.date}</div></div>
+    <div class="saved-price">${Number(d.vente).toLocaleString('fr-FR',{minimumFractionDigits:2})} €</div>
+    <button class="saved-del" onclick="delSaved(${i})">×</button>
+  </div>`).join('');
+}
+function resetForm(){
+  if(!confirm('Effacer le chiffrage en cours ?')) return;
+  state.matieres=[];state.mo=[];state.frais=[];save();
+  ['a-client','a-piece','a-desc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('remise').value='0';
+  renderMat();renderMO();renderFrais();calc();
+}
+
+// Init
+document.getElementById('a-date').value=new Date().toISOString().split('T')[0];
+renderMat();renderMO();renderFrais();renderSaved();calc();
+// Add default rows if empty
+if(!state.matieres.length){addMat();}
+if(!state.mo.length){addMO();}
+</script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Élence — Devis Archi</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--orange:#E8622A;--orange-light:#FDF0E9;--teal:#3BBFAD;--teal-light:#E4F7F5;--purple:#7C6FCD;--purple-light:#F3F0FF;--cream:#FAF8F5;--sand:#F0EDE7;--text:#2A2420;--text-mid:#7A6E68;--text-light:#B0A49C;--white:#fff;--border:rgba(42,36,32,.10);--border-strong:rgba(42,36,32,.18);--radius:14px;--radius-sm:8px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh}
+header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;gap:12px}
+.logo{font-family:'DM Serif Display',serif;font-size:20px;color:var(--orange);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.logo span{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:300;color:var(--text-mid);letter-spacing:.12em;text-transform:uppercase}
+.nav-links{display:flex;gap:5px}
+.nav-btn{padding:5px 12px;font-size:12px;font-family:'DM Sans',sans-serif;border:1px solid var(--border-strong);border-radius:20px;background:transparent;color:var(--text-mid);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.nav-btn:hover{background:var(--sand)}.nav-btn.active{background:var(--orange);color:white;border-color:var(--orange)}
+.page{max-width:900px;margin:0 auto;padding:2rem 1.5rem 5rem}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem}
+.card.or{border-top:2.5px solid var(--orange)}.card.te{border-top:2.5px solid var(--teal)}.card.ne{border-top:2.5px solid var(--text-light)}.card.pu{border-top:2.5px solid var(--purple)}
+.ch{padding:.8rem 1.2rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.ch.or-bg{background:var(--orange-light)}.ch.te-bg{background:var(--teal-light)}.ch.pu-bg{background:var(--purple-light)}
+.ct{font-size:11px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--text-mid);display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%}.dot-or{background:var(--orange)}.dot-te{background:var(--teal)}.dot-ne{background:var(--text-light)}.dot-pu{background:var(--purple)}
+.cb{padding:.875rem 1.2rem 1.2rem}
+.field-row{display:grid;gap:10px;margin-bottom:12px}
+.field-row.c2{grid-template-columns:1fr 1fr}.field-row.c3{grid-template-columns:1fr 1fr 1fr}
+.field label{font-size:11px;color:var(--text-mid);letter-spacing:.07em;text-transform:uppercase;display:block;margin-bottom:3px}
+.field input,.field select,.field textarea{width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:7px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--orange);background:white}
+.field textarea{height:65px;resize:vertical}
+/* TARIFS SECTION */
+.tarif-global{background:var(--orange-light);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:1rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.tg-field{display:flex;flex-direction:column;gap:3px}
+.tg-label{font-size:10px;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em}
+.tg-input{font-size:18px;font-family:'DM Serif Display',serif;width:90px;border:none;border-bottom:1.5px solid var(--border-strong);background:transparent;color:var(--orange);outline:none;padding:2px 0}
+/* PRESTATIONS */
+.presta-grid{display:flex;flex-direction:column;gap:6px}
+.presta-item{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.ph{display:flex;align-items:center;padding:9px 12px;cursor:pointer;background:var(--cream);gap:10px}
+.ph:hover{background:var(--orange-light)}
+.ph.active{background:var(--orange-light);border-bottom:1px solid var(--border)}
+.pcheck{width:17px;height:17px;border-radius:5px;border:1.5px solid var(--border-strong);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;background:transparent}
+.pcheck.on{background:var(--orange);border-color:var(--orange)}.pcheck.on::after{content:'✓';font-size:9px;color:white;font-weight:500}
+.pname{flex:1;font-size:13px;font-weight:500}
+.pdesc-s{font-size:11px;color:var(--text-light);flex:2;display:none}
+@media(min-width:600px){.pdesc-s{display:block}}
+.pprice{font-size:13px;font-family:'DM Serif Display',serif;color:var(--orange);min-width:70px;text-align:right}
+.pd{padding:10px 12px;background:var(--white);display:none;border-top:1px solid var(--border)}
+.pd.open{display:block}
+.pd-desc{font-size:12px;color:var(--text-mid);line-height:1.6;margin-bottom:8px}
+.pd-inputs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:8px}
+.mini-field label{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:3px}
+.mini-field input{width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:4px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none}
+.mini-field input:focus{border-color:var(--orange)}
+/* FORFAITS */
+.forfait-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.forfait-item{border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;cursor:pointer;display:flex;align-items:flex-start;gap:8px;transition:all .15s;background:var(--cream)}
+.forfait-item:hover{background:var(--orange-light);border-color:var(--orange)}
+.forfait-item.on{background:var(--orange-light);border-color:var(--orange)}
+.fcheck{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border-strong);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;background:transparent;margin-top:1px}
+.fcheck.on{background:var(--orange);border-color:var(--orange)}.fcheck.on::after{content:'✓';font-size:8px;color:white;font-weight:500}
+.fname{font-size:12px;font-weight:500;flex:1}.fdesc{font-size:11px;color:var(--text-light);margin-top:1px}
+.fprice{font-size:12px;font-family:'DM Serif Display',serif;color:var(--orange);min-width:50px;text-align:right}
+/* RÉSULTAT */
+.result-box{background:var(--orange-light);border:1.5px solid var(--orange);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-top:1rem}
+.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:.875rem}
+.r-label{font-size:10px;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.r-val{font-size:24px;font-family:'DM Serif Display',serif}
+.r-val.main{font-size:30px;color:var(--orange)}
+.result-table{width:100%;border-collapse:collapse;margin-top:8px}
+.result-table td{font-size:12px;padding:4px 7px;border-bottom:1px solid rgba(232,98,42,.12)}
+.result-table td:last-child{text-align:right;font-weight:500}
+.result-table tr:last-child td{border-bottom:none}
+.result-table tr.subtotal td{background:rgba(232,98,42,.06);font-family:'DM Serif Display',serif;font-size:13px}
+.btn-save-dv{padding:7px 18px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--orange);color:white;border:none;border-radius:20px;cursor:pointer;font-weight:500}
+.btn-save-dv:hover{background:#C9501F}
+.btn-rst{padding:7px 14px;font-size:13px;font-family:'DM Sans',sans-serif;background:transparent;color:var(--text-mid);border:1px solid var(--border-strong);border-radius:20px;cursor:pointer}
+.saved-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 13px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.sdel{font-size:13px;color:var(--text-light);cursor:pointer;background:none;border:none}.sdel:hover{color:#E74C3C}
+@media print{header,.btn-save-dv,.btn-rst,.card.ne{display:none}.result-box{background:white;border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Élence <span>devis archi</span></div>
+  <div class="nav-links">
+    <a href="elence_planning.html" class="nav-btn">Planning</a>
+    <a href="elence_ca.html" class="nav-btn">CA 2026</a>
+    <a href="elence_devis_archi.html" class="nav-btn active">Devis archi</a>
+    <a href="elence_devis_atelier.html" class="nav-btn">Devis atelier</a>
+    <a href="elence_projets.html" class="nav-btn">Mes projets</a>
+  </div>
+</header>
+
+<div class="page">
+  <div style="margin-bottom:1.5rem">
+    <h1 style="font-family:'DM Serif Display',serif;font-size:28px;font-weight:normal">Devis — Architecture intérieure</h1>
+    <p style="font-size:13px;color:var(--text-mid);margin-top:4px">Tarif au m² paramétrable par prestation + forfaits optionnels</p>
+  </div>
+
+  <!-- CLIENT -->
+  <div class="card or">
+    <div class="ch or-bg"><div class="ct"><span class="dot dot-or"></span>Client & projet</div></div>
+    <div class="cb">
+      <div class="field-row c3">
+        <div class="field"><label>Client</label><input type="text" id="d-client" placeholder="Nom du client" oninput="calc()"></div>
+        <div class="field"><label>Adresse / commune</label><input type="text" id="d-adresse" placeholder="Ville" oninput="calc()"></div>
+        <div class="field"><label>Date devis</label><input type="date" id="d-date"></div>
+      </div>
+      <div class="field-row c3">
+        <div class="field">
+          <label>Type de projet</label>
+          <select id="d-type" onchange="calc()">
+            <option value="renovation">Rénovation intérieure</option>
+            <option value="neuf">Construction neuve</option>
+            <option value="extension">Extension / agrandissement</option>
+            <option value="amenagement">Aménagement commercial</option>
+            <option value="mobilier">Mobilier sur mesure</option>
+          </select>
+        </div>
+        <div class="field"><label>Surface (m²)</label><input type="number" id="d-surface" value="0" min="0" oninput="calc()"></div>
+        <div class="field"><label>Remarques</label><input type="text" id="d-remarques" placeholder="Conditions, délais…"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TARIFS GLOBAUX -->
+  <div class="card or">
+    <div class="ch or-bg"><div class="ct"><span class="dot dot-or"></span>Tarifs de base (modifiables)</div></div>
+    <div class="cb">
+      <div class="tarif-global" id="tarif-global-ui"></div>
+      <p style="font-size:11px;color:var(--text-light)">Ces tarifs s'appliquent par défaut à toutes les prestations. Tu peux affiner prestation par prestation ci-dessous.</p>
+    </div>
+  </div>
+
+  <!-- PRESTATIONS -->
+  <div class="card or">
+    <div class="ch or-bg"><div class="ct"><span class="dot dot-or"></span>Prestations — coche ce qui est inclus</div></div>
+    <div class="cb">
+      <div class="presta-grid" id="presta-grid"></div>
+    </div>
+  </div>
+
+  <!-- FORFAITS -->
+  <div class="card pu">
+    <div class="ch pu-bg"><div class="ct"><span class="dot dot-pu"></span>Forfaits optionnels</div></div>
+    <div class="cb">
+      <div class="forfait-grid" id="forfait-grid"></div>
+    </div>
+  </div>
+
+  <!-- RÉSULTAT -->
+  <div class="result-box">
+    <div class="result-grid">
+      <div><div class="r-label">Honoraires HT</div><div class="r-val main" id="r-total">—</div></div>
+      <div><div class="r-label">Surface traitée</div><div class="r-val" id="r-surf">—</div></div>
+      <div><div class="r-label">Total TTC (20%)</div><div class="r-val" id="r-ttc">—</div></div>
+    </div>
+    <table class="result-table" id="result-table"></table>
+    <div style="display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap;align-items:center">
+      <div>
+        <div style="font-size:10px;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Remise (%)</div>
+        <input type="number" id="d-remise" value="0" min="0" max="50" style="width:65px;font-size:13px;padding:5px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);outline:none" oninput="calc()">
+      </div>
+      <div style="margin-top:16px;display:flex;gap:7px;flex-wrap:wrap">
+        <button class="btn-save-dv" onclick="saveDevis()">Enregistrer</button>
+        <button class="btn-rst" onclick="resetDevis()">Nouveau devis</button>
+        <button class="btn-save-dv" style="background:var(--teal)" onclick="window.print()">Imprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAUVEGARDÉS -->
+  <div class="card ne" style="margin-top:1.5rem">
+    <div class="ch"><div class="ct"><span class="dot dot-ne"></span>Devis enregistrés</div></div>
+    <div class="cb" id="saved-archi"><div style="font-size:12px;color:var(--text-light);font-style:italic">Aucun devis enregistré</div></div>
+  </div>
+</div>
+
+<script>
+const KEY_AR='elence_archi_v2';
+
+// Tarifs par défaut au m²
+const TARIFS_DEF={
+  visite:0,        // forfait fixe
+  esquisse:8,      // €/m²
+  plans:12,        // €/m²
+  rendu3d:6,       // €/m²
+  mobilier:15,     // €/m²
+  carnet:5,        // €/m²
+  coordination:4,  // €/m²
+  shopping:3,      // €/m²
+  dp:0,            // forfait fixe
+};
+
+const PRESTATIONS=[
+  {id:'visite',name:'Visite conseil',desc:'Analyse de l\'espace, diagnostic, recommandations.',detail:'1re étape du projet — visite sur site, écoute du client, recommandations orales ou écrites, orientation générale. Prix au forfait.',isForffait:true,forfaitDef:150,inputs:[{id:'nb',label:'Nb visites',val:1}]},
+  {id:'esquisse',name:'Esquisse & parti pris',desc:'Concept spatial, ambiance, premières idées.',detail:'Croquis d\'ambiance, schémas d\'organisation, planche tendance. Formalise la direction créative du projet avant la conception technique.',inputs:[]},
+  {id:'plans',name:'Plans AutoCAD',desc:'Plans cotés, implantation, coupes.',detail:'Plans techniques réalisés sur AutoCAD : existant, implantation mobilier, calepinage sol, coupes. Livrés PDF + DWG.',inputs:[{id:'nb_plans',label:'Nb plans',val:3,prixUnit:0}]},
+  {id:'rendu3d',name:'Rendu 3D (SketchUp/Enscape)',desc:'Vues 3D photoréalistes.',detail:'Modélisation sur SketchUp, rendus Enscape. Prix au m² + forfait par vue supplémentaire.',inputs:[{id:'nb_vues',label:'Nb vues',val:3,prixUnit:40}]},
+  {id:'mobilier',name:'Conception mobilier sur mesure',desc:'Plans techniques + cahier des charges menuisier.',detail:'Plans cotés des meubles sur mesure, détails d\'assemblage, spécifications matériaux. Facilite la relation avec le menuisier.',inputs:[{id:'nb_meubles',label:'Nb meubles',val:1,prixUnit:80}]},
+  {id:'carnet',name:'Carnet de détails techniques',desc:'Détails constructifs, fiches matériaux.',detail:'Document de synthèse : détails de pose, calepinage, fiches produits, liste des prestations artisans.',inputs:[]},
+  {id:'coordination',name:'Coordination entreprises',desc:'Interface client/artisans, analyse devis.',detail:'Assistance dans la relation avec les artisans : demandes de devis, analyse comparative, recommandations. Hors maîtrise d\'œuvre.',inputs:[{id:'nb_ent',label:'Nb artisans',val:2,prixUnit:60}]},
+  {id:'shopping',name:'Shopping list & sourcing',desc:'Sélection mobilier, matériaux, luminaires.',detail:'Sélection personnalisée des produits. Livraison d\'une liste commentée avec liens et alternatives.',inputs:[]},
+  {id:'dp',name:'Dossier DP / PC',desc:'Déclaration préalable ou permis de construire.',detail:'Préparation du dossier administratif : plans de masse, façades, notice. DP (≤20m²) ou PC. Sans volets structurels. Prix au forfait.',isForffait:true,forfaitDef:450,inputs:[{id:'nb_dp',label:'Nb dossiers',val:1}]},
+];
+
+const FORFAITS=[
+  {id:'urgence',name:'Majoration urgence',desc:'Délai < 10 jours',prix:20,unit:'%'},
+  {id:'depl',name:'Déplacements > 50km',desc:'Frais kilométriques',prix:80,unit:'forfait'},
+  {id:'rendu_supp',name:'Rendu 3D supplémentaire',desc:'Par vue additionnelle',prix:60,unit:'/ vue'},
+  {id:'pres',name:'Présentation client',desc:'Réunion de présentation',prix:120,unit:'forfait'},
+  {id:'suivi',name:'Suivi de fabrication',desc:'Visites atelier menuisier',prix:90,unit:'/ visite'},
+  {id:'traduction',name:'Notice descriptive',desc:'Document écrit pour client',prix:80,unit:'forfait'},
+];
+
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY_AR))||null;}catch(e){S=null;}
+if(!S) S={sel:{},inputs:{},tarifs:{...TARIFS_DEF},forfaits:{},saved:[]};
+if(!S.tarifs) S.tarifs={...TARIFS_DEF};
+
+function save(){try{localStorage.setItem(KEY_AR,JSON.stringify(S));}catch(e){}}
+function fmt(v){return Number(v).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+'€';}
+
+function renderTarifGlobal(){
+  const el=document.getElementById('tarif-global-ui');
+  el.innerHTML=`
+    <div class="tg-field"><div class="tg-label">Tarif visite conseil (€)</div><input class="tg-input" type="number" value="${S.tarifs.visite_forfait||150}" onchange="S.tarifs.visite_forfait=parseFloat(this.value)||150;save();calc()"></div>
+    <div class="tg-field"><div class="tg-label">Tarif plans (€/m²)</div><input class="tg-input" type="number" value="${S.tarifs.plans||12}" onchange="S.tarifs.plans=parseFloat(this.value)||12;save();renderPrestations();calc()"></div>
+    <div class="tg-field"><div class="tg-label">Tarif 3D (€/m²)</div><input class="tg-input" type="number" value="${S.tarifs.rendu3d||6}" onchange="S.tarifs.rendu3d=parseFloat(this.value)||6;save();renderPrestations();calc()"></div>
+    <div class="tg-field"><div class="tg-label">Tarif esquisse (€/m²)</div><input class="tg-input" type="number" value="${S.tarifs.esquisse||8}" onchange="S.tarifs.esquisse=parseFloat(this.value)||8;save();renderPrestations();calc()"></div>
+    <div class="tg-field"><div class="tg-label">Tarif mobilier (€/m²)</div><input class="tg-input" type="number" value="${S.tarifs.mobilier||15}" onchange="S.tarifs.mobilier=parseFloat(this.value)||15;save();renderPrestations();calc()"></div>
+    <div class="tg-field"><div class="tg-label">Forfait DP/PC (€)</div><input class="tg-input" type="number" value="${S.tarifs.dp_forfait||450}" onchange="S.tarifs.dp_forfait=parseFloat(this.value)||450;save();calc()"></div>`;
+}
+
+function calcPresta(p){
+  const surf=parseFloat(document.getElementById('d-surface').value)||0;
+  if(p.isForffait){
+    const nb=S.inputs[p.id+'_nb']||1;
+    const forfait=p.id==='visite'?(S.tarifs.visite_forfait||150):(S.tarifs.dp_forfait||450);
+    return {total:Math.round(forfait*nb),detail:`${nb} × ${fmt(forfait)}`};
+  }
+  const tarifM2=S.tarifs[p.id]||0;
+  let base=surf*tarifM2;
+  let detail=surf>0?`${surf}m² × ${tarifM2}€`:'0';
+  // extras
+  if(p.inputs) p.inputs.forEach(inp=>{
+    if(inp.prixUnit>0){
+      const nb=S.inputs[p.id+'_'+inp.id]||inp.val;
+      base+=nb*inp.prixUnit;
+      detail+=` + ${nb}×${fmt(inp.prixUnit)}`;
+    }
+  });
+  return {total:Math.round(base),detail};
+}
+
+function renderPrestations(){
+  const surf=parseFloat(document.getElementById('d-surface').value)||0;
+  const grid=document.getElementById('presta-grid');
+  grid.innerHTML=PRESTATIONS.map(p=>{
+    const on=!!S.sel[p.id];
+    const {total,detail}=calcPresta(p);
+    return `<div class="presta-item">
+      <div class="ph ${on?'active':''}" onclick="togglePresta('${p.id}')">
+        <div class="pcheck ${on?'on':''}"></div>
+        <span class="pname">${p.name}</span>
+        <span class="pdesc-s">${p.desc}</span>
+        <span class="pprice">${on&&total>0?fmt(total):'—'}</span>
+      </div>
+      <div class="pd ${on?'open':''}">
+        <div class="pd-desc">${p.detail} ${!p.isForffait&&surf>0?`<span style="color:var(--orange)">(${detail})</span>`:''}</div>
+        ${p.inputs&&p.inputs.length?`<div class="pd-inputs">${p.inputs.map(inp=>`
+          <div class="mini-field"><label>${inp.label}</label>
+            <input type="number" value="${S.inputs[p.id+'_'+inp.id]||inp.val}" min="0" onchange="S.inputs['${p.id}_${inp.id}']=parseFloat(this.value)||0;save();renderPrestations();calc()">
+          </div>`).join('')}</div>`:''}
+        ${!p.isForffait?`<div class="mini-field" style="margin-top:8px;max-width:150px"><label>Tarif €/m² (personnalisé)</label>
+          <input type="number" value="${S.tarifs[p.id]||0}" min="0" onchange="S.tarifs['${p.id}']=parseFloat(this.value)||0;save();renderPrestations();calc()">
+        </div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function togglePresta(id){S.sel[id]=!S.sel[id];save();renderPrestations();calc();}
+
+function renderForfaits(){
+  document.getElementById('forfait-grid').innerHTML=FORFAITS.map(f=>{
+    const on=!!S.forfaits[f.id];
+    return `<div class="forfait-item ${on?'on':''}" onclick="toggleForfait('${f.id}')">
+      <div class="fcheck ${on?'on':''}"></div>
+      <div><div class="fname">${f.name}</div><div class="fdesc">${f.desc}</div></div>
+      <div><div class="fprice">${f.prix}${f.unit==='%'?'%':'€'}</div><div style="font-size:10px;color:var(--text-light)">${f.unit}</div></div>
+    </div>`;
+  }).join('');
+}
+function toggleForfait(id){S.forfaits[id]=!S.forfaits[id];save();renderForfaits();calc();}
+
+function calc(){
+  const surf=parseFloat(document.getElementById('d-surface').value)||0;
+  const remise=parseFloat(document.getElementById('d-remise').value)||0;
+  let totalHT=0;const rows=[];
+  PRESTATIONS.forEach(p=>{
+    if(!S.sel[p.id]) return;
+    const {total,detail}=calcPresta(p);
+    totalHT+=total;
+    rows.push({name:p.name,detail,total});
+  });
+  // forfaits
+  let forfaitTotal=0;
+  FORFAITS.forEach(f=>{
+    if(!S.forfaits[f.id]) return;
+    let montant=f.unit==='%'?Math.round(totalHT*f.prix/100):f.prix;
+    forfaitTotal+=montant;
+    rows.push({name:f.name,detail:f.unit==='%'?`${f.prix}% des honoraires`:f.unit,total:montant,isForfait:true});
+  });
+  totalHT+=forfaitTotal;
+  const remiseMontant=Math.round(totalHT*remise/100);
+  const netHT=totalHT-remiseMontant;
+  const ttc=Math.round(netHT*1.2);
+  document.getElementById('r-total').textContent=netHT>0?fmt(netHT):'—';
+  document.getElementById('r-surf').textContent=surf>0?surf+'m²':'—';
+  document.getElementById('r-ttc').textContent=ttc>0?fmt(ttc):'—';
+  const t=document.getElementById('result-table');
+  if(!rows.length){t.innerHTML='';return;}
+  let html=rows.map(r=>`<tr ${r.isForfait?'style="color:var(--purple)"':''}><td>${r.name}</td><td style="color:var(--text-light);font-size:11px">${r.detail}</td><td>${fmt(r.total)}</td></tr>`).join('');
+  if(remise>0) html+=`<tr><td colspan="2" style="color:var(--text-light)">Remise ${remise}%</td><td style="color:#E74C3C">−${fmt(remiseMontant)}</td></tr>`;
+  html+=`<tr class="subtotal"><td colspan="2">Total HT</td><td>${fmt(netHT)}</td></tr>`;
+  t.innerHTML=html;
+}
+
+function saveDevis(){
+  const client=document.getElementById('d-client').value||'Sans nom';
+  const type=document.getElementById('d-type').options[document.getElementById('d-type').selectedIndex].text;
+  const surf=parseFloat(document.getElementById('d-surface').value)||0;
+  const remise=parseFloat(document.getElementById('d-remise').value)||0;
+  let totalHT=0;
+  PRESTATIONS.forEach(p=>{if(S.sel[p.id]) totalHT+=calcPresta(p).total;});
+  FORFAITS.forEach(f=>{if(S.forfaits[f.id]) totalHT+=f.unit==='%'?Math.round(totalHT*f.prix/100):f.prix;});
+  const net=Math.round(totalHT*(1-remise/100));
+  S.saved.push({client,type,surface:surf,total:net,date:new Date().toLocaleDateString('fr-FR')});
+  save();renderSaved();alert('Devis enregistré !');
+}
+function delSaved(i){S.saved.splice(i,1);save();renderSaved();}
+function renderSaved(){
+  const el=document.getElementById('saved-archi');
+  if(!S.saved.length){el.innerHTML='<div style="font-size:12px;color:var(--text-light);font-style:italic">Aucun devis enregistré</div>';return;}
+  el.innerHTML=S.saved.map((d,i)=>`<div class="saved-card">
+    <div style="flex:1"><div style="font-size:13px;font-weight:500">${d.client} — ${d.type}</div><div style="font-size:11px;color:var(--text-light)">${d.date} · ${d.surface}m²</div></div>
+    <div style="font-family:'DM Serif Display',serif;font-size:16px;color:var(--orange)">${Number(d.total).toLocaleString('fr-FR')} €</div>
+    <button class="sdel" onclick="delSaved(${i})">×</button>
+  </div>`).join('');
+}
+function resetDevis(){
+  if(!confirm('Effacer ce devis ?')) return;
+  S.sel={};S.inputs={};S.forfaits={};save();
+  ['d-client','d-adresse','d-remarques'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('d-surface').value='0';document.getElementById('d-remise').value='0';
+  renderPrestations();renderForfaits();calc();
+}
+
+document.getElementById('d-date').value=new Date().toISOString().split('T')[0];
+renderTarifGlobal();renderPrestations();renderForfaits();calc();renderSaved();
+document.querySelectorAll('#d-surface,#d-taux').forEach(el=>el&&el.addEventListener('input',()=>{renderPrestations();calc();}));
+</script>
+</body>
+</html>

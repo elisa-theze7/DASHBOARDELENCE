@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Élence — Suivi CA 2026</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--orange:#E8622A;--orange-light:#FDF0E9;--orange-mid:#F5C4A3;--teal:#3BBFAD;--teal-light:#E4F7F5;--cream:#FAF8F5;--sand:#F0EDE7;--text:#2A2420;--text-mid:#7A6E68;--text-light:#B0A49C;--white:#fff;--border:rgba(42,36,32,.10);--border-strong:rgba(42,36,32,.18);--radius:14px;--radius-sm:8px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh}
+header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;gap:12px}
+.logo{font-family:'DM Serif Display',serif;font-size:20px;color:var(--orange);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.logo span{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:300;color:var(--text-mid);letter-spacing:.12em;text-transform:uppercase}
+.nav-links{display:flex;gap:5px}
+.nav-btn{padding:5px 12px;font-size:12px;font-family:'DM Sans',sans-serif;border:1px solid var(--border-strong);border-radius:20px;background:transparent;color:var(--text-mid);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.nav-btn:hover{background:var(--sand)}.nav-btn.active{background:var(--orange);color:white;border-color:var(--orange)}
+.page{max-width:1080px;margin:0 auto;padding:2rem 1.5rem 5rem}
+.two-col{display:grid;grid-template-columns:1fr 310px;gap:1.5rem;align-items:start}
+/* STATS */
+.stats-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.75rem}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:.875rem 1rem}
+.stat-card.a-orange{border-left:3px solid var(--orange)}.stat-card.a-teal{border-left:3px solid var(--teal)}.stat-card.a-red{border-left:3px solid #E74C3C}
+.sl{font-size:10px;color:var(--text-light);letter-spacing:.08em;text-transform:uppercase;font-weight:500;margin-bottom:2px}
+.sv{font-size:22px;font-family:'DM Serif Display',serif;line-height:1}
+.sv.or{color:var(--orange)}.sv.te{color:var(--teal)}.sv.re{color:#E74C3C}.sv.gr{color:#2A9088}
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem}
+.card.or{border-top:2.5px solid var(--orange)}.card.te{border-top:2.5px solid var(--teal)}.card.ne{border-top:2.5px solid var(--text-light)}
+.ch{padding:.8rem 1.2rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.ch.or-bg{background:var(--orange-light)}.ch.te-bg{background:var(--teal-light)}
+.ct{font-size:11px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--text-mid);display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%}.dot-or{background:var(--orange)}.dot-te{background:var(--teal)}.dot-ne{background:var(--text-light)}
+.cb{padding:.75rem 1.2rem 1rem}
+/* ACRE banner */
+.acre-banner{background:var(--teal-light);border:1px solid var(--teal);border-radius:var(--radius-sm);padding:9px 13px;font-size:12px;color:var(--text-mid);line-height:1.6;margin-bottom:1.25rem}
+.acre-banner strong{color:var(--teal)}
+/* MONTH NAV */
+.month-nav{display:flex;gap:5px;flex-wrap:wrap}
+.mnav{padding:4px 10px;font-size:12px;font-family:'DM Sans',sans-serif;border:1px solid var(--border-strong);border-radius:20px;background:transparent;color:var(--text-mid);cursor:pointer;transition:all .15s;white-space:nowrap}
+.mnav:hover{background:var(--sand)}.mnav.active{background:var(--orange);color:white;border-color:var(--orange)}.mnav.has{font-weight:500;color:var(--text)}
+/* MOIS DETAIL */
+.big-label{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.08em;font-weight:500;margin-bottom:4px}
+.big-input{width:100%;font-size:30px;font-family:'DM Serif Display',serif;padding:6px 0;border:none;border-bottom:2px solid var(--border-strong);background:transparent;color:var(--orange);outline:none;transition:border-color .15s}
+.big-input:focus{border-bottom-color:var(--orange)}.big-input::placeholder{color:var(--orange-mid)}
+.mois-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:1rem 0}
+.mbloc{background:var(--sand);border-radius:var(--radius-sm);padding:.75rem 1rem}
+.mbloc-label{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.07em;font-weight:500;margin-bottom:4px}
+.mbloc-val{font-size:22px;font-family:'DM Serif Display',serif;line-height:1}
+.mbloc-val.or{color:var(--orange)}.mbloc-val.gr{color:#2A9088}.mbloc-val.re{color:#E74C3C}
+.mbloc-sub{font-size:11px;color:var(--text-light);margin-top:3px}
+.ponct-inp{width:100%;font-size:20px;font-family:'DM Serif Display',serif;border:none;border-bottom:1.5px solid var(--border-strong);background:transparent;outline:none;padding:2px 0}
+/* ANNUEL */
+.annuel-toggle{display:flex;align-items:center;gap:7px;cursor:pointer;padding:.5rem 0;color:var(--text-mid);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;border:none;background:none;font-family:'DM Sans',sans-serif;width:100%;border-top:1px solid var(--border);margin-top:.75rem}
+.annuel-toggle .chev{font-size:11px;transition:transform .2s;display:inline-block;margin-left:auto}
+.annuel-toggle.open .chev{transform:rotate(180deg)}
+.annuel-body{display:none}.annuel-body.open{display:block}
+.atable{width:100%;border-collapse:collapse;margin-top:.5rem}
+.atable th{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--text-light);padding:6px 7px;text-align:right;border-bottom:1px solid var(--border)}
+.atable th:first-child{text-align:left}
+.atable td{font-size:12px;padding:7px 7px;text-align:right;border-bottom:1px solid var(--border)}
+.atable td:first-child{text-align:left;font-weight:500}
+.atable tr:last-child td{border-bottom:none}
+.atable tr.cur td{background:var(--orange-light)}
+.atable tr.total-r td{background:var(--sand);font-family:'DM Serif Display',serif;font-size:13px;font-weight:500}
+.atable tr:hover td{background:var(--cream)}
+.pos{color:#2A9088}.neg{color:#E74C3C}.dim{color:var(--text-light)}
+/* DÉPENSES */
+.dep-section-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--text-light);margin:10px 0 4px}
+.dep-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.dep-row:last-child{border-bottom:none}
+.dep-name{flex:1;font-size:13px}
+.dep-tag{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--sand);color:var(--text-mid);white-space:nowrap}
+.dep-inp{width:68px;font-size:13px;font-family:'DM Sans',sans-serif;text-align:right;padding:3px 5px;border:1px solid var(--border-strong);border-radius:5px;background:var(--cream);color:var(--text);outline:none}
+.dep-inp:focus{border-color:var(--orange);background:white}
+.dep-an{font-size:11px;color:var(--text-light);min-width:52px;text-align:right}
+.dep-total-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;margin-top:6px;border-top:1px solid var(--border-strong)}
+.dep-total-val{font-family:'DM Serif Display',serif;font-size:18px;color:var(--orange)}
+.taux-box{background:var(--orange-light);border-radius:var(--radius-sm);padding:9px 12px;font-size:12px;color:var(--text-mid);line-height:1.7;margin-top:10px}
+.taux-box strong{color:var(--text)}
+/* PROJETS */
+.proj-row{display:flex;flex-direction:column;gap:3px;padding:8px 0;border-bottom:1px solid var(--border)}
+.proj-row:last-child{border-bottom:none}
+.proj-top{display:flex;align-items:center;gap:7px}
+.proj-name{flex:1;font-size:13px;font-weight:500}
+.pbadge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px}
+.b-archi{background:var(--orange-light);color:var(--orange)}.b-mask{background:var(--teal-light);color:#2A9088}.b-design{background:#F3F0FF;color:#6B4FBB}.b-atelier{background:#E1F5EE;color:#085041}
+.pamount{font-family:'DM Serif Display',serif;font-size:15px}
+.pdel{font-size:13px;color:var(--text-light);cursor:pointer;background:none;border:none;opacity:0;transition:opacity .15s}
+.proj-row:hover .pdel{opacity:1}
+.pmeta{font-size:11px;color:var(--text-light);display:flex;gap:8px;flex-wrap:wrap}
+.spill{font-size:10px;padding:2px 7px;border-radius:20px}
+.sp-fact{background:var(--teal-light);color:#2A9088}.sp-enc{background:var(--orange-light);color:var(--orange)}.sp-dev{background:var(--sand);color:var(--text-mid)}
+.add-form{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
+.add-form input,.add-form select{font-size:12px;font-family:'DM Sans',sans-serif;padding:5px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none}
+.add-form input:focus,.add-form select:focus{border-color:var(--orange)}
+.btn-add{padding:5px 12px;font-size:12px;font-family:'DM Sans',sans-serif;background:var(--orange);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-weight:500}
+.btn-add:hover{background:#C9501F}
+/* GRAPH */
+.prog-row{display:flex;align-items:center;gap:7px;padding:3px 0}
+.prog-label{font-size:11px;color:var(--text-mid);min-width:26px;text-align:right}
+.prog-bg{flex:1;background:var(--sand);border-radius:4px;height:6px}
+.prog-fill{height:6px;border-radius:4px;background:var(--orange);transition:width .4s}
+.prog-val{font-size:11px;font-weight:500;min-width:48px;text-align:right}
+@media(max-width:800px){.two-col{grid-template-columns:1fr}.stats-strip{grid-template-columns:repeat(2,1fr)}header{padding:0 1rem}.page{padding:1rem .875rem 4rem}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Élence <span>CA 2026</span></div>
+  <div class="nav-links">
+    <a href="elence_planning.html" class="nav-btn">Planning</a>
+    <a href="elence_ca.html" class="nav-btn active">CA 2026</a>
+    <a href="elence_devis_archi.html" class="nav-btn">Devis archi</a>
+    <a href="elence_devis_atelier.html" class="nav-btn">Devis atelier</a>
+    <a href="elence_projets.html" class="nav-btn">Mes projets</a>
+  </div>
+</header>
+
+<div class="page">
+  <!-- ACRE BANNER -->
+  <div class="acre-banner">
+    <strong>ACRE en cours</strong> — Taux cotisations : <strong>13 %</strong> jusqu'en août 2026 inclus · <strong>25,8 %</strong> à partir de septembre 2026
+  </div>
+
+  <div class="stats-strip" id="stats-strip"></div>
+
+  <div class="two-col">
+    <div>
+      <!-- MOIS -->
+      <div class="card or">
+        <div class="ch or-bg">
+          <div class="ct"><span class="dot dot-or"></span>CA mensuel</div>
+          <div class="month-nav" id="month-nav"></div>
+        </div>
+        <div class="cb" id="mois-detail"></div>
+      </div>
+
+      <!-- PROJETS -->
+      <div class="card te">
+        <div class="ch te-bg">
+          <div class="ct"><span class="dot dot-te"></span>Projets facturés & en cours</div>
+          <div id="proj-tabs" style="display:flex;gap:4px"></div>
+        </div>
+        <div class="cb">
+          <div id="proj-list"></div>
+          <div class="add-form">
+            <input type="text" id="p-name" placeholder="Nom projet / client" style="flex:2;min-width:90px">
+            <select id="p-type"><option value="archi">Archi</option><option value="mask">MASK</option><option value="design">Design</option><option value="atelier">Atelier</option></select>
+            <input type="text" id="p-client" placeholder="Client" style="min-width:70px">
+            <input type="number" id="p-amount" placeholder="€" style="min-width:70px">
+            <select id="p-month" style="min-width:95px">
+              <option value="">Mois —</option>
+              <option>Janvier</option><option>Février</option><option>Mars</option><option>Avril</option>
+              <option>Mai</option><option>Juin</option><option>Juillet</option><option>Août</option>
+              <option>Septembre</option><option>Octobre</option><option>Novembre</option><option>Décembre</option>
+            </select>
+            <select id="p-status"><option value="facture">Facturé</option><option value="encours">En cours</option><option value="devis">Devis envoyé</option></select>
+            <button class="btn-add" onclick="addProj()">+ Ajouter</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <!-- GRAPHE -->
+      <div class="card ne" style="margin-bottom:1.25rem">
+        <div class="ch"><div class="ct"><span class="dot dot-ne"></span>Progression 2026</div></div>
+        <div class="cb" id="chart-body"></div>
+      </div>
+      <!-- DÉPENSES -->
+      <div class="card or">
+        <div class="ch or-bg"><div class="ct"><span class="dot dot-or"></span>Dépenses 2026</div></div>
+        <div class="cb">
+          <div class="dep-section-label">Régulières (€/mois)</div>
+          <div id="dep-fixes"></div>
+          <div class="dep-section-label" style="margin-top:12px">Ponctuelles (budget mensuel estimé)</div>
+          <div id="dep-ponct"></div>
+          <div class="dep-total-row">
+            <span style="font-size:12px;font-weight:500;color:var(--text-mid);text-transform:uppercase;letter-spacing:.06em">Total fixes / mois</span>
+            <span class="dep-total-val" id="dep-total-mois">—</span>
+          </div>
+          <div class="taux-box" id="taux-info"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY='elence_ca_v4';
+const MOIS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const MOIS_S=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+// ACRE: 13% jan-aug 2026, 25.8% sept-dec 2026
+const TAUX=[.13,.13,.13,.13,.13,.13,.13,.13,.258,.258,.258,.258];
+
+const DEP_FIXES_DEF=[
+  {name:'Adobe CC',tag:'Logiciel',mois:0},
+  {name:'AutoCAD LT',tag:'Logiciel',mois:0},
+  {name:'SketchUp Pro',tag:'Logiciel',mois:0},
+  {name:'Abby Facturation',tag:'Logiciel',mois:13},
+  {name:'Site / hébergement',tag:'Web',mois:23},
+  {name:'Mutuelle pro',tag:'Mutuelle',mois:0},
+];
+const DEP_PONCT_DEF=[
+  {name:'Matériel informatique',mois:0},
+  {name:'Déplacements',mois:0},
+  {name:'Formation',mois:0},
+  {name:'Sous-traitance',mois:0},
+  {name:'Divers',mois:0},
+];
+
+let S;
+// Migration : cherche v4, puis v3, puis v2
+try{S=JSON.parse(localStorage.getItem(KEY))||null;}catch(e){S=null;}
+if(!S){try{S=JSON.parse(localStorage.getItem('elence_ca_v3'))||null;}catch(e){S=null;}}
+if(!S){try{S=JSON.parse(localStorage.getItem('elence_ca_v2'))||null;}catch(e){S=null;}}
+if(S){localStorage.setItem(KEY,JSON.stringify(S));}
+if(!S) S={ca:Array(12).fill(0),depPonctMens:Array(12).fill(0),fixes:DEP_FIXES_DEF.map(d=>({...d})),ponct:DEP_PONCT_DEF.map(d=>({...d})),projects:[],activeMois:new Date().getMonth(),annuelOpen:false,projFilter:'all'};
+if(!S.fixes) S.fixes=DEP_FIXES_DEF.map(d=>({...d}));
+if(!S.ponct) S.ponct=DEP_PONCT_DEF.map(d=>({...d}));
+
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function totalFixes(){return S.fixes.reduce((s,d)=>s+Number(d.mois||0),0);}
+function taux(mi){return TAUX[mi]||.258;}
+function sal(mi){const ca=S.ca[mi]||0;return Math.round(ca-ca*taux(mi)-totalFixes()-(S.depPonctMens[mi]||0));}
+function fmtN(v){return Number(v).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+'€';}
+
+function renderMonthNav(){
+  const el=document.getElementById('month-nav');
+  el.innerHTML=MOIS.map((m,i)=>`<button class="mnav ${S.activeMois===i?'active':S.ca[i]>0?'has':''}" onclick="setMois(${i})">${MOIS_S[i]}</button>`).join('');
+}
+function setMois(i){S.activeMois=i;save();renderMonthNav();renderMoisDetail();renderProjList();}
+
+function renderMoisDetail(){
+  const mi=S.activeMois;
+  const ca=S.ca[mi]||0;
+  const urssaf=Math.round(ca*taux(mi));
+  const fixes=Math.round(totalFixes());
+  const ponct=S.depPonctMens[mi]||0;
+  const salaire=sal(mi);
+  const isCur=new Date().getMonth()===mi;
+  const tauxPct=Math.round(taux(mi)*100);
+  document.getElementById('mois-detail').innerHTML=`
+    <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);margin-bottom:.75rem">
+      ${MOIS[mi]} 2026 ${isCur?'<span style="font-size:13px;color:var(--text-light);font-family:DM Sans,sans-serif">· mois en cours</span>':''}
+    </div>
+    <div class="big-label">CA facturé (€)</div>
+    <input class="big-input" type="number" value="${ca||''}" placeholder="0" onchange="updateCA(${mi},this.value)" oninput="liveCA(${mi},this.value)">
+    <div class="mois-grid">
+      <div class="mbloc">
+        <div class="mbloc-label">URSSAF (${tauxPct}%)</div>
+        <div class="mbloc-val re" id="urssaf-live">${ca>0?fmtN(urssaf):'—'}</div>
+        <div class="mbloc-sub">${mi<8?'Taux ACRE':'Taux plein'}</div>
+      </div>
+      <div class="mbloc">
+        <div class="mbloc-label">Dépenses fixes</div>
+        <div class="mbloc-val">${fmtN(fixes)}</div>
+        <div class="mbloc-sub">/mois</div>
+      </div>
+      <div class="mbloc">
+        <div class="mbloc-label">Dép. ponctuelles ce mois</div>
+        <input class="ponct-inp" type="number" value="${ponct||''}" placeholder="0" onchange="updatePonct(${mi},this.value)">
+      </div>
+      <div class="mbloc" style="background:${ca>0?(salaire>=0?'var(--teal-light)':'#FEF2F2'):'var(--sand)'}">
+        <div class="mbloc-label">Salaire disponible</div>
+        <div class="mbloc-val ${ca>0?(salaire>=0?'gr':'re'):''}" id="sal-live">${ca>0?fmtN(salaire):'—'}</div>
+        <div class="mbloc-sub">${ca>0?(salaire>=0?'Net disponible':'Déficit'):'Saisir un CA'}</div>
+      </div>
+    </div>
+    <!-- ANNUEL TOGGLE -->
+    <button class="annuel-toggle ${S.annuelOpen?'open':''}" id="annuel-toggle" onclick="toggleAnnuel()">
+      Récapitulatif annuel 2026
+      <span class="chev">▾</span>
+    </button>
+    <div class="annuel-body ${S.annuelOpen?'open':''}" id="annuel-body"></div>`;
+  if(S.annuelOpen) renderAnnuel();
+}
+
+function liveCA(mi,v){
+  const ca=parseFloat(v)||0;
+  const u=document.getElementById('urssaf-live');
+  const s=document.getElementById('sal-live');
+  if(u) u.textContent=ca>0?fmtN(Math.round(ca*taux(mi))):'—';
+  const salaire=Math.round(ca-ca*taux(mi)-totalFixes()-(S.depPonctMens[mi]||0));
+  if(s){s.textContent=ca>0?fmtN(salaire):'—';s.className='mbloc-val '+(salaire>=0?'gr':'re');}
+}
+function updateCA(mi,v){
+  S.ca[mi]=parseFloat(v)||0;
+  // Sync to projects: auto-add CA if there's a facturé project this month
+  save();renderAll();
+}
+function updatePonct(mi,v){S.depPonctMens[mi]=parseFloat(v)||0;save();renderMoisDetail();renderAnnuel();renderStats();}
+
+function toggleAnnuel(){
+  S.annuelOpen=!S.annuelOpen;save();
+  const t=document.getElementById('annuel-toggle');
+  const b=document.getElementById('annuel-body');
+  if(t) t.classList.toggle('open',S.annuelOpen);
+  if(b){b.classList.toggle('open',S.annuelOpen);if(S.annuelOpen)renderAnnuel();}
+}
+function renderAnnuel(){
+  const el=document.getElementById('annuel-body');if(!el)return;
+  const curMois=new Date().getMonth();
+  let rows=MOIS.map((m,i)=>{
+    const ca=S.ca[i]||0;
+    const ur=ca>0?Math.round(ca*taux(i)):0;
+    const fx=Math.round(totalFixes());
+    const po=S.depPonctMens[i]||0;
+    const sa=ca>0?sal(i):null;
+    return `<tr class="${i===curMois?'cur':''}">
+      <td>${m}</td>
+      <td class="${ca>0?'':'dim'}">${ca>0?fmtN(ca):'—'}</td>
+      <td style="font-size:10px;color:var(--text-light)">${Math.round(taux(i)*100)}%</td>
+      <td class="${ca>0?'neg':'dim'}">${ca>0?fmtN(ur):'—'}</td>
+      <td class="dim">${fmtN(fx)}</td>
+      <td class="dim">${po>0?fmtN(po):'—'}</td>
+      <td class="${sa!==null?(sa>=0?'pos':'neg'):'dim'}">${sa!==null?fmtN(sa):'—'}</td>
+    </tr>`;
+  }).join('');
+  const tCA=S.ca.reduce((s,v)=>s+(v||0),0);
+  const tUR=S.ca.reduce((s,v,i)=>s+Math.round((v||0)*taux(i)),0);
+  const tFx=Math.round(totalFixes()*12);
+  const tPo=S.depPonctMens.reduce((s,v)=>s+(v||0),0);
+  const tSa=S.ca.reduce((s,v,i)=>s+(v>0?sal(i):0),0);
+  rows+=`<tr class="total-r"><td>TOTAL</td><td>${fmtN(tCA)}</td><td></td><td>${fmtN(tUR)}</td><td>${fmtN(tFx)}</td><td>${fmtN(tPo)}</td><td class="${tSa>=0?'pos':'neg'}">${fmtN(tSa)}</td></tr>`;
+  el.innerHTML=`<table class="atable"><thead><tr><th style="text-align:left">Mois</th><th>CA</th><th>Taux</th><th>URSSAF</th><th>Fixes</th><th>Ponct.</th><th>Salaire</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderChart(){
+  const el=document.getElementById('chart-body');
+  const maxCA=Math.max(...S.ca.filter(v=>v>0),1);
+  el.innerHTML=MOIS.map((m,i)=>{
+    const ca=S.ca[i]||0;
+    const pct=Math.round(ca/maxCA*100);
+    return `<div class="prog-row">
+      <span class="prog-label">${MOIS_S[i]}</span>
+      <div class="prog-bg"><div class="prog-fill" style="width:${pct}%;background:${i===S.activeMois?'var(--orange)':i<8?'var(--teal)':'var(--orange-mid)'}"></div></div>
+      <span class="prog-val ${ca>0?'':'dim'}">${ca>0?fmtN(ca):'—'}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderDep(){
+  document.getElementById('dep-fixes').innerHTML=S.fixes.map((d,i)=>`
+    <div class="dep-row">
+      <span class="dep-name">${d.name}</span>
+      <span class="dep-tag">${d.tag}</span>
+      <input class="dep-inp" type="number" value="${d.mois||0}" onchange="updFix(${i},this.value)">
+      <span class="dep-an">${fmtN((d.mois||0)*12)}/an</span>
+    </div>`).join('');
+  document.getElementById('dep-ponct').innerHTML=S.ponct.map((d,i)=>`
+    <div class="dep-row">
+      <span class="dep-name">${d.name}</span>
+      <input class="dep-inp" type="number" value="${d.mois||0}" onchange="updPonctItem(${i},this.value)">
+      <span class="dep-an">budget/mois</span>
+    </div>`).join('');
+  document.getElementById('dep-total-mois').textContent=fmtN(totalFixes());
+  const mi=S.activeMois;
+  document.getElementById('taux-info').innerHTML=`Taux URSSAF ce mois : <strong>${Math.round(taux(mi)*100)} %</strong> (${mi<8?'ACRE':'taux plein'})<br>Pour <strong>1 500 €/mois net</strong> → facturer ~<strong>${fmtN(Math.round((1500+totalFixes())/(1-taux(mi))))}/mois</strong>`;
+}
+function updFix(i,v){S.fixes[i].mois=parseFloat(v)||0;save();renderDep();renderMoisDetail();renderStats();}
+function updPonctItem(i,v){S.ponct[i].mois=parseFloat(v)||0;save();}
+
+function renderProjList(){
+  const filter=S.projFilter||'all';
+  const tabsEl=document.getElementById('proj-tabs');
+  tabsEl.innerHTML=`<button class="mnav ${filter==='all'?'active':''}" onclick="setProjFilter('all')" style="padding:3px 9px;font-size:11px">Tous</button>
+    <button class="mnav ${filter===MOIS[S.activeMois]?'active':''}" onclick="setProjFilter('${MOIS[S.activeMois]}')" style="padding:3px 9px;font-size:11px">${MOIS_S[S.activeMois]}</button>`;
+  const projs=filter==='all'?S.projects:S.projects.filter(p=>p.month===filter);
+  const el=document.getElementById('proj-list');
+  if(!projs.length){el.innerHTML='<div style="font-size:12px;color:var(--text-light);font-style:italic;padding:6px 0">Aucun projet'+(filter!=='all'?' ce mois':'')+' — ajouter ci-dessous</div>';return;}
+  const SL={facture:'sp-fact',encours:'sp-enc',devis:'sp-dev'};
+  const SN={facture:'Facturé',encours:'En cours',devis:'Devis envoyé'};
+  el.innerHTML=projs.map(p=>{
+    const ri=S.projects.indexOf(p);
+    return `<div class="proj-row">
+      <div class="proj-top">
+        <span class="proj-name">${p.name}</span>
+        <span class="pbadge b-${p.type}">${p.type.toUpperCase()}</span>
+        <span class="pamount ${p.status==='facture'?'pos':''}">${fmtN(p.amount)}</span>
+        <button class="pdel" onclick="delProj(${ri})">×</button>
+      </div>
+      <div class="pmeta">
+        ${p.client?`<span>${p.client}</span>`:''}
+        ${p.month?`<span>${p.month}</span>`:''}
+        <span class="spill ${SL[p.status]||'sp-dev'}">${SN[p.status]||p.status}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+function setProjFilter(v){S.projFilter=v;save();renderProjList();}
+
+function addProj(){
+  const name=document.getElementById('p-name').value.trim();
+  const amount=parseFloat(document.getElementById('p-amount').value)||0;
+  if(!name) return;
+  const month=document.getElementById('p-month').value||MOIS[S.activeMois];
+  const status=document.getElementById('p-status').value;
+  const mi=MOIS.indexOf(month)>=0?MOIS.indexOf(month):S.activeMois;
+  S.projects.push({name,type:document.getElementById('p-type').value,client:document.getElementById('p-client').value.trim(),amount,month,status});
+  // Si facturé : ajoute au CA du mois
+  if(status==='facture' && amount>0){
+    S.ca[mi]=(S.ca[mi]||0)+amount;
+  }
+  save();renderAll();
+  ['p-name','p-client','p-amount'].forEach(id=>document.getElementById(id).value='');
+}
+function delProj(i){S.projects.splice(i,1);save();renderProjList();renderStats();}
+
+function renderStats(){
+  const el=document.getElementById('stats-strip');
+  const totalCA=S.ca.reduce((s,v)=>s+(v||0),0);
+  const totalSal=S.ca.reduce((s,v,i)=>s+(v>0?sal(i):0),0);
+  const moisFact=S.ca.filter(v=>v>0).length;
+  const caMois=S.ca[S.activeMois]||0;
+  const obj36=Math.min(Math.round(totalCA/36000*100),999);
+  el.innerHTML=`
+    <div class="stat-card a-orange"><div class="sl">CA total 2026</div><div class="sv or">${fmtN(totalCA)}</div></div>
+    <div class="stat-card a-teal"><div class="sl">Salaire cumulé</div><div class="sv ${totalSal>=0?'gr':'re'}">${fmtN(totalSal)}</div></div>
+    <div class="stat-card"><div class="sl">CA — ${MOIS_S[S.activeMois]}</div><div class="sv">${caMois>0?fmtN(caMois):'—'}</div></div>
+    <div class="stat-card"><div class="sl">Mois facturés</div><div class="sv te">${moisFact}</div></div>
+    <div class="stat-card ${totalCA<18000?'a-red':''}"><div class="sl">Objectif 36k€</div><div class="sv ${totalCA>=36000?'gr':totalCA>=18000?'or':'re'}">${obj36}%</div></div>`;
+}
+
+function renderAll(){renderMonthNav();renderMoisDetail();renderChart();renderDep();renderProjList();renderStats();}
+renderAll();
+</script>
+</body>
+</html>
