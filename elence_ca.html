@@ -104,6 +104,9 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
 .prog-val{font-size:11px;font-weight:500;min-width:48px;text-align:right}
 @media(max-width:800px){.two-col{grid-template-columns:1fr}.stats-strip{grid-template-columns:repeat(2,1fr)}header{padding:0 1rem}.page{padding:1rem .875rem 4rem}}
 </style>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
 <header>
@@ -189,6 +192,22 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
 
 <script>
 const KEY='elence_ca_v4';
+const FB_CA_PATH='elence_ca';
+
+// Init Firebase (partagé avec planning)
+if(!window._fbInit){
+  firebase.initializeApp({
+    apiKey:"AIzaSyBhZKYT-3BTqmqpDv-6LWfnTqnEQmmHVL4",
+    authDomain:"elence-dashboard.firebaseapp.com",
+    databaseURL:"https://elence-dashboard-default-rtdb.firebaseio.com",
+    projectId:"elence-dashboard",
+    storageBucket:"elence-dashboard.firebasestorage.app",
+    messagingSenderId:"206545221004",
+    appId:"1:206545221004:web:79c1d36fd389bad59a92a9"
+  });
+  window._fbInit=true;
+}
+const dbCA=firebase.database();
 const MOIS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const MOIS_S=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
 // ACRE: 13% jan-aug 2026, 25.8% sept-dec 2026
@@ -220,7 +239,10 @@ if(!S) S={ca:Array(12).fill(0),depPonctMens:Array(12).fill(0),fixes:DEP_FIXES_DE
 if(!S.fixes) S.fixes=DEP_FIXES_DEF.map(d=>({...d}));
 if(!S.ponct) S.ponct=DEP_PONCT_DEF.map(d=>({...d}));
 
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+  dbCA.ref(FB_CA_PATH).set(JSON.parse(JSON.stringify(S))).catch(e=>console.warn('FB CA:',e));
+}
 function totalFixes(){return S.fixes.reduce((s,d)=>s+Number(d.mois||0),0);}
 function taux(mi){return TAUX[mi]||.258;}
 function sal(mi){const ca=S.ca[mi]||0;return Math.round(ca-ca*taux(mi)-totalFixes()-(S.depPonctMens[mi]||0));}
@@ -424,6 +446,19 @@ function renderStats(){
 }
 
 function renderAll(){renderMonthNav();renderMoisDetail();renderChart();renderDep();renderProjList();renderStats();}
+
+// Écoute Firebase CA en temps réel
+dbCA.ref(FB_CA_PATH).on('value',snap=>{
+  const fbData=snap.val();
+  if(fbData&&fbData.ca){
+    Object.keys(fbData).forEach(k=>{S[k]=fbData[k];});
+    try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+    renderAll();
+  } else if(S&&S.ca){
+    // Première fois : pousse les données locales
+    dbCA.ref(FB_CA_PATH).set(JSON.parse(JSON.stringify(S)));
+  }
+});
 renderAll();
 </script>
 </body>

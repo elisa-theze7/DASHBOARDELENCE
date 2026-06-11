@@ -80,6 +80,8 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
 .sdel{font-size:13px;color:var(--text-light);cursor:pointer;background:none;border:none}.sdel:hover{color:#E74C3C}
 @media print{header,.btn-save-dv,.btn-rst,.card.ne{display:none}.result-box{background:white;border:1px solid #ccc}}
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
 <header>
@@ -179,6 +181,11 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
 </div>
 
 <script>
+
+if(!window._fbInit){
+  firebase.initializeApp({apiKey:"AIzaSyBhZKYT-3BTqmqpDv-6LWfnTqnEQmmHVL4",authDomain:"elence-dashboard.firebaseapp.com",databaseURL:"https://elence-dashboard-default-rtdb.firebaseio.com",projectId:"elence-dashboard",storageBucket:"elence-dashboard.firebasestorage.app",messagingSenderId:"206545221004",appId:"1:206545221004:web:79c1d36fd389bad59a92a9"});
+  window._fbInit=true;
+}
 const KEY_AR='elence_archi_v2';
 
 // Tarifs par défaut au m²

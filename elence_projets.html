@@ -101,6 +101,9 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
 .empty-state h2{font-family:'DM Serif Display',serif;font-size:22px;color:var(--text-mid);margin-bottom:.5rem}
 @media(max-width:800px){.layout{grid-template-columns:1fr}.fiche-body{grid-template-columns:1fr}header{padding:0 1rem}.page{padding:1rem .875rem 4rem}}
 </style>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -165,73 +168,70 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
 <script>
 const KEY_PROJ='elence_projets_v1';
 const CORE_KEY='elence_core';
-const STATUS_MAP={conc:{label:'En conception',cls:'s-conc'},att:{label:'En attente',cls:'s-att'},fab:{label:'Fabrication',cls:'s-fab'},fact:{label:'À facturer',cls:'s-fact'},done:{label:'Terminé',cls:'s-done'}};
-const TYPE_LBL={freelance:'Archi intérieure',atelier:'Fabrication atelier'};
+const FIREBASE_PATH='elence';
 const MOIS_LIST=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
-// ── CORE PARTAGÉ : lit/écrit dans elence_core ──
+// Init Firebase
+if(!window._fbInit){
+  firebase.initializeApp({
+    apiKey:"AIzaSyBhZKYT-3BTqmqpDv-6LWfnTqnEQmmHVL4",
+    authDomain:"elence-dashboard.firebaseapp.com",
+    databaseURL:"https://elence-dashboard-default-rtdb.firebaseio.com",
+    projectId:"elence-dashboard",
+    storageBucket:"elence-dashboard.firebasestorage.app",
+    messagingSenderId:"206545221004",
+    appId:"1:206545221004:web:79c1d36fd389bad59a92a9"
+  });
+  window._fbInit=true;
+}
+const db=firebase.database();
+
 function genId(){return 'p_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);}
 
-function coreLoad(){
-  let c=null;
-  try{c=JSON.parse(localStorage.getItem(CORE_KEY));}catch(e){}
-  // Migration depuis anciennes clés planning
-  if(!c||!c.projects||c.projects.length===0){
-    let old=null;
-    ['elence_planner_v4','elence_planner_v3','elence_planner_v2'].forEach(k=>{
-      if(!old) try{const d=JSON.parse(localStorage.getItem(k));if(d&&d.projects&&d.projects.length>0)old=d;}catch(e){}
-    });
-    if(old){
-      if(!c) c={};
-      // Fusionne les projets migrés (sans écraser ceux déjà dans core)
-      const existing=(c.projects||[]).map(p=>p.name);
-      const toMerge=(old.projects||[]).filter(p=>!existing.includes(p.name));
-      c.projects=[...(c.projects||[]),...toMerge];
-      c.tasks=c.tasks||old.tasks||{today:[],week:[],month:[],perso:[]};
-      c.admin=c.admin||old.admin||{};
-    }
-  }
+function sanitizeCore(c){
   if(!c) c={};
   if(!c.projects) c.projects=[];
-  // Assigne un id à chaque projet qui n'en a pas
-  let dirty=false;
   c.projects.forEach(p=>{
-    if(!p.id){p.id=genId();dirty=true;}
+    if(!p.id) p.id=genId();
     if(!p.steps) p.steps=[];
     if(!p.journal) p.journal=[];
     if(!p.docs) p.docs=[];
     if(!p.notes) p.notes='';
+    if(p.montant===undefined) p.montant=0;
     if(p.monthFacture===undefined) p.monthFacture=new Date().getMonth();
   });
-  if(dirty) try{localStorage.setItem(CORE_KEY,JSON.stringify(c));}catch(e){}
   return c;
 }
-function coreSave(c){try{localStorage.setItem(CORE_KEY,JSON.stringify(c));}catch(e){}}
 
-// État local (UI uniquement : quel projet est ouvert, filtre)
-let UI={activeId:null,filter:'all'};
-try{const u=JSON.parse(localStorage.getItem(KEY_PROJ));if(u){UI.activeId=u.activeId||null;UI.filter=u.filter||'all';}}catch(e){}
-function saveUI(){try{localStorage.setItem(KEY_PROJ,JSON.stringify(UI));}catch(e){}}
-
-function getCore(){return coreLoad();}
-function saveCore(c){coreSave(c);}
-
-// ── SYNC PROJET FACTURÉ → CA ──
-function syncToCA(p, oldStatus, core){
-  if(p.status==='fact' && oldStatus!=='fact' && p.montant>0){
-    const mi=p.monthFacture!==undefined?p.monthFacture:new Date().getMonth();
-    try{
-      let caState=JSON.parse(localStorage.getItem('elence_ca_v4'));
-      if(!caState) caState={ca:Array(12).fill(0),projects:[],depPonctMens:Array(12).fill(0)};
-      if(!caState.ca) caState.ca=Array(12).fill(0);
-      if(!caState.projects) caState.projects=[];
-      caState.ca[mi]=(caState.ca[mi]||0)+p.montant;
-      const already=caState.projects.some(pp=>pp.projId===p.id);
-      if(!already) caState.projects.push({name:p.name,type:p.type==='atelier'?'atelier':'archi',client:p.client||'',amount:p.montant,month:MOIS_LIST[mi],status:'facture',projId:p.id});
-      localStorage.setItem('elence_ca_v4',JSON.stringify(caState));
-    }catch(e){}
-  }
+function getCore(){
+  let c=null;
+  try{c=JSON.parse(localStorage.getItem(CORE_KEY));}catch(e){}
+  return sanitizeCore(c||{});
 }
+function saveCore(c){
+  try{localStorage.setItem(CORE_KEY,JSON.stringify(c));}catch(e){}
+  db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(c))).catch(e=>console.warn('Firebase:',e));
+}
+
+// Écoute Firebase en temps réel
+db.ref(FIREBASE_PATH).on('value',snap=>{
+  const fbData=snap.val();
+  if(fbData&&fbData.projects){
+    const merged=sanitizeCore(fbData);
+    try{localStorage.setItem(CORE_KEY,JSON.stringify(merged));}catch(e){}
+    renderList();
+    const ui=getUI();
+    if(ui.activeId) renderFiche();
+  }
+});
+
+// État UI local
+function getUI(){
+  let u={activeId:null,filter:'all'};
+  try{const s=JSON.parse(localStorage.getItem(KEY_PROJ));if(s){u.activeId=s.activeId||null;u.filter=s.filter||'all';}}catch(e){}
+  return u;
+}
+function saveUI(ui){try{localStorage.setItem(KEY_PROJ,JSON.stringify(ui));}catch(e){}}
 
 function dlPill(dl){
   if(!dl) return '';
@@ -244,7 +244,7 @@ function dlPill(dl){
 }
 
 function setFilter(f){
-  UI.filter=f;saveUI();
+  const UI=getUI();UI.filter=f;saveUI(UI);
   ['all','freelance','atelier','done'].forEach(k=>{
     const el=document.getElementById('f-'+k);
     if(el) el.className='fb'+(k===f?' active':'');
@@ -253,6 +253,7 @@ function setFilter(f){
 }
 
 function renderList(){
+  const UI=getUI();
   const core=getCore();
   const el=document.getElementById('proj-list');
   let projs=core.projects;
@@ -279,9 +280,10 @@ function renderList(){
   }).join('');
 }
 
-function openFiche(id){UI.activeId=id;saveUI();renderList();renderFiche();}
+function openFiche(id){const UI=getUI();UI.activeId=id;saveUI(UI);renderList();renderFiche();}
 
 function renderFiche(){
+  const UI=getUI();
   const core=getCore();
   const p=core.projects.find(p=>p.id===UI.activeId);
   if(!p){document.getElementById('fiche-zone').innerHTML='<div class="empty-state"><h2>Sélectionne un projet</h2><p style="font-size:13px">Clique dans la liste à gauche.</p></div>';return;}
@@ -480,7 +482,7 @@ function saveNewProject(){
     steps,notes:'',journal:[],docs:[],createdAt:Date.now()};
   core.projects.push(p);
   saveCore(core);
-  UI.activeId=p.id;saveUI();
+  const _ui=getUI();_ui.activeId=p.id;saveUI(_ui);
   closeModal();renderList();renderFiche();
   ['m-name','m-client','m-notes','m-deadline','m-montant','m-adresse'].forEach(id=>document.getElementById(id).value='');
 }
@@ -496,7 +498,8 @@ function delProject(id){
 
 document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
 renderList();
-if(UI.activeId) renderFiche();
+const _initUI=getUI();
+if(_initUI.activeId) renderFiche();
 </script>
 </body>
 </html>
