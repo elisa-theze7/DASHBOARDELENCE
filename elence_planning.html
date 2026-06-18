@@ -183,7 +183,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
       <div class="sb">
         <div class="task-list" id="perso-tasks"></div>
         <div class="add-row" style="flex-direction:column;gap:6px">
-          <input type="text" id="perso-inp" placeholder="Courses, RDV, perso…" onkeydown="if(event.key==='Enter')addTask('perso')" style="width:100%">
+          <input type="text" id="perso-inp" placeholder="Courses, RDV, perso…" onfocus="window._isEditing=true" onblur="window._isEditing=false" onkeydown="if(event.key==='Enter'){event.preventDefault();addTask('perso');}" style="width:100%">
           <div style="display:flex;gap:6px;width:100%">
             <select id="perso-cat" style="flex:1"><option value="perso">Perso</option><option value="urgent">Urgent</option><option value="admin">Admin</option></select>
             <button class="btn-plus pu" onclick="addTask('perso')">+</button>
@@ -203,7 +203,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
         <div class="sb">
           <div class="task-list" id="today-tasks"></div>
           <div class="add-row">
-            <input type="text" id="today-inp" placeholder="Ajouter une tâche du jour…" onkeydown="if(event.key==='Enter')addTask('today')">
+            <input type="text" id="today-inp" placeholder="Ajouter une tâche du jour…" onfocus="window._isEditing=true" onblur="window._isEditing=false" onkeydown="if(event.key==='Enter'){event.preventDefault();addTask('today');}">
             <select id="today-cat"><option value="">—</option><option value="urgent">Urgent</option><option value="freelance">Archi int.</option><option value="atelier">Atelier</option><option value="perso">Perso</option></select>
             <button class="btn-plus" onclick="addTask('today')">+</button>
           </div>
@@ -215,7 +215,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
         <div class="sb">
           <div class="task-list" id="week-tasks"></div>
           <div class="add-row">
-            <input type="text" id="week-inp" placeholder="Ajouter une tâche…" onkeydown="if(event.key==='Enter')addTask('week')">
+            <input type="text" id="week-inp" placeholder="Ajouter une tâche…" onfocus="window._isEditing=true" onblur="window._isEditing=false" onkeydown="if(event.key==='Enter'){event.preventDefault();addTask('week');}">
             <select id="week-cat"><option value="">—</option><option value="urgent">Urgent</option><option value="freelance">Archi int.</option><option value="atelier">Atelier</option><option value="perso">Perso</option></select>
             <button class="btn-plus" onclick="addTask('week')">+</button>
           </div>
@@ -233,7 +233,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
         <div class="sb">
           <div class="task-list" id="month-tasks"></div>
           <div class="add-row">
-            <input type="text" id="month-inp" placeholder="Ajouter une tâche…" onkeydown="if(event.key==='Enter')addTask('month')">
+            <input type="text" id="month-inp" placeholder="Ajouter une tâche…" onfocus="window._isEditing=true" onblur="window._isEditing=false" onkeydown="if(event.key==='Enter'){event.preventDefault();addTask('month');}">
             <select id="month-cat"><option value="">—</option><option value="urgent">Urgent</option><option value="freelance">Archi int.</option><option value="atelier">Atelier</option><option value="perso">Perso</option></select>
             <button class="btn-plus" onclick="addTask('month')">+</button>
           </div>
@@ -334,14 +334,19 @@ function coreLoad(){
     if(c) c={tasks:c.tasks||{today:[],week:[],month:[],perso:[]},projects:c.projects||[],admin:c.admin||{},lastDate:c.lastDate||null};
   }
   c=sanitizeCore(c||{});
-  // Écoute Firebase en temps réel
+  // Écoute Firebase en temps réel — ne re-render pas si en train d'éditer
   db.ref(FIREBASE_PATH).on('value',snap=>{
     const fbData=snap.val();
     if(fbData&&fbData.projects){
       const merged=sanitizeCore(fbData);
-      Object.keys(merged).forEach(k=>{S[k]=merged[k];});
-      try{localStorage.setItem(CORE_KEY,JSON.stringify(S));}catch(e){}
-      renderAll();
+      if(!window._isEditing){
+        Object.keys(merged).forEach(k=>{S[k]=merged[k];});
+        try{localStorage.setItem(CORE_KEY,JSON.stringify(S));}catch(e){}
+        renderAll();
+      } else {
+        // En édition : on garde quand même la sauvegarde locale à jour en arrière-plan
+        try{localStorage.setItem(CORE_KEY,JSON.stringify(merged));}catch(e){}
+      }
     } else {
       // Pas encore de données sur Firebase : pousse les données locales
       const hasLocal=(c.projects&&c.projects.length>0)||(c.tasks&&c.tasks.today&&c.tasks.today.length>0);
@@ -423,8 +428,10 @@ function renderTasks(zone){
 function addTask(zone){
   const inp=document.getElementById(zone+'-inp');const cat=document.getElementById(zone+'-cat').value;const text=inp.value.trim();
   if(!text) return;
+  window._isEditing=true;
   S.tasks[zone].push({text,cat,done:false});
   save();inp.value='';renderTasks(zone);renderStats();
+  setTimeout(()=>{window._isEditing=false;},1000);
 }
 function toggleTask(zone,i){
   S.tasks[zone][i].done=!S.tasks[zone][i].done;

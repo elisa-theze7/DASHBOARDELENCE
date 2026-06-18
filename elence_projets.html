@@ -335,12 +335,12 @@ function renderFiche(){
         <div class="fiche-col">
           <div class="section-label">Informations</div>
           <div class="info-grid">
-            <div class="info-field"><div class="if-label">Client</div><input class="if-input" type="text" value="${p.client||''}" onchange="updateField('client',this.value)" placeholder="—"></div>
-            <div class="info-field"><div class="if-label">Adresse</div><input class="if-input" type="text" value="${p.adresse||''}" onchange="updateField('adresse',this.value)" placeholder="—"></div>
-            <div class="info-field"><div class="if-label">Deadline</div><input class="if-input" type="date" value="${p.deadline||''}" onchange="updateField('deadline',this.value)"></div>
+            <div class="info-field"><div class="if-label">Client</div><input class="if-input" type="text" value="${p.client||''}" onfocus="_isEditing=true" onchange="updateField('client',this.value)" placeholder="—"></div>
+            <div class="info-field"><div class="if-label">Adresse</div><input class="if-input" type="text" value="${p.adresse||''}" onfocus="_isEditing=true" onchange="updateField('adresse',this.value)" placeholder="—"></div>
+            <div class="info-field"><div class="if-label">Deadline</div><input class="if-input" type="date" value="${p.deadline||''}" onfocus="_isEditing=true" onchange="updateField('deadline',this.value)"></div>
             <div class="info-field" style="grid-column:1/-1">
               <div class="if-label">Montant total devis (€)</div>
-              <input class="if-input" type="number" value="${p.montant||''}" onchange="updateField('montant',parseFloat(this.value)||0)" placeholder="0">
+              <input class="if-input" type="number" value="${p.montant||''}" onfocus="_isEditing=true" onchange="updateField('montant',parseFloat(this.value)||0)" placeholder="0">
             </div>
             <div class="info-field">
               <div class="if-label">Statut</div>
@@ -357,7 +357,7 @@ function renderFiche(){
             </div>
             <div class="info-field">
               <div class="if-label">Lien devis / facture</div>
-              <input class="if-input" type="text" value="${p.devisUrl||''}" onchange="updateField('devisUrl',this.value)" placeholder="Chemin ou URL">
+              <input class="if-input" type="text" value="${p.devisUrl||''}" onfocus="_isEditing=true" onchange="updateField('devisUrl',this.value)" placeholder="Chemin ou URL">
             </div>
           </div>
           <div class="section-label" style="margin-top:1.25rem">Étapes du projet</div>
@@ -398,7 +398,7 @@ function renderFiche(){
           </div>
 
           <div class="section-label" style="margin-top:1.25rem">Notes libres</div>
-          <textarea class="notes-area" id="notes-area" placeholder="Notes, idées, références, contacts…" onchange="updateField('notes',this.value)">${p.notes||''}</textarea>
+          <textarea class="notes-area" id="notes-area" placeholder="Notes, idées, références, contacts…" onfocus="_isEditing=true" oninput="updateField('notes',this.value)" onchange="updateField('notes',this.value)">${p.notes||''}</textarea>
         </div>
         <div class="fiche-col">
           <div class="section-label">Journal de projet</div>
