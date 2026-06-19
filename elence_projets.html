@@ -132,6 +132,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
     <a href="elence_devis_archi.html" class="nav-btn">Devis archi</a>
     <a href="elence_devis_atelier.html" class="nav-btn">Devis atelier</a>
     <a href="elence_projets.html" class="nav-btn active">Mes projets</a>
+    <a href="elence_temps.html" class="nav-btn">Suivi temps</a>
   </div>
 </header>
 
@@ -151,6 +152,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
         <button class="fb active" id="f-all" onclick="setFilter('all')">Tous</button>
         <button class="fb" id="f-freelance" onclick="setFilter('freelance')">Archi</button>
         <button class="fb" id="f-atelier" onclick="setFilter('atelier')">Atelier</button>
+        <button class="fb" id="f-mask" onclick="setFilter('mask')">MASK</button>
         <button class="fb" id="f-done" onclick="setFilter('done')">Terminés</button>
       </div>
       <div id="proj-list"></div>
@@ -251,6 +253,33 @@ db.ref(FIREBASE_PATH).on('value',snap=>{
   }
 });
 
+// ── MASK : écoute elence_temps pour récupérer les projets MASK ──
+let _maskCache=[];
+try{const t=JSON.parse(localStorage.getItem('elence_temps_v1'));if(t&&t.maskProjects)_maskCache=t.maskProjects;}catch(e){}
+db.ref('elence_temps').on('value',snap=>{
+  const d=snap.val();
+  if(d&&d.maskProjects){
+    _maskCache=d.maskProjects;
+    try{
+      let t=JSON.parse(localStorage.getItem('elence_temps_v1')||'{}');
+      t.maskProjects=_maskCache;
+      t.projTimes=t.projTimes||{};
+      localStorage.setItem('elence_temps_v1',JSON.stringify(t));
+    }catch(e){}
+    renderList();
+    const ui=getUI();
+    if(ui.activeId&&ui.activeId.startsWith('mask_')&&!_isEditing) renderFiche();
+  }
+});
+function saveMaskCache(){
+  try{
+    let t=JSON.parse(localStorage.getItem('elence_temps_v1')||'{}');
+    t.maskProjects=_maskCache;
+    localStorage.setItem('elence_temps_v1',JSON.stringify(t));
+    db.ref('elence_temps').set(JSON.parse(JSON.stringify(t)));
+  }catch(e){}
+}
+
 // État UI local
 function getUI(){
   let u={activeId:null,filter:'all'};
@@ -271,7 +300,7 @@ function dlPill(dl){
 
 function setFilter(f){
   const UI=getUI();UI.filter=f;saveUI(UI);
-  ['all','freelance','atelier','done'].forEach(k=>{
+  ['all','freelance','atelier','mask','done'].forEach(k=>{
     const el=document.getElementById('f-'+k);
     if(el) el.className='fb'+(k===f?' active':'');
   });
@@ -280,8 +309,25 @@ function setFilter(f){
 
 function renderList(){
   const UI=getUI();
-  const core=getCore();
   const el=document.getElementById('proj-list');
+
+  // Filtre MASK : liste séparée
+  if(UI.filter==='mask'){
+    if(!_maskCache.length){el.innerHTML='<div style="font-size:12px;color:var(--text-light);font-style:italic;padding:8px 0">Aucun projet MASK — crée-en un depuis Suivi du temps</div>';return;}
+    el.innerHTML=_maskCache.map(p=>{
+      const activeMask='mask_'+p.id;
+      return `<div class="proj-item ${UI.activeId===activeMask?'active':''}" onclick="openFiche('${activeMask}')" style="border-left-color:var(--purple)">
+        <div class="proj-item-name">${p.name}</div>
+        <div class="proj-item-meta">
+          <span class="spill" style="background:var(--purple-light);color:var(--purple)">MASK</span>
+          ${p.budget?`<span style="font-size:10px;color:var(--text-light)">Budget ${Number(p.budget).toLocaleString('fr-FR')}€</span>`:''}
+        </div>
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  const core=getCore();
   let projs=core.projects;
   if(UI.filter==='freelance') projs=projs.filter(p=>p.type==='freelance'&&p.status!=='done');
   else if(UI.filter==='atelier') projs=projs.filter(p=>p.type==='atelier'&&p.status!=='done');
@@ -310,6 +356,46 @@ function openFiche(id){_isEditing=false;if(_saveTimeout){clearTimeout(_saveTimeo
 
 function renderFiche(){
   const UI=getUI();
+
+  // ── Fiche spéciale projet MASK ──
+  if(UI.activeId&&UI.activeId.startsWith('mask_')){
+    const maskId=UI.activeId.replace('mask_','');
+    const p=_maskCache.find(p=>p.id===maskId);
+    if(!p){document.getElementById('fiche-zone').innerHTML='<div class="empty-state"><h2>Projet MASK introuvable</h2></div>';return;}
+    const journal=p.journal||[];
+    const totalH=(p.entries||[]).reduce((s,e)=>s+e.heures,0);
+    const totalE=totalH*31.15;
+    document.getElementById('fiche-zone').innerHTML=`
+      <div class="fiche">
+        <div class="fiche-header" style="background:var(--purple-light)">
+          <div class="fiche-title">${p.name}</div>
+          <div class="fiche-meta-row">
+            <span class="spill" style="background:var(--purple);color:white">MASK</span>
+            ${p.budget?`<span style="font-size:11px;color:var(--text-mid)">Budget ${Number(p.budget).toLocaleString('fr-FR')}€</span>`:''}
+            <span style="font-size:11px;color:var(--text-mid)">${totalH.toFixed(1)}h passées · ${Math.round(totalE).toLocaleString('fr-FR')}€</span>
+            <a href="elence_temps.html" style="margin-left:auto;font-size:11px;padding:3px 10px;border:1px solid var(--border-strong);border-radius:20px;background:transparent;color:var(--text-mid);text-decoration:none">Voir le suivi temps →</a>
+          </div>
+        </div>
+        <div class="fiche-body" style="grid-template-columns:1fr">
+          <div class="fiche-col" style="border-right:none">
+            <div class="section-label">Notes de call & suivi — ${p.name}</div>
+            <div id="journal-list">
+              ${journal.length?journal.map((e,ei)=>`<div class="journal-entry">
+                <button class="je-del" onclick="delMaskJournal(${ei})">×</button>
+                <div class="je-date">${e.date}</div>
+                <div class="je-text">${e.text.replace(/\\n/g,'<br>')}</div>
+              </div>`).join(''):'<div style="font-size:12px;color:var(--text-light);font-style:italic;margin-bottom:8px">Aucune note — ajoute tes retours de call, points discutés…</div>'}
+            </div>
+            <div class="journal-add">
+              <textarea id="journal-inp" placeholder="Nouvelle note de call…"></textarea>
+              <button class="journal-add-btn" onclick="addMaskJournal()">Ajouter</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+
   const core=getCore();
   const p=core.projects.find(p=>p.id===UI.activeId);
   if(!p){document.getElementById('fiche-zone').innerHTML='<div class="empty-state"><h2>Sélectionne un projet</h2><p style="font-size:13px">Clique dans la liste à gauche.</p></div>';return;}
@@ -465,48 +551,75 @@ function updateStatusField(val){
 }
 
 function toggleStep(si){
+  const ui=getUI();
   const core=getCore();
-  const p=core.projects.find(p=>p.id===UI.activeId);
+  const p=core.projects.find(p=>p.id===ui.activeId);
   if(!p) return;
   p.steps[si].done=!p.steps[si].done;
   saveCore(core);
   renderFiche();renderList();
 }
 function delStep(si){
+  const ui=getUI();
   const core=getCore();
-  const p=core.projects.find(p=>p.id===UI.activeId);
+  const p=core.projects.find(p=>p.id===ui.activeId);
   if(!p) return;
   p.steps.splice(si,1);saveCore(core);renderFiche();
 }
 function addStep(){
   const inp=document.getElementById('step-inp');if(!inp||!inp.value.trim())return;
+  const ui=getUI();
   const core=getCore();
-  const p=core.projects.find(p=>p.id===UI.activeId);
+  const p=core.projects.find(p=>p.id===ui.activeId);
   if(!p) return;
   p.steps.push({text:inp.value.trim(),done:false});
   inp.value='';saveCore(core);renderFiche();
 }
 function addJournal(){
   const inp=document.getElementById('journal-inp');if(!inp||!inp.value.trim())return;
+  const ui=getUI();
+  // Si c'est un projet MASK, redirige vers la fonction MASK
+  if(ui.activeId&&ui.activeId.startsWith('mask_')){addMaskJournal();return;}
   const core=getCore();
-  const p=core.projects.find(p=>p.id===UI.activeId);
+  const p=core.projects.find(p=>p.id===ui.activeId);
   if(!p) return;
   if(!p.journal) p.journal=[];
   p.journal.unshift({text:inp.value.trim(),date:new Date().toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long',year:'numeric'})});
   inp.value='';saveCore(core);renderFiche();
 }
 function delJournal(ei){
+  const ui=getUI();
   const core=getCore();
-  const p=core.projects.find(p=>p.id===UI.activeId);
+  const p=core.projects.find(p=>p.id===ui.activeId);
   if(!p) return;
   p.journal.splice(ei,1);saveCore(core);renderFiche();
+}
+
+// ── Journal pour projets MASK ──
+function addMaskJournal(){
+  const inp=document.getElementById('journal-inp');if(!inp||!inp.value.trim())return;
+  const ui=getUI();
+  const maskId=ui.activeId.replace('mask_','');
+  const p=_maskCache.find(p=>p.id===maskId);
+  if(!p) return;
+  if(!p.journal) p.journal=[];
+  p.journal.unshift({text:inp.value.trim(),date:new Date().toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long',year:'numeric'})});
+  inp.value='';saveMaskCache();renderFiche();
+}
+function delMaskJournal(ei){
+  const ui=getUI();
+  const maskId=ui.activeId.replace('mask_','');
+  const p=_maskCache.find(p=>p.id===maskId);
+  if(!p) return;
+  p.journal.splice(ei,1);saveMaskCache();renderFiche();
 }
 function addDoc(){
   const n=document.getElementById('doc-name').value.trim();
   const u=document.getElementById('doc-url').value.trim();
   if(!n) return;
+  const ui=getUI();
   const core=getCore();
-  const p=core.projects.find(p=>p.id===UI.activeId);
+  const p=core.projects.find(p=>p.id===ui.activeId);
   if(!p) return;
   if(!p.docs) p.docs=[];
   p.docs.push({name:n,url:u||'#'});
@@ -514,8 +627,9 @@ function addDoc(){
   saveCore(core);renderFiche();
 }
 function delDoc(di){
+  const ui=getUI();
   const core=getCore();
-  const p=core.projects.find(p=>p.id===UI.activeId);
+  const p=core.projects.find(p=>p.id===ui.activeId);
   if(!p) return;
   p.docs.splice(di,1);saveCore(core);renderFiche();
 }

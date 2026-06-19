@@ -149,6 +149,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
     <a href="elence_devis_archi.html" class="nav-btn">Devis archi</a>
     <a href="elence_devis_atelier.html" class="nav-btn">Devis atelier</a>
     <a href="elence_projets.html" class="nav-btn">Mes projets</a>
+    <a href="elence_temps.html" class="nav-btn">Suivi temps</a>
   </div>
 </header>
 
@@ -369,13 +370,14 @@ function toast(msg){const el=document.getElementById('toast');el.textContent=msg
 function checkAutodefer(){
   const today=new Date().toDateString();
   if(S.lastDate&&S.lastDate!==today){
+    // Archive les tâches cochées (fin de journée précédente)
+    const doneCount=S.tasks.today.filter(t=>t.done).length;
+    S.tasks.today=S.tasks.today.filter(t=>!t.done);
+    // Les non cochées restent, marquées comme reportées
     const u=S.tasks.today.filter(t=>!t.done);
-    if(u.length){
-      // Marque les tâches non faites comme reportées — elles restent dans aujourd'hui surlignées
-      u.forEach(t=>{t.deferred=(t.deferred||0)+1;t.reportee=true;});
-      save();
-      toast(u.length+' tâche(s) d\'hier reportée(s) aujourd\'hui');
-    }
+    if(u.length) u.forEach(t=>{t.deferred=(t.deferred||0)+1;t.reportee=true;});
+    save();
+    if(u.length||doneCount) toast((u.length?u.length+' tâche(s) reportée(s)':'')+(u.length&&doneCount?' · ':'')+(doneCount?doneCount+' archivée(s)':''));
   }
   S.lastDate=today;save();
 }
