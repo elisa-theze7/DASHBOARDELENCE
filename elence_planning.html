@@ -281,40 +281,33 @@ const STATUS_MAP={conc:{label:'En conception',cls:'s-conc'},att:{label:'En atten
 const BADGE_CLS={urgent:'b-re',freelance:'b-or',atelier:'b-te',perso:'b-pu',admin:'b-sa'};
 const BADGE_LBL={urgent:'urgent',freelance:'archi int.',atelier:'atelier',perso:'perso',admin:'admin'};
 const MOIS_LIST=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-
-// ── CORE PARTAGÉ ──
 const CORE_KEY='elence_core';
 const FIREBASE_PATH='elence';
 
-// Init Firebase
+// ── FIREBASE ──
 if(!window._fbInit){
-  firebase.initializeApp({
-    apiKey:"AIzaSyBhZKYT-3BTqmqpDv-6LWfnTqnEQmmHVL4",
-    authDomain:"elence-dashboard.firebaseapp.com",
-    databaseURL:"https://elence-dashboard-default-rtdb.firebaseio.com",
-    projectId:"elence-dashboard",
-    storageBucket:"elence-dashboard.firebasestorage.app",
-    messagingSenderId:"206545221004",
-    appId:"1:206545221004:web:79c1d36fd389bad59a92a9"
-  });
+  firebase.initializeApp({apiKey:"AIzaSyBhZKYT-3BTqmqpDv-6LWfnTqnEQmmHVL4",authDomain:"elence-dashboard.firebaseapp.com",databaseURL:"https://elence-dashboard-default-rtdb.firebaseio.com",projectId:"elence-dashboard",storageBucket:"elence-dashboard.firebasestorage.app",messagingSenderId:"206545221004",appId:"1:206545221004:web:79c1d36fd389bad59a92a9"});
   window._fbInit=true;
 }
 const db=firebase.database();
 
 function genId(){return 'p_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);}
 
-function sanitizeCore(c){
-  if(!c) c={};
-  if(!c.tasks) c.tasks={today:[],week:[],month:[],perso:[]};
-  if(!c.tasks.perso) c.tasks.perso=[];
-  if(!c.projects) c.projects=[];
-  if(!c.admin) c.admin={};
+function sanitize(c){
+  if(!c||typeof c!=='object') c={};
+  if(!c.tasks||typeof c.tasks!=='object') c.tasks={};
+  if(!Array.isArray(c.tasks.today)) c.tasks.today=[];
+  if(!Array.isArray(c.tasks.week)) c.tasks.week=[];
+  if(!Array.isArray(c.tasks.month)) c.tasks.month=[];
+  if(!Array.isArray(c.tasks.perso)) c.tasks.perso=[];
+  if(!Array.isArray(c.projects)) c.projects=[];
+  if(!c.admin||typeof c.admin!=='object') c.admin={};
   ['urssaf','facturation','ca','insta','site','rcpro'].forEach(k=>{if(c.admin[k]===undefined)c.admin[k]=false;});
   c.projects.forEach(p=>{
     if(!p.id) p.id=genId();
-    if(!p.steps) p.steps=[];
-    if(!p.journal) p.journal=[];
-    if(!p.docs) p.docs=[];
+    if(!Array.isArray(p.steps)) p.steps=[];
+    if(!Array.isArray(p.journal)) p.journal=[];
+    if(!Array.isArray(p.docs)) p.docs=[];
     if(!p.notes) p.notes='';
     if(p.montant===undefined) p.montant=0;
     if(p.monthFacture===undefined) p.monthFacture=new Date().getMonth();
@@ -322,59 +315,51 @@ function sanitizeCore(c){
   return c;
 }
 
-function coreLoad(){
-  // Charge localStorage immédiatement pour affichage rapide
-  let c=null;
-  try{c=JSON.parse(localStorage.getItem(CORE_KEY));}catch(e){}
-  if(!c||!c.projects||c.projects.length===0){
+// Charge depuis localStorage d'abord
+let S={tasks:{today:[],week:[],month:[],perso:[]},projects:[],admin:{},lastDate:null};
+try{
+  let local=JSON.parse(localStorage.getItem(CORE_KEY));
+  if(!local||!local.projects){
     ['elence_planner_v4','elence_planner_v3','elence_planner_v2'].forEach(k=>{
-      if(!c) try{const d=JSON.parse(localStorage.getItem(k));if(d&&d.projects)c=d;}catch(e){}
+      if(!local) try{const d=JSON.parse(localStorage.getItem(k));if(d&&d.projects)local={tasks:d.tasks||{},projects:d.projects||[],admin:d.admin||{},lastDate:d.lastDate||null};}catch(e){}
     });
-    if(c) c={tasks:c.tasks||{today:[],week:[],month:[],perso:[]},projects:c.projects||[],admin:c.admin||{},lastDate:c.lastDate||null};
   }
-  c=sanitizeCore(c||{});
-  // Écoute Firebase en temps réel — ne re-render pas si en train d'éditer
-  db.ref(FIREBASE_PATH).on('value',snap=>{
-    const fbData=snap.val();
-    if(fbData&&fbData.projects){
-      const merged=sanitizeCore(fbData);
+  if(local) S=sanitize(local);
+}catch(e){console.warn('localStorage load error:',e);}
+
+function save(){
+  try{localStorage.setItem(CORE_KEY,JSON.stringify(S));}catch(e){}
+  db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(S))).catch(e=>console.warn('FB save:',e));
+}
+
+// Écoute Firebase — ne re-render que si pas en train d'éditer
+db.ref(FIREBASE_PATH).on('value',snap=>{
+  try{
+    const d=snap.val();
+    if(d&&d.projects){
+      const merged=sanitize(d);
       if(!window._isEditing){
-        Object.keys(merged).forEach(k=>{S[k]=merged[k];});
+        S=merged;
         try{localStorage.setItem(CORE_KEY,JSON.stringify(S));}catch(e){}
         renderAll();
-      } else {
-        // En édition : on garde quand même la sauvegarde locale à jour en arrière-plan
-        try{localStorage.setItem(CORE_KEY,JSON.stringify(merged));}catch(e){}
       }
-    } else {
-      // Pas encore de données sur Firebase : pousse les données locales
-      const hasLocal=(c.projects&&c.projects.length>0)||(c.tasks&&c.tasks.today&&c.tasks.today.length>0);
-      if(hasLocal) db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(c)));
+    } else if(S.projects.length>0||S.tasks.today.length>0){
+      db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(S)));
     }
-  });
-  return c;
-}
+  }catch(e){console.warn('FB listener error:',e);}
+});
 
-function coreSave(c){
-  try{localStorage.setItem(CORE_KEY,JSON.stringify(c));}catch(e){}
-  db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(c))).catch(e=>console.warn('Firebase:',e));
-}
+function toast(msg){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}
 
-let S=coreLoad();
-function save(){coreSave(S);}
-
-function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}
-
+// ── AUTO-DEFER ──
 function checkAutodefer(){
   const today=new Date().toDateString();
   if(S.lastDate&&S.lastDate!==today){
-    // 1. Supprime les tâches cochées de la veille
     const doneCount=S.tasks.today.filter(t=>t.done).length;
     S.tasks.today=S.tasks.today.filter(t=>!t.done);
-    // 2. Les non cochées restent mais sont marquées reportées
     S.tasks.today.forEach(t=>{t.deferred=(t.deferred||0)+1;t.reportee=true;});
-    save();
     const remaining=S.tasks.today.length;
+    save();
     if(doneCount||remaining) toast((doneCount?doneCount+' tâche(s) archivée(s)':'')+(doneCount&&remaining?' · ':'')+(remaining?remaining+' reportée(s)':''));
   }
   S.lastDate=today;save();
@@ -392,7 +377,7 @@ function promoteTask(zone,i){
   S.tasks.today.push({...t,deferred:0});
   S.tasks[zone].splice(i,1);
   save();renderTasks(zone);renderTasks('today');renderStats();
-  toast('"'+t.text+'" déplacée dans Aujourd\'hui');
+  toast('"'+t.text+'" → Aujourd\'hui');
 }
 
 function dlPill(dl){
@@ -405,19 +390,24 @@ function dlPill(dl){
   return '<span class="dlp dl-ok">'+fmt+'</span>';
 }
 
+// ── TÂCHES ──
 function renderTasks(zone){
   const el=document.getElementById(zone+'-tasks');
   if(!el) return;
   const tasks=S.tasks[zone];
+  if(!Array.isArray(tasks)||!tasks.length){
+    el.innerHTML='<div class="empty">Aucune tâche !</div>';
+    if(zone==='today'){const c=document.getElementById('today-count');if(c)c.textContent='';}
+    return;
+  }
   const showPromote=(zone==='week'||zone==='month');
-  if(!tasks.length){el.innerHTML='<div class="empty">Aucune tâche !</div>';if(zone==='today'){const c=document.getElementById('today-count');if(c)c.textContent='';}return;}
   el.innerHTML=tasks.map((t,i)=>{
-    const isReportee=!t.done&&t.reportee;
-    return `<div class="task-item ${isReportee?'task-reportee':''}" title="${isReportee?'Reportée depuis hier':''}">
-      <div class="tcb ${t.done?'done':''}" onclick="toggleTask('${zone}',${i})"></div>
-      <span class="tt ${t.done?'done':''}" onclick="toggleTask('${zone}',${i})">${t.text}</span>
+    const isRep=!t.done&&t.reportee;
+    return `<div class="task-item${isRep?' task-reportee':''}">
+      <div class="tcb${t.done?' done':''}" onclick="toggleTask('${zone}',${i})"></div>
+      <span class="tt${t.done?' done':''}" onclick="toggleTask('${zone}',${i})">${t.text||''}</span>
       ${t.cat&&BADGE_CLS[t.cat]?`<span class="tbadge ${BADGE_CLS[t.cat]}">${BADGE_LBL[t.cat]}</span>`:''}
-      ${isReportee?`<span class="defer-badge">hier +${t.deferred}j</span>`:''}
+      ${isRep?`<span class="defer-badge">+${t.deferred}j</span>`:''}
       ${showPromote&&!t.done?`<button class="promote-btn" onclick="promoteTask('${zone}',${i})">→ Aujourd'hui</button>`:''}
       <button class="tdel" onclick="delTask('${zone}',${i})">×</button>
     </div>`;
@@ -426,95 +416,40 @@ function renderTasks(zone){
 }
 
 function addTask(zone){
-  const inp=document.getElementById(zone+'-inp');const cat=document.getElementById(zone+'-cat').value;const text=inp.value.trim();
+  const inp=document.getElementById(zone+'-inp');
+  const catEl=document.getElementById(zone+'-cat');
+  const text=inp?inp.value.trim():'';
   if(!text) return;
+  const cat=catEl?catEl.value:'';
   window._isEditing=true;
+  if(!Array.isArray(S.tasks[zone])) S.tasks[zone]=[];
   S.tasks[zone].push({text,cat,done:false});
   save();inp.value='';renderTasks(zone);renderStats();
   setTimeout(()=>{window._isEditing=false;},1000);
 }
+
 function toggleTask(zone,i){
+  if(!S.tasks[zone]||!S.tasks[zone][i]) return;
   S.tasks[zone][i].done=!S.tasks[zone][i].done;
-  // Quand on coche une tâche reportée, on retire le flag
   if(S.tasks[zone][i].done) S.tasks[zone][i].reportee=false;
   save();renderTasks(zone);renderStats();
 }
-function delTask(zone,i){S.tasks[zone].splice(i,1);save();renderTasks(zone);renderStats();}
+function delTask(zone,i){
+  if(!S.tasks[zone]) return;
+  S.tasks[zone].splice(i,1);save();renderTasks(zone);renderStats();
+}
 
 function clearDone(){
   if(!confirm('Archiver toutes les tâches terminées et projets terminés ?')) return;
-  ['today','week','month','perso'].forEach(z=>{S.tasks[z]=S.tasks[z].filter(t=>!t.done);});
+  ['today','week','month','perso'].forEach(z=>{S.tasks[z]=(S.tasks[z]||[]).filter(t=>!t.done);});
   S.projects=S.projects.filter(p=>p.status!=='done');
   save();renderAll();
 }
 
-// ── NETTOYAGE des anciennes tâches injectées depuis projets ──
-function cleanInjectedTasks(){
-  let dirty=false;
-  ['today','week','month'].forEach(z=>{
-    const before=S.tasks[z].length;
-    S.tasks[z]=S.tasks[z].filter(t=>!t.fromProjId&&!t.isReminder);
-    if(S.tasks[z].length!==before) dirty=true;
-  });
-  if(dirty) save();
-}
-
-// ── BANDEAU PROJET URGENT ──
-function renderProjetUrgent(){
-  const el=document.getElementById('projet-urgent-bar');
-  if(!el) return;
-  const now=new Date();now.setHours(0,0,0,0);
-  // Projets actifs triés par deadline (les sans deadline passent en dernier)
-  const actifs=S.projects.filter(p=>p.status!=='done').map(p=>{
-    const diff=p.deadline?Math.round((new Date(p.deadline+'T00:00:00')-now)/86400000):9999;
-    return{...p,diff};
-  }).sort((a,b)=>a.diff-b.diff);
-  if(!actifs.length){el.style.display='none';return;}
-  el.style.display='block';
-  const p=actifs[0]; // le plus urgent
-  const sm=STATUS_MAP[p.status]||STATUS_MAP.conc;
-  const steps=p.steps||[];
-  const pending=steps.filter(s=>!s.done);
-  const nextStep=pending.length>0?pending[0].text:null;
-  const progPct=steps.length>0?Math.round(steps.filter(s=>s.done).length/steps.length*100):0;
-  // Couleur selon urgence
-  let bg,border,icon;
-  if(p.diff<0){bg='#FEF2F2';border='#E74C3C';icon='🔴';}
-  else if(p.diff<=3){bg='#FFF8E1';border='#F0C040';icon='🟠';}
-  else if(p.diff<=7){bg='var(--orange-light)';border='var(--orange)';icon='🟡';}
-  else{bg='var(--teal-light)';border='var(--teal)';icon='';}
-  const dlTxt=p.deadline?(p.diff<0?'En retard de '+Math.abs(p.diff)+'j':p.diff===0?'Deadline aujourd\'hui':'Deadline dans '+p.diff+'j'):'Pas de deadline';
-  el.style.background=bg;
-  el.style.borderColor=border;
-  el.innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
-        <span style="font-size:18px;flex-shrink:0">${icon}</span>
-        <div style="min-width:0">
-          <div style="font-size:13px;font-weight:500;color:var(--text)">Projet prioritaire — <span style="color:${border}">${p.name}</span></div>
-          <div style="font-size:11px;color:var(--text-mid);margin-top:2px;display:flex;gap:10px;flex-wrap:wrap">
-            <span>${dlTxt}</span>
-            ${p.client?`<span>· ${p.client}</span>`:''}
-            <span class="spill ${sm.cls}">${sm.label}</span>
-            ${steps.length>0?`<span>· ${progPct}% avancé (${steps.filter(s=>s.done).length}/${steps.length} étapes)</span>`:''}
-          </div>
-          ${nextStep?`<div style="margin-top:5px;font-size:12px;color:var(--text-mid)">→ Prochaine étape : <strong style="color:var(--text)">${nextStep}</strong></div>`:''}
-        </div>
-      </div>
-      ${steps.length>0?`<div style="min-width:120px;flex-shrink:0">
-        <div style="font-size:10px;color:var(--text-light);margin-bottom:3px;text-transform:uppercase;letter-spacing:.07em">Avancement</div>
-        <div style="background:rgba(255,255,255,.5);border-radius:5px;height:6px"><div style="height:6px;border-radius:5px;background:${border};width:${progPct}%"></div></div>
-        <div style="font-size:10px;color:var(--text-mid);margin-top:3px">${progPct}%</div>
-      </div>`:''}
-      ${actifs.length>1?`<div style="font-size:11px;color:var(--text-light);flex-shrink:0">+${actifs.length-1} autre(s)</div>`:''}
-    </div>`;
-}
-
 // ── SYNC PROJET FACTURÉ → CA ──
-function syncProjToCA(p, oldStatus){
-  if(p.status==='fact' && oldStatus!=='fact' && p.montant>0){
-    const mi = p.monthFacture!==undefined ? p.monthFacture : new Date().getMonth();
-    // Sync vers elence_ca_v4
+function syncProjToCA(p,oldStatus){
+  if(p.status==='fact'&&oldStatus!=='fact'&&p.montant>0){
+    const mi=p.monthFacture!==undefined?p.monthFacture:new Date().getMonth();
     try{
       let caState=JSON.parse(localStorage.getItem('elence_ca_v4'));
       if(!caState) caState={ca:Array(12).fill(0),projects:[],depPonctMens:Array(12).fill(0)};
@@ -524,11 +459,13 @@ function syncProjToCA(p, oldStatus){
       const already=caState.projects.some(pp=>pp.projId===p.id);
       if(!already) caState.projects.push({name:p.name,type:p.type==='atelier'?'atelier':'archi',client:p.client||'',amount:p.montant,month:MOIS_LIST[mi],status:'facture',projId:p.id});
       localStorage.setItem('elence_ca_v4',JSON.stringify(caState));
+      db.ref('elence_ca').set(caState);
     }catch(e){}
     toast('✓ CA mis à jour : +'+Number(p.montant).toLocaleString('fr-FR')+'€ sur '+MOIS_LIST[mi]);
   }
 }
 
+// ── PROJETS ──
 function renderProjects(){
   ['freelance','atelier'].forEach(type=>{
     const el=document.getElementById('proj-'+type+'-body');
@@ -566,13 +503,13 @@ function projCard(p){
           ${Object.entries(STATUS_MAP).map(([k,v])=>`<option value="${k}" ${p.status===k?'selected':''}>${v.label}</option>`).join('')}
         </select>
         <button class="pdel" onclick="event.stopPropagation();delProj(${ri})">×</button>
-        <span class="pchev ${exp?'open':''}">▾</span>
+        <span class="pchev${exp?' open':''}">▾</span>
       </div>
     </div>
-    <div class="proj-steps ${exp?'open':''}">
+    <div class="proj-steps${exp?' open':''}">
       ${steps.map((s,si)=>`<div class="step-row">
-        <div class="scb ${s.done?'done':''}" onclick="toggleStep(${ri},${si})"></div>
-        <span class="stxt ${s.done?'done':''}" onclick="toggleStep(${ri},${si})">${s.text}</span>
+        <div class="scb${s.done?' done':''}" onclick="toggleStep(${ri},${si})"></div>
+        <span class="stxt${s.done?' done':''}" onclick="toggleStep(${ri},${si})">${s.text}</span>
         <button class="sdel" onclick="delStep(${ri},${si})">×</button>
       </div>`).join('')}
       <div class="sadd-row">
@@ -584,17 +521,9 @@ function projCard(p){
 }
 
 function toggleProj(i){S.projects[i]._expanded=!S.projects[i]._expanded;renderProjects();}
-function changeStatus(i,v){
-  const old=S.projects[i].status;
-  S.projects[i].status=v;
-  syncProjToCA(S.projects[i],old);
-  save();renderProjects();renderStats();
-}
+function changeStatus(i,v){const old=S.projects[i].status;S.projects[i].status=v;syncProjToCA(S.projects[i],old);save();renderProjects();renderStats();}
 function delProj(i){if(confirm('Supprimer ce projet ?')){S.projects.splice(i,1);save();renderAll();}}
-function toggleStep(pi,si){
-  S.projects[pi].steps[si].done=!S.projects[pi].steps[si].done;
-  save();renderProjects();
-}
+function toggleStep(pi,si){S.projects[pi].steps[si].done=!S.projects[pi].steps[si].done;save();renderProjects();}
 function delStep(pi,si){S.projects[pi].steps.splice(si,1);save();renderProjects();}
 function addStep(pi){const inp=document.getElementById('si-'+pi);if(!inp||!inp.value.trim())return;S.projects[pi].steps.push({text:inp.value.trim(),done:false});inp.value='';save();renderProjects();}
 
@@ -615,7 +544,7 @@ function saveProject(){
   if(p.status==='fact') syncProjToCA(p,'');
   save();closeModal();renderAll();
   ['m-name','m-client','m-notes','m-deadline'].forEach(id=>document.getElementById(id).value='');
-  toast('Projet créé + tâches injectées dans le planning !');
+  toast('Projet créé !');
 }
 
 function toggleAdmin(key){S.admin[key]=!S.admin[key];save();renderAdmin();}
@@ -632,21 +561,9 @@ function renderAdmin(){
   });
 }
 
-function checkDeadlines(){
-  const bar=document.getElementById('deadline-bar');
-  const now=new Date();now.setHours(0,0,0,0);
-  const warnings=S.projects.filter(p=>p.deadline&&p.status!=='done').map(p=>{
-    const d=new Date(p.deadline+'T00:00:00');
-    return{name:p.name,diff:Math.round((d-now)/86400000)};
-  }).filter(x=>x.diff<=7).sort((a,b)=>a.diff-b.diff);
-  if(warnings.length){
-    bar.className='deadline-bar show';
-    bar.innerHTML='⚠ Deadlines proches : '+warnings.map(w=>`<strong>${w.name}</strong> ${w.diff<0?'en retard de '+Math.abs(w.diff)+'j':'dans '+w.diff+'j'}`).join(' · ');
-  } else bar.className='deadline-bar';
-}
-
 function renderStats(){
   const el=document.getElementById('stats-strip');
+  if(!el) return;
   const allTasks=Object.values(S.tasks).flat();
   const active=allTasks.filter(t=>!t.done).length;
   const done=allTasks.filter(t=>t.done).length;
