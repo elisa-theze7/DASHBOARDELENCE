@@ -247,7 +247,7 @@ function save(){
 function totalFixes(){return S.fixes.reduce((s,d)=>s+Number(d.mois||0),0);}
 function taux(mi){return TAUX[mi]||.258;}
 function sal(mi){const ca=S.ca[mi]||0;return Math.round(ca-ca*taux(mi)-totalFixes()-(S.depPonctMens[mi]||0));}
-function fmtN(v){return Number(v).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+'€';}
+function fmtN(v){return Number(v).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+'€';}
 
 function renderMonthNav(){
   const el=document.getElementById('month-nav');
@@ -314,7 +314,10 @@ function updateCA(mi,v){
   if(_caSaveTimeout) clearTimeout(_caSaveTimeout);
   _caSaveTimeout=setTimeout(()=>{save();renderAll();_caEditing=false;},800);
 }
-function updatePonct(mi,v){S.depPonctMens[mi]=parseFloat(v)||0;save();renderMoisDetail();renderAnnuel();renderStats();}
+function updatePonct(mi,v){
+  S.depPonctMens[mi]=parseFloat(v)||0;
+  save();renderAll();
+}
 
 function toggleAnnuel(){
   S.annuelOpen=!S.annuelOpen;save();

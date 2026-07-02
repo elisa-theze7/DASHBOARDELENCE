@@ -164,7 +164,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
       <div class="mfield"><label>Client</label><input type="text" id="m-client" placeholder="Nom, contact…"></div>
       <div class="mfield"><label>Deadline</label><input type="date" id="m-deadline"></div>
     </div>
-    <div class="mfield"><label>Étapes (une par ligne — la 1re ira dans "Aujourd'hui")</label><textarea id="m-notes" placeholder="Relevé de côtes&#10;Plans AutoCAD&#10;Rendu 3D&#10;Livraison client"></textarea></div>
+    <div class="mfield"><label>Étapes (une par ligne)</label><textarea id="m-notes" placeholder="Relevé de côtes&#10;Plans AutoCAD&#10;Rendu 3D&#10;Livraison client"></textarea></div>
     <div class="mfoot"><button class="btn-cancel" onclick="closeModal()">Annuler</button><button class="btn-save" onclick="saveProject()">Enregistrer</button></div>
   </div>
 </div>
@@ -173,8 +173,6 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
   <!-- STATS -->
   <div class="stats-strip" id="stats-strip"></div>
 
-  <!-- PROJET PRIORITAIRE -->
-  <div id="projet-urgent-bar" style="display:none;border:1.5px solid;border-radius:var(--radius);padding:12px 16px;margin-bottom:1.25rem;transition:all .3s"></div>
 
   <!-- TOP: PERSO sidebar + AUJOURD'HUI + SEMAINE -->
   <div class="top-grid">
@@ -370,14 +368,14 @@ function toast(msg){const el=document.getElementById('toast');el.textContent=msg
 function checkAutodefer(){
   const today=new Date().toDateString();
   if(S.lastDate&&S.lastDate!==today){
-    // Archive les tâches cochées (fin de journée précédente)
+    // 1. Supprime les tâches cochées de la veille
     const doneCount=S.tasks.today.filter(t=>t.done).length;
     S.tasks.today=S.tasks.today.filter(t=>!t.done);
-    // Les non cochées restent, marquées comme reportées
-    const u=S.tasks.today.filter(t=>!t.done);
-    if(u.length) u.forEach(t=>{t.deferred=(t.deferred||0)+1;t.reportee=true;});
+    // 2. Les non cochées restent mais sont marquées reportées
+    S.tasks.today.forEach(t=>{t.deferred=(t.deferred||0)+1;t.reportee=true;});
     save();
-    if(u.length||doneCount) toast((u.length?u.length+' tâche(s) reportée(s)':'')+(u.length&&doneCount?' · ':'')+(doneCount?doneCount+' archivée(s)':''));
+    const remaining=S.tasks.today.length;
+    if(doneCount||remaining) toast((doneCount?doneCount+' tâche(s) archivée(s)':'')+(doneCount&&remaining?' · ':'')+(remaining?remaining+' reportée(s)':''));
   }
   S.lastDate=today;save();
 }
@@ -590,15 +588,15 @@ function changeStatus(i,v){
   const old=S.projects[i].status;
   S.projects[i].status=v;
   syncProjToCA(S.projects[i],old);
-  save();renderProjects();renderStats();renderProjetUrgent();
+  save();renderProjects();renderStats();
 }
 function delProj(i){if(confirm('Supprimer ce projet ?')){S.projects.splice(i,1);save();renderAll();}}
 function toggleStep(pi,si){
   S.projects[pi].steps[si].done=!S.projects[pi].steps[si].done;
-  save();renderProjects();renderProjetUrgent();
+  save();renderProjects();
 }
 function delStep(pi,si){S.projects[pi].steps.splice(si,1);save();renderProjects();}
-function addStep(pi){const inp=document.getElementById('si-'+pi);if(!inp||!inp.value.trim())return;S.projects[pi].steps.push({text:inp.value.trim(),done:false});inp.value='';save();renderProjects();renderProjetUrgent();}
+function addStep(pi){const inp=document.getElementById('si-'+pi);if(!inp||!inp.value.trim())return;S.projects[pi].steps.push({text:inp.value.trim(),done:false});inp.value='';save();renderProjects();}
 
 function openModal(){document.getElementById('modal-overlay').classList.add('open');document.getElementById('m-type').value='freelance';}
 function openModalAtelier(){document.getElementById('modal-overlay').classList.add('open');document.getElementById('m-type').value='atelier';}
@@ -663,9 +661,8 @@ function renderStats(){
 }
 
 function renderAll(){
-  cleanInjectedTasks();
   ['today','week','month','perso'].forEach(z=>renderTasks(z));
-  renderProjects();renderAdmin();renderStats();renderProjetUrgent();
+  renderProjects();renderAdmin();renderStats();
 }
 
 document.getElementById('header-date').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});

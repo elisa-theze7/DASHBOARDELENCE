@@ -147,6 +147,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
 
 <script>
 const TAUX_MASK=31.15;
+const TAUX_ARCHI=31.15; // même taux pour l'archi
 const FB_TEMPS_PATH='elence_temps';
 
 if(!window._fbInit){
@@ -214,17 +215,34 @@ function renderProjTimeList(){
     const entries=S.projTimes[p.id]||[];
     const totalH=entries.reduce((s,e)=>s+e.heures,0);
     const exp=p._timeExpanded;
+    const totalE=Math.round(totalH*TAUX_ARCHI);
+    const budget=p.montant||0;
+    const diff=budget-totalE;
+    const pct=budget>0?Math.min(Math.round(totalE/budget*100),150):0;
+    const barColor=pct>100?'#E74C3C':pct>85?'#F0C040':'var(--teal)';
+    const statusCls=diff>=0?'pos':'neg';
     return `<div class="proj-time-card">
       <div class="ptc-header" onclick="toggleProjTime('${p.id}')">
         <span class="ptc-name">${p.name}</span>
-        <span class="ptc-total">${totalH>0?fmtH(totalH):'—'}</span>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          ${totalH>0?`<span style="font-size:11px;font-family:'DM Serif Display',serif;color:${diff>=0?'var(--teal)':'#E74C3C'}">${diff>=0?'✓ ':'⚠ '}${diff>=0?'+'+fmtE(diff):fmtE(Math.abs(diff))+' en dépassement'}</span>`:''}
+          <span class="ptc-total">${totalH>0?fmtH(totalH):'—'}</span>
+        </div>
         <span class="ptc-chevron ${exp?'open':''}">▾</span>
       </div>
+      ${totalH>0&&budget>0?`<div style="margin:0 14px;height:4px;background:var(--sand);border-radius:4px">
+        <div style="height:4px;border-radius:4px;background:${barColor};width:${Math.min(pct,100)}%;transition:width .4s"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:4px 14px 0;font-size:10px;color:var(--text-light)">
+        <span>${fmtE(totalE)} calculé sur ${fmtH(totalH)}</span>
+        <span>Budget devis : ${fmtE(budget)}</span>
+      </div>`:''}
       <div class="ptc-body ${exp?'open':''}" id="ptc-body-${p.id}">
+        ${budget===0?`<div style="font-size:12px;color:var(--text-light);font-style:italic;padding:4px 0 8px">Ajoute un montant devis dans "Mes projets" pour voir l'analyse budget</div>`:''}
         ${entries.map((e,ei)=>`<div class="temps-row">
           <span class="temps-date">${e.date}</span>
           <span class="temps-desc">${e.desc||'—'}</span>
-          <span class="temps-h">${fmtH(e.heures)}</span>
+          <span class="temps-h">${fmtH(e.heures)} · ${fmtE(e.heures*TAUX_ARCHI)}</span>
           <button class="temps-del" onclick="delProjTime('${p.id}',${ei})">×</button>
         </div>`).join('')||'<div class="empty">Aucune entrée de temps</div>'}
         <div class="add-temps-row">
@@ -362,15 +380,15 @@ function saveMaskProject(){
 function renderStats(){
   const el=document.getElementById('stats-strip');
   const totalArchiH=Object.values(S.projTimes).flat().reduce((s,e)=>s+e.heures,0);
+  const totalArchiE=Math.round(totalArchiH*TAUX_ARCHI);
   const totalMaskH=S.maskProjects.reduce((s,p)=>s+p.entries.reduce((ss,e)=>ss+e.heures,0),0);
-  const totalMaskE=totalMaskH*TAUX_MASK;
+  const totalMaskE=Math.round(totalMaskH*TAUX_MASK);
   const totalBudget=S.maskProjects.reduce((s,p)=>s+(p.budget||0),0);
-  const totalCalc=S.maskProjects.reduce((s,p)=>s+p.entries.reduce((ss,e)=>ss+e.heures,0)*TAUX_MASK,0);
-  const margeTotal=totalBudget-totalCalc;
+  const margeTotal=totalBudget-totalMaskE;
   el.innerHTML=`
-    <div class="stat-card a-or"><div class="sl">Temps archi/atelier</div><div class="sv or">${fmtH(totalArchiH)}</div></div>
-    <div class="stat-card a-pu"><div class="sl">Temps MASK</div><div class="sv pu">${fmtH(totalMaskH)}</div></div>
-    <div class="stat-card a-pu"><div class="sl">Montant MASK calculé</div><div class="sv pu">${fmtE(totalMaskE)}</div></div>
+    <div class="stat-card a-or"><div class="sl">Temps archi/atelier</div><div class="sv or">${fmtH(totalArchiH)}</div><div style="font-size:11px;color:var(--text-light);margin-top:3px">${totalArchiE>0?fmtE(totalArchiE):''}</div></div>
+    <div class="stat-card a-pu"><div class="sl">Temps MASK</div><div class="sv pu">${fmtH(totalMaskH)}</div><div style="font-size:11px;color:var(--text-light);margin-top:3px">${totalMaskE>0?fmtE(totalMaskE):''}</div></div>
+    <div class="stat-card a-pu"><div class="sl">Budget MASK total</div><div class="sv pu">${totalBudget>0?fmtE(totalBudget):'—'}</div></div>
     <div class="stat-card ${margeTotal<0?'a-or':'a-te'}"><div class="sl">${margeTotal>=0?'Marge MASK':'Dépassement MASK'}</div><div class="sv ${margeTotal>=0?'te':'or'}">${totalBudget>0?fmtE(Math.abs(margeTotal)):'—'}</div></div>`;
 }
 
