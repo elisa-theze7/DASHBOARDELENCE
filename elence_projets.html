@@ -155,6 +155,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
         <button class="fb" id="f-mask" onclick="setFilter('mask')">MASK</button>
         <button class="fb" id="f-done" onclick="setFilter('done')">Terminés</button>
       </div>
+      <button class="btn-new-proj" onclick="openNewMaskFromProjets()" id="btn-new-mask" style="display:none;background:var(--purple-light);border-color:var(--purple);color:var(--purple)">+ Nouveau projet MASK</button>
       <div id="proj-list"></div>
     </div>
     <!-- FICHE -->
@@ -304,7 +305,32 @@ function setFilter(f){
     const el=document.getElementById('f-'+k);
     if(el) el.className='fb'+(k===f?' active':'');
   });
+  // Affiche le bouton "Nouveau projet MASK" seulement sur le filtre MASK
+  const maskBtn=document.getElementById('btn-new-mask');
+  if(maskBtn) maskBtn.style.display=f==='mask'?'block':'none';
   renderList();
+}
+
+function openNewMaskFromProjets(){
+  const name=prompt('Nom du projet MASK :');
+  if(!name||!name.trim()) return;
+  const budgetStr=prompt('Budget estimé (€) — laisser vide si non défini :');
+  const budget=parseFloat(budgetStr)||0;
+  // Sauvegarde dans elence_temps via Firebase
+  try{
+    let t=JSON.parse(localStorage.getItem('elence_temps_v1')||'{}');
+    if(!t.maskProjects) t.maskProjects=[];
+    if(!t.projTimes) t.projTimes={};
+    const newP={id:'t_'+Date.now(),name:name.trim(),budget,entries:[],_expanded:false,journal:[]};
+    t.maskProjects.push(newP);
+    _maskCache=t.maskProjects;
+    localStorage.setItem('elence_temps_v1',JSON.stringify(t));
+    db.ref('elence_temps').set(JSON.parse(JSON.stringify(t)));
+    renderList();
+    // Ouvre la fiche du nouveau projet MASK
+    const ui=getUI();ui.activeId='mask_'+newP.id;saveUI(ui);
+    renderFiche();
+  }catch(e){console.error(e);}
 }
 
 function renderList(){

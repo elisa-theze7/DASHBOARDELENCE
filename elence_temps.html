@@ -25,45 +25,49 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
 .ct{font-size:11px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--text-mid);display:flex;align-items:center;gap:6px}
 .dot{width:7px;height:7px;border-radius:50%}.dot-or{background:var(--orange)}.dot-te{background:var(--teal)}.dot-pu{background:var(--purple)}
 .cb{padding:.875rem 1.2rem 1.2rem}
+/* STATS */
 .stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
 .stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:.875rem 1rem}
-.stat-card.a-or{border-left:3px solid var(--orange)}.stat-card.a-te{border-left:3px solid var(--teal)}.stat-card.a-pu{border-left:3px solid var(--purple)}
+.stat-card.a-or{border-left:3px solid var(--orange)}.stat-card.a-te{border-left:3px solid var(--teal)}.stat-card.a-pu{border-left:3px solid var(--purple)}.stat-card.a-red{border-left:3px solid #E74C3C}
 .sl{font-size:10px;color:var(--text-light);letter-spacing:.08em;text-transform:uppercase;font-weight:500;margin-bottom:2px}
 .sv{font-size:24px;font-family:'DM Serif Display',serif;line-height:1}
-.sv.or{color:var(--orange)}.sv.te{color:var(--teal)}.sv.pu{color:var(--purple)}
-
+.sv.or{color:var(--orange)}.sv.te{color:var(--teal)}.sv.pu{color:var(--purple)}.sv.re{color:#E74C3C}
+/* MARGE BANNER */
+.marge-banner{border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.marge-banner.green{background:#E8F8F4;border:1px solid var(--teal)}
+.marge-banner.red{background:#FEF2F2;border:1px solid #E74C3C}
+.marge-banner.neutral{background:var(--sand);border:1px solid var(--border)}
+.marge-val{font-family:'DM Serif Display',serif;font-size:22px}
+.marge-val.green{color:var(--teal)}.marge-val.red{color:#E74C3C}
 /* TEMPS ENTRIES */
 .temps-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
 .temps-row:last-child{border-bottom:none}
 .temps-date{font-size:11px;color:var(--text-light);min-width:70px}
 .temps-desc{flex:1;font-size:13px;color:var(--text)}
-.temps-h{font-size:13px;font-family:'DM Serif Display',serif;color:var(--orange);min-width:50px;text-align:right}
+.temps-h{font-size:13px;font-family:'DM Serif Display',serif;color:var(--orange);min-width:100px;text-align:right}
 .temps-del{font-size:13px;color:var(--text-light);cursor:pointer;background:none;border:none;opacity:0;transition:opacity .15s}
 .temps-row:hover .temps-del{opacity:1}
-
-/* PROJET CARD avec accordéon */
+/* PROJET CARD */
 .proj-time-card{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;overflow:hidden}
 .ptc-header{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:var(--cream)}
 .ptc-header:hover{background:var(--orange-light)}
 .ptc-name{font-size:13px;font-weight:500;flex:1}
-.ptc-total{font-size:13px;font-family:'DM Serif Display',serif;color:var(--orange)}
-.ptc-chevron{font-size:11px;color:var(--text-light);transition:transform .2s;margin-left:8px}
+.ptc-chevron{font-size:11px;color:var(--text-light);transition:transform .2s;margin-left:8px;flex-shrink:0}
 .ptc-chevron.open{transform:rotate(180deg)}
 .ptc-body{padding:10px 14px;background:white;display:none;border-top:1px solid var(--border)}
 .ptc-body.open{display:block}
-.add-temps-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+/* SAISIE TEMPS */
+.add-temps-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center}
 .add-temps-row input,.add-temps-row select{font-size:12px;font-family:'DM Sans',sans-serif;padding:6px 9px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none}
-.add-temps-row input:focus,.add-temps-row select:focus{border-color:var(--orange)}
+.add-temps-row input:focus{border-color:var(--orange)}
+.time-hint{font-size:10px;color:var(--text-light);margin-top:3px}
 .btn-add-temps{padding:6px 14px;font-size:12px;font-family:'DM Sans',sans-serif;background:var(--orange);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-weight:500}
 .btn-add-temps:hover{background:#C9501F}
-
-/* MASK SECTION */
+.btn-pu{background:var(--purple)!important}.btn-pu:hover{background:#5a4fa0!important}
+/* MASK */
 .mask-proj-card{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;overflow:hidden}
 .mpc-header{padding:12px 14px;background:var(--purple-light);display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}
 .mpc-name{font-size:14px;font-weight:500;flex:1}
-.mpc-budget{font-size:12px;color:var(--text-mid)}
-.mpc-chevron{font-size:11px;color:var(--text-light);transition:transform .2s}
-.mpc-chevron.open{transform:rotate(180deg)}
 .mpc-body{padding:12px 14px;display:none;background:white}
 .mpc-body.open{display:block}
 .mpc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
@@ -71,17 +75,17 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
 .mpc-stat-label{font-size:9px;color:var(--text-light);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
 .mpc-stat-val{font-size:17px;font-family:'DM Serif Display',serif}
 .mpc-stat-val.under{color:#2A9088}.mpc-stat-val.over{color:#E74C3C}.mpc-stat-val.neutral{color:var(--text)}
-.mpc-bar-bg{background:var(--sand);border-radius:6px;height:8px;margin-bottom:12px}
+.mpc-bar-bg{background:var(--sand);border-radius:6px;height:8px;margin-bottom:8px}
 .mpc-bar-fill{height:8px;border-radius:6px;transition:width .4s}
 .mask-del{font-size:13px;color:var(--text-light);cursor:pointer;background:none;border:none}
 .mask-del:hover{color:#E74C3C}
-.field-inline label{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:3px}
-.field-inline input{font-size:13px;font-family:'DM Sans',sans-serif;padding:6px 9px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none;width:100%}
-.field-inline input:focus{border-color:var(--purple)}
+.mpc-chevron{font-size:11px;color:var(--text-light);transition:transform .2s}
+.mpc-chevron.open{transform:rotate(180deg)}
+.prog-bar-bg{background:var(--sand);border-radius:4px;height:4px;margin:2px 0 6px}
+.prog-bar-fill{height:4px;border-radius:4px;transition:width .4s}
 .empty{font-size:12px;color:var(--text-light);font-style:italic;padding:8px 0}
-.taux-banner{background:var(--purple-light);border:1px solid var(--purple);border-radius:var(--radius-sm);padding:9px 13px;font-size:12px;color:var(--text-mid);margin-bottom:1.25rem}
-.taux-banner strong{color:var(--purple)}
-@media(max-width:800px){.stats-strip{grid-template-columns:repeat(2,1fr)}header{padding:0 1rem}.page{padding:1rem .875rem 4rem}.mpc-stats{grid-template-columns:1fr 1fr}}
+.taux-info{font-size:11px;color:var(--text-mid);background:var(--sand);border-radius:var(--radius-sm);padding:7px 10px;margin-bottom:10px}
+@media(max-width:800px){.stats-strip{grid-template-columns:repeat(2,1fr)}header{padding:0 1rem}.page{padding:1rem .875rem 4rem}.mpc-stats{grid-template-columns:1fr 1fr}.add-temps-row{flex-direction:column;align-items:stretch}}
 </style>
 </head>
 <body>
@@ -100,27 +104,42 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
 <div class="page">
   <div style="margin-bottom:1.5rem">
     <h1 style="font-family:'DM Serif Display',serif;font-size:28px;font-weight:normal">Suivi du temps</h1>
-    <p style="font-size:13px;color:var(--text-mid);margin-top:3px">Temps passé par projet — archi/atelier et freelance MASK</p>
+    <p style="font-size:13px;color:var(--text-mid);margin-top:3px">Saisis ton temps en H:Min — calcul automatique en décimal · 31,15 €/h</p>
   </div>
 
   <div class="stats-strip" id="stats-strip"></div>
 
-  <!-- TEMPS PAR PROJET (lié à Mes Projets) -->
+  <!-- ARCHI INTÉRIEURE -->
   <div class="card or">
-    <div class="ch or-bg"><div class="ct"><span class="dot dot-or"></span>Temps par projet (archi / atelier)</div></div>
+    <div class="ch or-bg">
+      <div class="ct"><span class="dot dot-or"></span>Élence — Archi intérieure</div>
+    </div>
     <div class="cb">
-      <div id="proj-time-list"></div>
+      <div id="marge-archi"></div>
+      <div id="proj-time-archi"></div>
     </div>
   </div>
 
-  <!-- MASK FREELANCE -->
+  <!-- ATELIER FABRICATION -->
+  <div class="card te">
+    <div class="ch te-bg">
+      <div class="ct"><span class="dot dot-te"></span>Élence — Fabrication atelier</div>
+    </div>
+    <div class="cb">
+      <div id="marge-atelier"></div>
+      <div id="proj-time-atelier"></div>
+    </div>
+  </div>
+
+  <!-- MASK -->
   <div class="card pu">
     <div class="ch pu-bg">
       <div class="ct"><span class="dot dot-pu"></span>Freelance MASK</div>
       <button onclick="openMaskModal()" style="font-size:12px;padding:5px 13px;border:none;border-radius:20px;background:var(--purple);color:white;cursor:pointer;font-family:'DM Sans',sans-serif">+ Nouveau projet MASK</button>
     </div>
     <div class="cb">
-      <div class="taux-banner">Taux horaire freelance : <strong>31,15 €/h</strong> — le calcul compare ton temps facturé au budget estimé pour repérer les dépassements.</div>
+      <div id="marge-mask"></div>
+      <div class="taux-info">Taux horaire : <strong>31,15 €/h</strong> · Saisie en H:Min, conversion automatique</div>
       <div id="mask-list"></div>
     </div>
   </div>
@@ -146,224 +165,301 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
 </div>
 
 <script>
-const TAUX_MASK=31.15;
-const TAUX_ARCHI=31.15; // même taux pour l'archi
-const FB_TEMPS_PATH='elence_temps';
+const TAUX = 31.15;
+const FB_TEMPS_PATH = 'elence_temps';
 
 if(!window._fbInit){
   firebase.initializeApp({apiKey:"AIzaSyBhZKYT-3BTqmqpDv-6LWfnTqnEQmmHVL4",authDomain:"elence-dashboard.firebaseapp.com",databaseURL:"https://elence-dashboard-default-rtdb.firebaseio.com",projectId:"elence-dashboard",storageBucket:"elence-dashboard.firebasestorage.app",messagingSenderId:"206545221004",appId:"1:206545221004:web:79c1d36fd389bad59a92a9"});
   window._fbInit=true;
 }
-const db=firebase.database();
-
+const db = firebase.database();
 function genId(){return 't_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);}
 
-let _isEditing=false;
-let S={projTimes:{},maskProjects:[]}; // projTimes: { projId: [{date,desc,heures}] }, maskProjects: [{id,name,budget,entries:[{date,desc,heures}],_expanded}]
+// ── CONVERSION TEMPS ──
+// Parse "2:30" ou "2.5" ou "2h30" → heures décimal
+function parseTemps(val){
+  if(!val||!val.trim()) return 0;
+  val = val.trim().replace(',','.');
+  // Format H:MM ou H:M
+  if(val.includes(':')){ const [h,m]=val.split(':'); return parseFloat(h||0)+parseFloat(m||0)/60; }
+  // Format Xh ou XhYY
+  if(val.toLowerCase().includes('h')){ const [h,m]=val.toLowerCase().split('h'); return parseFloat(h||0)+parseFloat(m||0)/60; }
+  // Décimal direct
+  return parseFloat(val)||0;
+}
+// Formate heures décimal → "2h30"
+function fmtHMin(h){
+  if(!h||h<=0) return '0h00';
+  const hh=Math.floor(h);
+  const mm=Math.round((h-hh)*60);
+  return hh+'h'+(mm<10?'0':'')+mm;
+}
+function fmtE(v){return Number(v).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+'€';}
+function fmtE0(v){return Number(v).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+'€';}
 
-function sanitizeTemps(c){
-  if(!c) c={};
-  if(!c.projTimes) c.projTimes={};
-  if(!c.maskProjects) c.maskProjects=[];
+// ── ÉTAT ──
+let S = {projTimes:{}, maskProjects:[]};
+let _coreProjects = [];
+let _isEditing = false;
+
+function sanitize(c){
+  if(!c||typeof c!=='object') c={};
+  if(!c.projTimes||typeof c.projTimes!=='object') c.projTimes={};
+  if(!Array.isArray(c.maskProjects)) c.maskProjects=[];
   c.maskProjects.forEach(p=>{
     if(!p.id) p.id=genId();
-    if(!p.entries) p.entries=[];
+    if(!Array.isArray(p.entries)) p.entries=[];
     if(p.budget===undefined) p.budget=0;
+    if(!p.journal) p.journal=[];
   });
   return c;
 }
+
+// Charge localStorage d'abord
+try{const l=JSON.parse(localStorage.getItem('elence_temps_v1'));if(l) S=sanitize(l);}catch(e){}
 
 function save(){
   try{localStorage.setItem('elence_temps_v1',JSON.stringify(S));}catch(e){}
   if(!_isEditing) db.ref(FB_TEMPS_PATH).set(JSON.parse(JSON.stringify(S))).catch(e=>console.warn('FB:',e));
 }
 
-// Charge localStorage en premier pour affichage rapide
-try{const local=JSON.parse(localStorage.getItem('elence_temps_v1'));if(local) S=sanitizeTemps(local);}catch(e){}
-
-// Écoute Firebase temps en temps réel
+// Firebase temps
 db.ref(FB_TEMPS_PATH).on('value',snap=>{
-  const fbData=snap.val();
-  if(fbData&&!_isEditing){
-    S=sanitizeTemps(fbData);
-    try{localStorage.setItem('elence_temps_v1',JSON.stringify(S));}catch(e){}
-    renderAll();
-  } else if(!fbData){
-    db.ref(FB_TEMPS_PATH).set(JSON.parse(JSON.stringify(S)));
-  }
+  try{
+    const d=snap.val();
+    if(d&&!_isEditing){S=sanitize(d);try{localStorage.setItem('elence_temps_v1',JSON.stringify(S));}catch(e){}renderAll();}
+    else if(!d) db.ref(FB_TEMPS_PATH).set(JSON.parse(JSON.stringify(S)));
+  }catch(e){console.warn('FB temps:',e);}
 });
 
-// Écoute aussi elence_core pour récupérer la liste des projets archi/atelier
-let _coreProjects=[];
+// Firebase core → projets archi/atelier
 db.ref('elence').on('value',snap=>{
-  const d=snap.val();
-  if(d&&d.projects){
-    _coreProjects=d.projects.filter(p=>p.status!=='done');
-    renderProjTimeList();
-    renderStats();
-  }
+  try{
+    const d=snap.val();
+    if(d&&d.projects){_coreProjects=d.projects.filter(p=>p.status!=='done');renderProjSections();renderStats();}
+  }catch(e){}
 });
 
-function fmtH(h){return Number(h).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1})+'h';}
-function fmtE(v){return Number(v).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:0})+'€';}
+// ── RENDER SECTIONS ARCHI / ATELIER ──
+function renderProjSections(){
+  const archiProjs = _coreProjects.filter(p=>p.type==='freelance');
+  const atelierProjs = _coreProjects.filter(p=>p.type==='atelier');
+  renderProjSection('archi', archiProjs, 'var(--orange)', 'var(--teal)');
+  renderProjSection('atelier', atelierProjs, 'var(--teal)', 'var(--teal)');
+}
 
-// ── TEMPS PAR PROJET (archi/atelier) ──
-function renderProjTimeList(){
-  const el=document.getElementById('proj-time-list');
-  if(!_coreProjects.length){el.innerHTML='<div class="empty">Aucun projet actif dans "Mes projets"</div>';return;}
-  el.innerHTML=_coreProjects.map(p=>{
+function calcMarge(projs){
+  let totalH=0, totalBudget=0;
+  projs.forEach(p=>{
     const entries=S.projTimes[p.id]||[];
-    const totalH=entries.reduce((s,e)=>s+e.heures,0);
-    const exp=p._timeExpanded;
-    const totalE=Math.round(totalH*TAUX_ARCHI);
-    const budget=p.montant||0;
-    const diff=budget-totalE;
-    const pct=budget>0?Math.min(Math.round(totalE/budget*100),150):0;
-    const barColor=pct>100?'#E74C3C':pct>85?'#F0C040':'var(--teal)';
-    const statusCls=diff>=0?'pos':'neg';
+    totalH+=entries.reduce((s,e)=>s+e.heures,0);
+    totalBudget+=(p.montant||0);
+  });
+  const totalE=totalH*TAUX;
+  return {totalH, totalE, totalBudget, marge:totalBudget-totalE};
+}
+
+function renderMargeBanner(elId, {totalH, totalE, totalBudget, marge}, accentColor){
+  const el=document.getElementById(elId);
+  if(!el) return;
+  if(totalH===0){el.innerHTML='';return;}
+  const hasBudget=totalBudget>0;
+  const cls=!hasBudget?'neutral':marge>=0?'green':'red';
+  el.innerHTML=`<div class="marge-banner ${cls}">
+    <div>
+      <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Bilan global</div>
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+        <span style="font-size:13px;color:var(--text-mid)">${fmtHMin(totalH)} travaillées · ${fmtE(totalE)} calculés</span>
+        ${hasBudget?`<span style="font-size:13px;color:var(--text-mid)">Budget total : ${fmtE0(totalBudget)}</span>`:''}
+      </div>
+    </div>
+    ${hasBudget?`<div>
+      <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">${marge>=0?'Marge':'Dépassement'}</div>
+      <div class="marge-val ${cls}">${marge>=0?'+':'−'}${fmtE(Math.abs(marge))}</div>
+    </div>`:'<div style="font-size:11px;color:var(--text-light)">Ajoute un montant devis<br>dans "Mes projets"</div>'}
+  </div>`;
+}
+
+function renderProjSection(type, projs, barColor, accentColor){
+  const listEl = document.getElementById('proj-time-'+type);
+  const margeEl = document.getElementById('marge-'+type);
+  if(!listEl) return;
+
+  const m = calcMarge(projs);
+  renderMargeBanner('marge-'+type, m, accentColor);
+
+  if(!projs.length){
+    listEl.innerHTML='<div class="empty">Aucun projet '+(type==='archi'?'archi intérieure':'fabrication atelier')+' actif</div>';
+    return;
+  }
+  listEl.innerHTML = projs.map(p=>{
+    const entries = S.projTimes[p.id]||[];
+    const totalH = entries.reduce((s,e)=>s+e.heures,0);
+    const totalE = totalH*TAUX;
+    const budget = p.montant||0;
+    const diff = budget-totalE;
+    const pct = budget>0?Math.min(Math.round(totalE/budget*100),150):0;
+    const bColor = pct>100?'#E74C3C':pct>85?'#F0C040':'var(--teal)';
+    const exp = !!_expandedProjTime[p.id];
     return `<div class="proj-time-card">
       <div class="ptc-header" onclick="toggleProjTime('${p.id}')">
         <span class="ptc-name">${p.name}</span>
-        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-          ${totalH>0?`<span style="font-size:11px;font-family:'DM Serif Display',serif;color:${diff>=0?'var(--teal)':'#E74C3C'}">${diff>=0?'✓ ':'⚠ '}${diff>=0?'+'+fmtE(diff):fmtE(Math.abs(diff))+' en dépassement'}</span>`:''}
-          <span class="ptc-total">${totalH>0?fmtH(totalH):'—'}</span>
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+          ${totalH>0?`<span style="font-size:12px;color:${diff>=0&&budget>0?'var(--teal)':budget>0?'#E74C3C':'var(--text-light)'};font-weight:500">
+            ${budget>0?(diff>=0?'✓ +'+fmtE(diff):'⚠ −'+fmtE(Math.abs(diff))):''}
+          </span>`:''}
+          <span style="font-size:13px;font-family:'DM Serif Display',serif;color:var(--orange)">${totalH>0?fmtHMin(totalH):'—'}</span>
         </div>
-        <span class="ptc-chevron ${exp?'open':''}">▾</span>
+        <span class="ptc-chevron${exp?' open':''}">▾</span>
       </div>
-      ${totalH>0&&budget>0?`<div style="margin:0 14px;height:4px;background:var(--sand);border-radius:4px">
-        <div style="height:4px;border-radius:4px;background:${barColor};width:${Math.min(pct,100)}%;transition:width .4s"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:4px 14px 0;font-size:10px;color:var(--text-light)">
-        <span>${fmtE(totalE)} calculé sur ${fmtH(totalH)}</span>
-        <span>Budget devis : ${fmtE(budget)}</span>
+      ${totalH>0?`<div style="padding:0 14px">
+        <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:${budget>0?Math.min(pct,100):0}%;background:${bColor}"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-light);padding-bottom:6px">
+          <span>${fmtE(totalE)} calculé</span>
+          ${budget>0?`<span>Budget : ${fmtE0(budget)}</span>`:'<span style="font-style:italic">Pas de budget devis</span>'}
+        </div>
       </div>`:''}
-      <div class="ptc-body ${exp?'open':''}" id="ptc-body-${p.id}">
-        ${budget===0?`<div style="font-size:12px;color:var(--text-light);font-style:italic;padding:4px 0 8px">Ajoute un montant devis dans "Mes projets" pour voir l'analyse budget</div>`:''}
+      <div class="ptc-body${exp?' open':''}" id="ptc-${p.id}">
         ${entries.map((e,ei)=>`<div class="temps-row">
           <span class="temps-date">${e.date}</span>
           <span class="temps-desc">${e.desc||'—'}</span>
-          <span class="temps-h">${fmtH(e.heures)} · ${fmtE(e.heures*TAUX_ARCHI)}</span>
+          <span class="temps-h">${fmtHMin(e.heures)} (${e.heures.toFixed(2)}h) · ${fmtE(e.heures*TAUX)}</span>
           <button class="temps-del" onclick="delProjTime('${p.id}',${ei})">×</button>
-        </div>`).join('')||'<div class="empty">Aucune entrée de temps</div>'}
+        </div>`).join('')||'<div class="empty">Aucune entrée — ajouter ci-dessous</div>'}
         <div class="add-temps-row">
-          <input type="date" id="pt-date-${p.id}" style="width:120px">
-          <input type="text" id="pt-desc-${p.id}" placeholder="Description (optionnel)" style="flex:1;min-width:100px">
-          <input type="number" id="pt-heures-${p.id}" placeholder="Heures" step="0.25" style="width:80px">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <input type="text" id="pt-t-${p.id}" placeholder="Ex: 2:30 ou 2h30" style="width:110px" oninput="previewTime('pt-t-${p.id}','pt-prev-${p.id}')">
+            <span class="time-hint" id="pt-prev-${p.id}"></span>
+          </div>
+          <input type="date" id="pt-d-${p.id}" style="width:130px">
+          <input type="text" id="pt-desc-${p.id}" placeholder="Description (optionnel)" style="flex:1;min-width:80px">
           <button class="btn-add-temps" onclick="addProjTime('${p.id}')">+ Ajouter</button>
         </div>
       </div>
     </div>`;
   }).join('');
-  // Set default date
-  _coreProjects.forEach(p=>{
-    const dInp=document.getElementById('pt-date-'+p.id);
-    if(dInp&&!dInp.value) dInp.value=new Date().toISOString().split('T')[0];
-  });
+  // Set default dates
+  projs.forEach(p=>{const d=document.getElementById('pt-d-'+p.id);if(d&&!d.value)d.value=new Date().toISOString().split('T')[0];});
 }
 
-const _expandedProjTime={};
+const _expandedProjTime = {};
 function toggleProjTime(id){
   _expandedProjTime[id]=!_expandedProjTime[id];
-  const p=_coreProjects.find(p=>p.id===id);
-  if(p) p._timeExpanded=_expandedProjTime[id];
-  renderProjTimeList();
+  renderProjSections();
+}
+
+function previewTime(inputId, previewId){
+  const val = document.getElementById(inputId)?.value;
+  const prev = document.getElementById(previewId);
+  if(!prev) return;
+  const h = parseTemps(val);
+  prev.textContent = h>0 ? '→ '+h.toFixed(2)+'h décimal' : '';
 }
 
 function addProjTime(projId){
-  const date=document.getElementById('pt-date-'+projId).value||new Date().toISOString().split('T')[0];
-  const desc=document.getElementById('pt-desc-'+projId).value.trim();
-  const heures=parseFloat(document.getElementById('pt-heures-'+projId).value)||0;
-  if(heures<=0) return;
+  const tEl=document.getElementById('pt-t-'+projId);
+  const dEl=document.getElementById('pt-d-'+projId);
+  const descEl=document.getElementById('pt-desc-'+projId);
+  const heures=parseTemps(tEl?.value);
+  if(heures<=0){alert('Saisis un temps valide (ex: 2:30 ou 1h45)');return;}
+  const date=dEl?.value||new Date().toISOString().split('T')[0];
+  const desc=descEl?.value.trim()||'';
   if(!S.projTimes[projId]) S.projTimes[projId]=[];
   S.projTimes[projId].push({date,desc,heures});
   _expandedProjTime[projId]=true;
-  const p=_coreProjects.find(p=>p.id===projId);if(p)p._timeExpanded=true;
-  save();renderProjTimeList();renderStats();
+  if(tEl) tEl.value='';
+  if(descEl) descEl.value='';
+  save();renderProjSections();renderStats();
 }
+
 function delProjTime(projId,ei){
+  if(!S.projTimes[projId]) return;
   S.projTimes[projId].splice(ei,1);
-  save();renderProjTimeList();renderStats();
+  save();renderProjSections();renderStats();
 }
 
 // ── MASK ──
+function renderMargeMask(){
+  const totalH=S.maskProjects.reduce((s,p)=>s+p.entries.reduce((ss,e)=>ss+e.heures,0),0);
+  const totalE=totalH*TAUX;
+  const totalBudget=S.maskProjects.reduce((s,p)=>s+(p.budget||0),0);
+  renderMargeBanner('marge-mask',{totalH,totalE,totalBudget,marge:totalBudget-totalE},'var(--purple)');
+}
+
 function renderMaskList(){
   const el=document.getElementById('mask-list');
-  if(!S.maskProjects.length){el.innerHTML='<div class="empty">Aucun projet MASK — clique sur "+ Nouveau projet MASK"</div>';return;}
+  if(!S.maskProjects.length){el.innerHTML='<div class="empty">Aucun projet MASK</div>';return;}
   el.innerHTML=S.maskProjects.map((p,pi)=>{
     const totalH=p.entries.reduce((s,e)=>s+e.heures,0);
-    const totalE=totalH*TAUX_MASK;
+    const totalE=totalH*TAUX;
     const budget=p.budget||0;
     const diff=budget-totalE;
     const pct=budget>0?Math.min(Math.round(totalE/budget*100),150):0;
-    const statusCls=diff>=0?'under':'over';
     const barColor=pct>100?'#E74C3C':pct>85?'#F0C040':'var(--purple)';
     const exp=p._expanded;
     return `<div class="mask-proj-card">
       <div class="mpc-header" onclick="toggleMaskProj(${pi})">
         <span class="mpc-name">${p.name}</span>
-        <span class="mpc-budget">${budget>0?'Budget '+fmtE(budget):'Sans budget'}</span>
+        <span style="font-size:12px;color:var(--text-mid)">${budget>0?fmtE0(budget):'Sans budget'}</span>
         <button class="mask-del" onclick="event.stopPropagation();delMaskProject(${pi})">×</button>
-        <span class="mpc-chevron ${exp?'open':''}">▾</span>
+        <span class="mpc-chevron${exp?' open':''}">▾</span>
       </div>
-      <div class="mpc-body ${exp?'open':''}">
+      <div class="mpc-body${exp?' open':''}">
         <div class="mpc-stats">
-          <div class="mpc-stat"><div class="mpc-stat-label">Temps passé</div><div class="mpc-stat-val neutral">${fmtH(totalH)}</div></div>
+          <div class="mpc-stat"><div class="mpc-stat-label">Temps passé</div><div class="mpc-stat-val neutral">${fmtHMin(totalH)}</div><div style="font-size:10px;color:var(--text-light)">${totalH>0?totalH.toFixed(2)+'h décimal':''}</div></div>
           <div class="mpc-stat"><div class="mpc-stat-label">Montant calculé</div><div class="mpc-stat-val neutral">${fmtE(totalE)}</div></div>
-          <div class="mpc-stat"><div class="mpc-stat-label">${diff>=0?'Marge':'Dépassement'}</div><div class="mpc-stat-val ${statusCls}">${budget>0?fmtE(Math.abs(diff)):'—'}</div></div>
+          <div class="mpc-stat"><div class="mpc-stat-label">${budget>0?(diff>=0?'Marge':'Dépassement'):'Budget'}</div><div class="mpc-stat-val ${budget>0?(diff>=0?'under':'over'):'neutral'}">${budget>0?fmtE(Math.abs(diff)):'—'}</div></div>
         </div>
         ${budget>0?`<div class="mpc-bar-bg"><div class="mpc-bar-fill" style="width:${Math.min(pct,100)}%;background:${barColor}"></div></div>
-        <div style="font-size:11px;color:var(--text-light);margin-bottom:12px">${pct}% du budget utilisé${pct>100?' — dépassement !':''}</div>`:''}
-        <div style="margin-bottom:8px">
-          <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Modifier le budget</div>
-          <input type="number" value="${p.budget||''}" placeholder="Budget €" onchange="updateMaskBudget(${pi},this.value)" style="width:140px;font-size:13px;font-family:'DM Sans',sans-serif;padding:6px 9px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);outline:none">
+        <div style="font-size:10px;color:var(--text-light);margin-bottom:10px">${pct}% du budget utilisé${pct>100?' ⚠ dépassement':''}</div>`:''}
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Modifier le budget (€)</div>
+            <input type="number" value="${p.budget||''}" placeholder="0" onfocus="_isEditing=true" onchange="updateMaskBudget(${pi},this.value)" style="width:130px;font-size:13px;font-family:'DM Sans',sans-serif;padding:6px 9px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);outline:none">
+          </div>
         </div>
-        <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;margin-top:10px">Entrées de temps</div>
+        <div style="font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Entrées de temps</div>
         ${p.entries.map((e,ei)=>`<div class="temps-row">
           <span class="temps-date">${e.date}</span>
           <span class="temps-desc">${e.desc||'—'}</span>
-          <span class="temps-h">${fmtH(e.heures)} · ${fmtE(e.heures*TAUX_MASK)}</span>
+          <span class="temps-h">${fmtHMin(e.heures)} · ${fmtE(e.heures*TAUX)}</span>
           <button class="temps-del" onclick="delMaskTime(${pi},${ei})">×</button>
         </div>`).join('')||'<div class="empty">Aucune entrée</div>'}
         <div class="add-temps-row">
-          <input type="date" id="mt-date-${pi}" style="width:120px">
-          <input type="text" id="mt-desc-${pi}" placeholder="Description" style="flex:1;min-width:100px">
-          <input type="number" id="mt-heures-${pi}" placeholder="Heures" step="0.25" style="width:80px">
-          <button class="btn-add-temps" onclick="addMaskTime(${pi})">+ Ajouter</button>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <input type="text" id="mt-t-${pi}" placeholder="Ex: 1:30 ou 1h30" style="width:110px" oninput="previewTime('mt-t-${pi}','mt-prev-${pi}')">
+            <span class="time-hint" id="mt-prev-${pi}"></span>
+          </div>
+          <input type="date" id="mt-d-${pi}" style="width:130px">
+          <input type="text" id="mt-desc-${pi}" placeholder="Description" style="flex:1;min-width:80px">
+          <button class="btn-add-temps btn-pu" onclick="addMaskTime(${pi})">+ Ajouter</button>
         </div>
       </div>
     </div>`;
   }).join('');
-  S.maskProjects.forEach((p,pi)=>{
-    const dInp=document.getElementById('mt-date-'+pi);
-    if(dInp&&!dInp.value) dInp.value=new Date().toISOString().split('T')[0];
-  });
+  S.maskProjects.forEach((p,pi)=>{const d=document.getElementById('mt-d-'+pi);if(d&&!d.value)d.value=new Date().toISOString().split('T')[0];});
 }
 
 function toggleMaskProj(pi){S.maskProjects[pi]._expanded=!S.maskProjects[pi]._expanded;renderMaskList();}
 function updateMaskBudget(pi,v){
-  _isEditing=true;
   S.maskProjects[pi].budget=parseFloat(v)||0;
-  save();renderMaskList();renderStats();
+  save();renderMaskList();renderMargeMask();renderStats();
   setTimeout(()=>{_isEditing=false;},1000);
 }
 function addMaskTime(pi){
-  const date=document.getElementById('mt-date-'+pi).value||new Date().toISOString().split('T')[0];
-  const desc=document.getElementById('mt-desc-'+pi).value.trim();
-  const heures=parseFloat(document.getElementById('mt-heures-'+pi).value)||0;
-  if(heures<=0) return;
-  S.maskProjects[pi].entries.push({date,desc,heures});
+  const tEl=document.getElementById('mt-t-'+pi);
+  const dEl=document.getElementById('mt-d-'+pi);
+  const descEl=document.getElementById('mt-desc-'+pi);
+  const heures=parseTemps(tEl?.value);
+  if(heures<=0){alert('Saisis un temps valide (ex: 2:30 ou 1h45)');return;}
+  const date=dEl?.value||new Date().toISOString().split('T')[0];
+  S.maskProjects[pi].entries.push({date,desc:descEl?.value.trim()||'',heures});
   S.maskProjects[pi]._expanded=true;
-  save();renderMaskList();renderStats();
+  if(tEl) tEl.value='';if(descEl) descEl.value='';
+  save();renderMaskList();renderMargeMask();renderStats();
 }
-function delMaskTime(pi,ei){
-  S.maskProjects[pi].entries.splice(ei,1);
-  save();renderMaskList();renderStats();
-}
-function delMaskProject(pi){
-  if(!confirm('Supprimer ce projet MASK et toutes ses entrées de temps ?')) return;
-  S.maskProjects.splice(pi,1);
-  save();renderMaskList();renderStats();
-}
+function delMaskTime(pi,ei){S.maskProjects[pi].entries.splice(ei,1);save();renderMaskList();renderMargeMask();renderStats();}
+function delMaskProject(pi){if(!confirm('Supprimer ce projet MASK ?'))return;S.maskProjects.splice(pi,1);save();renderMaskList();renderMargeMask();renderStats();}
 
 function openMaskModal(){document.getElementById('mask-modal-overlay').style.display='flex';}
 function closeMaskModal(){document.getElementById('mask-modal-overlay').style.display='none';}
@@ -371,29 +467,37 @@ function saveMaskProject(){
   const name=document.getElementById('mm-name').value.trim();
   if(!name) return;
   const budget=parseFloat(document.getElementById('mm-budget').value)||0;
-  S.maskProjects.push({id:genId(),name,budget,entries:[],_expanded:true});
-  save();closeMaskModal();renderMaskList();renderStats();
+  S.maskProjects.push({id:genId(),name,budget,entries:[],_expanded:true,journal:[]});
+  save();closeMaskModal();renderMaskList();renderMargeMask();renderStats();
   document.getElementById('mm-name').value='';document.getElementById('mm-budget').value='';
 }
 
-// ── STATS GLOBALES ──
+// ── STATS ──
 function renderStats(){
-  const el=document.getElementById('stats-strip');
-  const totalArchiH=Object.values(S.projTimes).flat().reduce((s,e)=>s+e.heures,0);
-  const totalArchiE=Math.round(totalArchiH*TAUX_ARCHI);
+  const el=document.getElementById('stats-strip');if(!el) return;
+  const archiProjs=_coreProjects.filter(p=>p.type==='freelance');
+  const atelierProjs=_coreProjects.filter(p=>p.type==='atelier');
+  const mA=calcMarge(archiProjs);
+  const mAt=calcMarge(atelierProjs);
   const totalMaskH=S.maskProjects.reduce((s,p)=>s+p.entries.reduce((ss,e)=>ss+e.heures,0),0);
-  const totalMaskE=Math.round(totalMaskH*TAUX_MASK);
-  const totalBudget=S.maskProjects.reduce((s,p)=>s+(p.budget||0),0);
-  const margeTotal=totalBudget-totalMaskE;
+  const totalMaskE=totalMaskH*TAUX;
+  const totalMaskBudget=S.maskProjects.reduce((s,p)=>s+(p.budget||0),0);
+  const margeMask=totalMaskBudget-totalMaskE;
   el.innerHTML=`
-    <div class="stat-card a-or"><div class="sl">Temps archi/atelier</div><div class="sv or">${fmtH(totalArchiH)}</div><div style="font-size:11px;color:var(--text-light);margin-top:3px">${totalArchiE>0?fmtE(totalArchiE):''}</div></div>
-    <div class="stat-card a-pu"><div class="sl">Temps MASK</div><div class="sv pu">${fmtH(totalMaskH)}</div><div style="font-size:11px;color:var(--text-light);margin-top:3px">${totalMaskE>0?fmtE(totalMaskE):''}</div></div>
-    <div class="stat-card a-pu"><div class="sl">Budget MASK total</div><div class="sv pu">${totalBudget>0?fmtE(totalBudget):'—'}</div></div>
-    <div class="stat-card ${margeTotal<0?'a-or':'a-te'}"><div class="sl">${margeTotal>=0?'Marge MASK':'Dépassement MASK'}</div><div class="sv ${margeTotal>=0?'te':'or'}">${totalBudget>0?fmtE(Math.abs(margeTotal)):'—'}</div></div>`;
+    <div class="stat-card a-or"><div class="sl">Archi intérieure</div><div class="sv or">${fmtHMin(mA.totalH)}</div><div style="font-size:11px;color:var(--text-light);margin-top:3px">${mA.totalE>0?fmtE(mA.totalE):''}</div></div>
+    <div class="stat-card a-te"><div class="sl">Fabrication atelier</div><div class="sv te">${fmtHMin(mAt.totalH)}</div><div style="font-size:11px;color:var(--text-light);margin-top:3px">${mAt.totalE>0?fmtE(mAt.totalE):''}</div></div>
+    <div class="stat-card a-pu"><div class="sl">MASK — temps</div><div class="sv pu">${fmtHMin(totalMaskH)}</div><div style="font-size:11px;color:var(--text-light);margin-top:3px">${totalMaskE>0?fmtE(totalMaskE):''}</div></div>
+    <div class="stat-card ${margeMask<0&&totalMaskBudget>0?'a-red':'a-pu'}"><div class="sl">Marge MASK</div><div class="sv ${margeMask>=0?'pu':'re'}">${totalMaskBudget>0?fmtE(Math.abs(margeMask)):'—'}</div></div>`;
 }
 
-function renderAll(){renderProjTimeList();renderMaskList();renderStats();}
-renderMaskList();renderStats();
+function calcMarge(projs){
+  let totalH=0,totalBudget=0;
+  projs.forEach(p=>{const e=S.projTimes[p.id]||[];totalH+=e.reduce((s,x)=>s+x.heures,0);totalBudget+=(p.montant||0);});
+  return{totalH,totalE:totalH*TAUX,totalBudget,marge:totalBudget-totalH*TAUX};
+}
+
+function renderAll(){renderProjSections();renderMaskList();renderMargeMask();renderStats();}
+renderMaskList();renderMargeMask();renderStats();
 
 document.getElementById('mask-modal-overlay').addEventListener('click',function(e){if(e.target===this)closeMaskModal();});
 </script>
