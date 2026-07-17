@@ -586,6 +586,21 @@ document.getElementById('header-date').textContent=new Date().toLocaleDateString
 checkAutodefer();
 renderAll();
 document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+// ── SYNC AUTO iOS ──
+function forceFirebaseSync(){
+  if(window._isEditing) return;
+  db.ref(FIREBASE_PATH).once('value',snap=>{
+    try{
+      const d=snap.val();
+      if(d&&d.projects){S=sanitize(d);try{localStorage.setItem(CORE_KEY,JSON.stringify(S));}catch(e){}renderAll();}
+    }catch(e){}
+  });
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)forceFirebaseSync();});
+window.addEventListener('focus',forceFirebaseSync);
+window.addEventListener('pageshow',forceFirebaseSync);
+
 </script>
 </body>
 </html>

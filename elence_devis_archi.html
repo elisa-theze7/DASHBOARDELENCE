@@ -370,6 +370,10 @@ function resetDevis(){
 document.getElementById('d-date').value=new Date().toISOString().split('T')[0];
 renderTarifGlobal();renderPrestations();renderForfaits();calc();renderSaved();
 document.querySelectorAll('#d-surface,#d-taux').forEach(el=>el&&el.addEventListener('input',()=>{renderPrestations();calc();}));
+
+// ── SYNC AUTO iOS ──
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&window.renderSaved)renderSaved();});
+
 </script>
 </body>
 </html>

@@ -288,6 +288,10 @@ renderMat();renderMO();renderFrais();renderSaved();calc();
 // Add default rows if empty
 if(!state.matieres.length){addMat();}
 if(!state.mo.length){addMO();}
+
+// ── SYNC AUTO iOS ──
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&window.renderSaved)renderSaved();});
+
 </script>
 </body>
 </html>

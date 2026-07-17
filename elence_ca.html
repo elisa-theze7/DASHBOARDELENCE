@@ -477,6 +477,21 @@ dbCA.ref(FB_CA_PATH).on('value',snap=>{
   }
 });
 renderAll();
+
+// ── SYNC AUTO iOS ──
+function forceFirebaseSync(){
+  if(_caEditing) return;
+  dbCA.ref(FB_CA_PATH).once('value',snap=>{
+    try{
+      const d=snap.val();
+      if(d&&d.ca){Object.keys(d).forEach(k=>{S[k]=d[k];});try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}renderAll();}
+    }catch(e){}
+  });
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)forceFirebaseSync();});
+window.addEventListener('focus',forceFirebaseSync);
+window.addEventListener('pageshow',forceFirebaseSync);
+
 </script>
 </body>
 </html>

@@ -500,6 +500,21 @@ function renderAll(){renderProjSections();renderMaskList();renderMargeMask();ren
 renderMaskList();renderMargeMask();renderStats();
 
 document.getElementById('mask-modal-overlay').addEventListener('click',function(e){if(e.target===this)closeMaskModal();});
+
+// ── SYNC AUTO iOS ──
+function forceFirebaseSync(){
+  if(_isEditing) return;
+  db.ref(FB_TEMPS_PATH).once('value',snap=>{
+    try{const d=snap.val();if(d){S=sanitize(d);try{localStorage.setItem('elence_temps_v1',JSON.stringify(S));}catch(e){}renderAll();}}catch(e){}
+  });
+  db.ref('elence').once('value',snap=>{
+    try{const d=snap.val();if(d&&d.projects){_coreProjects=d.projects.filter(p=>p.status!=='done');renderProjSections();renderStats();}}catch(e){}
+  });
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)forceFirebaseSync();});
+window.addEventListener('focus',forceFirebaseSync);
+window.addEventListener('pageshow',forceFirebaseSync);
+
 </script>
 </body>
 </html>

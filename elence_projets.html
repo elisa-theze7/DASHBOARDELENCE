@@ -750,6 +750,30 @@ document.getElementById('modal-overlay').addEventListener('click',function(e){if
 renderList();
 const _initUI=getUI();
 if(_initUI.activeId) renderFiche();
+
+// ── SYNC AUTO iOS ──
+function forceFirebaseSync(){
+  if(window._isEditing) return;
+  db.ref(FIREBASE_PATH).once('value',snap=>{
+    try{
+      const d=snap.val();
+      if(d&&d.projects){
+        _coreCache=sanitizeCore(d);
+        try{localStorage.setItem(CORE_KEY,JSON.stringify(_coreCache));}catch(e){}
+        renderList();
+        const ui=getUI();if(ui.activeId&&!ui.activeId.startsWith('mask_'))renderFiche();
+      }
+    }catch(e){}
+  });
+  // Sync MASK aussi
+  db.ref('elence_temps').once('value',snap=>{
+    try{const d=snap.val();if(d&&d.maskProjects){_maskCache=d.maskProjects;renderList();}}catch(e){}
+  });
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)forceFirebaseSync();});
+window.addEventListener('focus',forceFirebaseSync);
+window.addEventListener('pageshow',forceFirebaseSync);
+
 </script>
 </body>
 </html>
