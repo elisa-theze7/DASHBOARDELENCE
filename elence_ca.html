@@ -118,13 +118,14 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2
     <a href="elence_devis_atelier.html" class="nav-btn">Devis atelier</a>
     <a href="elence_projets.html" class="nav-btn">Mes projets</a>
     <a href="elence_temps.html" class="nav-btn">Suivi temps</a>
+    <a href="elence_atelier.html" class="nav-btn">Atelier</a>
   </div>
 </header>
 
 <div class="page">
   <!-- ACRE BANNER -->
   <div class="acre-banner">
-    <strong>ACRE en cours</strong> — Taux cotisations : <strong>15,2 %</strong> jusqu'en août 2026 inclus · <strong>25,8 %</strong> à partir de septembre 2026
+    <strong>ACRE en cours</strong> — Taux cotisations : <strong>15,2 %</strong> jan–juin 2026 · <strong>28 %</strong> à partir de juillet 2026
   </div>
 
   <div class="stats-strip" id="stats-strip"></div>
@@ -211,8 +212,8 @@ if(!window._fbInit){
 const dbCA=firebase.database();
 const MOIS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const MOIS_S=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
-// ACRE: 15,2% jan-aug 2026, 25.8% sept-dec 2026
-const TAUX=[.152,.152,.152,.152,.152,.152,.152,.152,.258,.258,.258,.258];
+// ACRE: 15,2% jan-juin 2026, 28% juillet-déc 2026
+const TAUX=[.152,.152,.152,.152,.152,.152,.28,.28,.28,.28,.28,.28];
 
 const DEP_FIXES_DEF=[
   {name:'Adobe CC',tag:'Logiciel',mois:0},

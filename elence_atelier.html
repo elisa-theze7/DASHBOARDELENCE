@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Élence — Gestion atelier</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--orange:#E8622A;--orange-light:#FDF0E9;--teal:#3BBFAD;--teal-light:#E4F7F5;--purple:#7C6FCD;--purple-light:#F3F0FF;--green:#2A9088;--green-light:#E8F8F4;--cream:#FAF8F5;--sand:#F0EDE7;--text:#2A2420;--text-mid:#7A6E68;--text-light:#B0A49C;--white:#fff;--border:rgba(42,36,32,.10);--border-strong:rgba(42,36,32,.18);--radius:14px;--radius-sm:8px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh}
+header{background:var(--white);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;gap:10px;flex-wrap:wrap}
+.logo{font-family:'DM Serif Display',serif;font-size:20px;color:var(--orange);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.logo span{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:300;color:var(--text-mid);letter-spacing:.12em;text-transform:uppercase}
+.nav-links{display:flex;gap:4px;flex-wrap:wrap}
+.nav-btn{padding:4px 10px;font-size:11px;font-family:'DM Sans',sans-serif;border:1px solid var(--border-strong);border-radius:20px;background:transparent;color:var(--text-mid);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;white-space:nowrap}
+.nav-btn:hover{background:var(--sand)}.nav-btn.active{background:var(--teal);color:white;border-color:var(--teal)}
+.page{max-width:1100px;margin:0 auto;padding:1.5rem 1.25rem 5rem}
+
+/* TABS */
+.tab-bar{display:flex;gap:6px;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0;flex-wrap:wrap}
+.tab-btn{padding:8px 16px;font-size:13px;font-weight:500;background:transparent;border:none;border-bottom:2.5px solid transparent;cursor:pointer;color:var(--text-mid);margin-bottom:-1px;font-family:'DM Sans',sans-serif;transition:all .15s}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--teal);border-bottom-color:var(--teal)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem}
+.card.te{border-top:2.5px solid var(--teal)}.card.or{border-top:2.5px solid var(--orange)}.card.pu{border-top:2.5px solid var(--purple)}.card.gr{border-top:2.5px solid var(--green)}
+.ch{padding:.75rem 1.2rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap}
+.ch.te-bg{background:var(--teal-light)}.ch.or-bg{background:var(--orange-light)}.ch.pu-bg{background:var(--purple-light)}.ch.gr-bg{background:var(--green-light)}
+.ct{font-size:11px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--text-mid);display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%}.dot-te{background:var(--teal)}.dot-or{background:var(--orange)}.dot-pu{background:var(--purple)}.dot-gr{background:var(--green)}
+.cb{padding:.875rem 1.2rem 1.2rem}
+
+/* STOCK TABLE */
+.stock-table{width:100%;border-collapse:collapse}
+.stock-table th{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--text-light);padding:7px 8px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.stock-table td{padding:8px 8px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+.stock-table tr:last-child td{border-bottom:none}
+.stock-table tr:hover td{background:var(--cream)}
+.stock-table input{font-size:12px;font-family:'DM Sans',sans-serif;padding:4px 7px;border:1px solid var(--border-strong);border-radius:5px;background:var(--cream);color:var(--text);outline:none;width:100%}
+.stock-table input:focus{border-color:var(--teal);background:white}
+.stock-table select{font-size:11px;font-family:'DM Sans',sans-serif;padding:3px 5px;border:1px solid var(--border-strong);border-radius:5px;background:var(--cream);color:var(--text);outline:none}
+.status-pill{font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap;display:inline-block}
+.s-stock{background:var(--green-light);color:var(--green)}
+.s-commander{background:#FEF2F2;color:#C0392B}
+.s-commande{background:#FFF8E1;color:#B07D00}
+
+/* CAT HEADER */
+.cat-header{display:flex;align-items:center;justify-content:space-between;padding:8px 0 5px;margin-top:12px;border-bottom:1.5px solid var(--border-strong)}
+.cat-header:first-of-type{margin-top:0}
+.cat-title{font-size:12px;font-weight:500;color:var(--text-mid);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.cat-icon{font-size:14px}
+.cat-count{font-size:11px;color:var(--text-light)}
+
+/* ADD FORM */
+.add-form{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:flex-end}
+.add-form input,.add-form select{font-size:12px;font-family:'DM Sans',sans-serif;padding:6px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none}
+.add-form input:focus,.add-form select:focus{border-color:var(--teal)}
+.btn-add{padding:6px 14px;font-size:12px;font-family:'DM Sans',sans-serif;background:var(--teal);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-weight:500;white-space:nowrap}
+.btn-add:hover{background:#2ea898}
+.btn-add.or{background:var(--orange)}.btn-add.or:hover{background:#C9501F}
+.btn-add.pu{background:var(--purple)}.btn-add.pu:hover{background:#5a4fa0}
+.del-btn{font-size:13px;color:var(--text-light);cursor:pointer;background:none;border:none;padding:0 3px;opacity:0;transition:opacity .15s}
+.stock-table tr:hover .del-btn{opacity:1}
+
+/* PREVISIONNEL */
+.prev-proj-card{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;overflow:hidden}
+.prev-proj-header{padding:10px 14px;background:var(--orange-light);display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:8px}
+.prev-proj-name{font-size:13px;font-weight:500;flex:1}
+.prev-proj-body{padding:10px 14px;background:white;display:none;border-top:1px solid var(--border)}
+.prev-proj-body.open{display:block}
+.prev-chev{font-size:11px;color:var(--text-light);transition:transform .2s}
+.prev-chev.open{transform:rotate(180deg)}
+.prev-table{width:100%;border-collapse:collapse;margin-bottom:8px}
+.prev-table th{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--text-light);padding:5px 7px;text-align:left;border-bottom:1px solid var(--border)}
+.prev-table td{padding:6px 7px;border-bottom:1px solid var(--border);font-size:12px}
+.prev-table tr:last-child td{border-bottom:none}
+.stock-ok{color:var(--green);font-weight:500}
+.stock-warn{color:#C0392B;font-weight:500}
+.stock-partial{color:#B07D00;font-weight:500}
+
+/* FOURNISSEURS */
+.fourn-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:8px}
+.fourn-name{font-size:14px;font-weight:500}
+.fourn-spec{font-size:11px;color:var(--text-mid);margin-top:2px}
+.fourn-contact{font-size:12px;color:var(--text-light);margin-top:4px}
+.fourn-fav{font-size:16px;cursor:pointer;background:none;border:none;line-height:1}
+.fourn-link{font-size:11px;color:var(--teal);text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:4px}
+.fourn-link:hover{text-decoration:underline}
+.fourn-actions{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.fourn-del{font-size:12px;color:var(--text-light);cursor:pointer;background:none;border:none;opacity:0;transition:opacity .15s}
+.fourn-card:hover .fourn-del{opacity:1}
+
+/* OUTILS */
+.outil-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px}
+.outil-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.outil-name{font-size:13px;font-weight:500}
+.outil-etat{font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px}
+.etat-ok{background:var(--green-light);color:var(--green)}
+.etat-attention{background:#FFF8E1;color:#B07D00}
+.etat-hs{background:#FEF2F2;color:#C0392B}
+.outil-notes{font-size:12px;color:var(--text-mid);line-height:1.5}
+.outil-del{font-size:12px;color:var(--text-light);cursor:pointer;background:none;border:none;opacity:0;transition:opacity .15s}
+.outil-card:hover .outil-del{opacity:1}
+
+/* STATS */
+.stock-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem}
+.sstat{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.75rem 1rem}
+.sstat.a-te{border-left:3px solid var(--teal)}.sstat.a-or{border-left:3px solid var(--orange)}.sstat.a-re{border-left:3px solid #E74C3C}
+.sslabel{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px}
+.ssval{font-size:22px;font-family:'DM Serif Display',serif}
+.ssval.te{color:var(--teal)}.ssval.or{color:var(--orange)}.ssval.re{color:#E74C3C}
+
+.empty{font-size:12px;color:var(--text-light);font-style:italic;padding:8px 0}
+@media(max-width:768px){.stock-stats{grid-template-columns:repeat(2,1fr)}header{padding:0 1rem;height:auto;padding:8px 1rem}.page{padding:1rem .875rem 4rem}.add-form{flex-direction:column}.stock-table{font-size:11px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Élence <span>atelier</span></div>
+  <div class="nav-links">
+    <a href="elence_planning.html" class="nav-btn">Planning</a>
+    <a href="elence_ca.html" class="nav-btn">CA</a>
+    <a href="elence_projets.html" class="nav-btn">Projets</a>
+    <a href="elence_temps.html" class="nav-btn">Temps</a>
+    <a href="elence_devis_atelier.html" class="nav-btn">Devis atelier</a>
+    <a href="elence_atelier.html" class="nav-btn active">Gestion atelier</a>
+  </div>
+</header>
+
+<div class="page">
+  <div style="margin-bottom:1.25rem">
+    <h1 style="font-family:'DM Serif Display',serif;font-size:26px;font-weight:normal">Gestion atelier</h1>
+    <p style="font-size:13px;color:var(--text-mid);margin-top:3px">Stocks, prévisionnel, fournisseurs, outils</p>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('stocks',this)">📦 Stocks</button>
+    <button class="tab-btn" onclick="showTab('previsionnel',this)">🧮 Prévisionnel</button>
+    <button class="tab-btn" onclick="showTab('fournisseurs',this)">🏪 Fournisseurs</button>
+    <button class="tab-btn" onclick="showTab('outils',this)">🔧 Outils</button>
+  </div>
+
+  <!-- ═══ STOCKS ═══ -->
+  <div id="tab-stocks" class="tab-panel active">
+    <div class="stock-stats" id="stock-stats"></div>
+    <div id="stock-sections"></div>
+  </div>
+
+  <!-- ═══ PRÉVISIONNEL ═══ -->
+  <div id="tab-previsionnel" class="tab-panel">
+    <div class="card or">
+      <div class="ch or-bg">
+        <div class="ct"><span class="dot dot-or"></span>Prévisionnel par projet</div>
+        <button class="btn-add or" onclick="addPrevProjet()">+ Nouveau projet</button>
+      </div>
+      <div class="cb" id="prev-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══ FOURNISSEURS ═══ -->
+  <div id="tab-fournisseurs" class="tab-panel">
+    <div class="card pu">
+      <div class="ch pu-bg">
+        <div class="ct"><span class="dot dot-pu"></span>Mes fournisseurs</div>
+        <button class="btn-add pu" onclick="openFournModal()">+ Ajouter</button>
+      </div>
+      <div class="cb" id="fourn-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══ OUTILS ═══ -->
+  <div id="tab-outils" class="tab-panel">
+    <div class="card gr">
+      <div class="ch gr-bg">
+        <div class="ct"><span class="dot dot-gr"></span>Mes outils</div>
+        <button class="btn-add" style="background:var(--green)" onclick="openOutilModal()">+ Ajouter</button>
+      </div>
+      <div class="cb" id="outil-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOURNISSEUR -->
+<div id="fourn-modal" style="display:none;position:fixed;inset:0;background:rgba(42,36,32,.45);z-index:200;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:var(--white);border-radius:var(--radius);padding:1.5rem;width:100%;max-width:440px;border:1px solid var(--border)">
+    <h3 style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:1rem">Nouveau fournisseur</h3>
+    <div style="display:grid;gap:10px">
+      <div><label style="font-size:11px;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:3px">Nom</label><input type="text" id="fn-name" placeholder="Ex : Egger, Hafele, Wurth…" style="width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:7px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);outline:none"></div>
+      <div><label style="font-size:11px;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:3px">Spécialité</label>
+        <select id="fn-spec" style="width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:7px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);outline:none">
+          <option>Panneaux / bois</option><option>Quincaillerie</option><option>Bandes de chant</option><option>Colle / adhésifs</option><option>Visserie</option><option>Outils / machines</option><option>Peinture / finition</option><option>Généraliste</option><option>Autre</option>
+        </select>
+      </div>
+      <div><label style="font-size:11px;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:3px">Contact (tél ou email)</label><input type="text" id="fn-contact" placeholder="0X XX XX XX XX" style="width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:7px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);outline:none"></div>
+      <div><label style="font-size:11px;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:3px">Site web</label><input type="text" id="fn-url" placeholder="https://…" style="width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:7px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);outline:none"></div>
+      <div><label style="font-size:11px;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:3px">Notes</label><input type="text" id="fn-notes" placeholder="Délai livraison, remise négociée…" style="width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:7px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);outline:none"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button onclick="closeFournModal()" style="padding:7px 16px;font-size:13px;font-family:'DM Sans',sans-serif;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:transparent;color:var(--text-mid);cursor:pointer">Annuler</button>
+      <button onclick="saveFourn()" style="padding:7px 18px;font-size:13px;font-family:'DM Sans',sans-serif;border:none;border-radius:var(--radius-sm);background:var(--purple);color:white;cursor:pointer;font-weight:500">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL OUTIL -->
+<div id="outil-modal" style="display:none;position:fixed;inset:0;background:rgba(42,36,32,.45);z-index:200;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:var(--white);border-radius:var(--radius);padding:1.5rem;width:100%;max-width:420px;border:1px solid var(--border)">
+    <h3 style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:1rem">Nouvel outil</h3>
+    <div style="display:grid;gap:10px">
+      <div><label style="font-size:11px;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:3px">Nom de l'outil</label><input type="text" id="ot-name" placeholder="Ex : Scie circulaire, Perceuse…" style="width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:7px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);outline:none"></div>
+      <div><label style="font-size:11px;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:3px">Marque / modèle</label><input type="text" id="ot-modele" placeholder="Ex : Festool TS 55" style="width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:7px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);outline:none"></div>
+      <div><label style="font-size:11px;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:3px">État</label>
+        <select id="ot-etat" style="width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:7px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);outline:none">
+          <option value="ok">✓ OK</option><option value="attention">⚠ Attention</option><option value="hs">✗ H.S.</option>
+        </select>
+      </div>
+      <div><label style="font-size:11px;color:var(--text-mid);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:3px">Notes / pièces à racheter</label><textarea id="ot-notes" placeholder="Ex : Lame à changer, courroie usée…" style="width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:7px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);outline:none;height:70px;resize:vertical"></textarea></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button onclick="closeOutilModal()" style="padding:7px 16px;font-size:13px;font-family:'DM Sans',sans-serif;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:transparent;color:var(--text-mid);cursor:pointer">Annuler</button>
+      <button onclick="saveOutil()" style="padding:7px 18px;font-size:13px;font-family:'DM Sans',sans-serif;border:none;border-radius:var(--radius-sm);background:var(--green);color:white;cursor:pointer;font-weight:500">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const FB_PATH='elence_atelier';
+if(!window._fbInit){
+  firebase.initializeApp({apiKey:"AIzaSyBhZKYT-3BTqmqpDv-6LWfnTqnEQmmHVL4",authDomain:"elence-dashboard.firebaseapp.com",databaseURL:"https://elence-dashboard-default-rtdb.firebaseio.com",projectId:"elence-dashboard",storageBucket:"elence-dashboard.firebasestorage.app",messagingSenderId:"206545221004",appId:"1:206545221004:web:79c1d36fd389bad59a92a9"});
+  window._fbInit=true;
+}
+const db=firebase.database();
+function genId(){return 'a_'+Date.now()+'_'+Math.random().toString(36).substr(2,4);}
+
+// ══ CATÉGORIES DE STOCK ══
+const CATEGORIES=[
+  {id:'panneaux',label:'Panneaux',icon:'🪵',unite:'panneau(x)',refs:['Mélaminé blanc 19mm','Mélaminé chêne 19mm','MDF 19mm','Contreplaqué 15mm','OSB','Autre']},
+  {id:'chant',label:'Bandes de chant',icon:'📏',unite:'rouleau(x)',refs:['Chant ABS blanc 0.4mm','Chant ABS chêne 0.4mm','Chant ABS blanc 2mm','Chant ABS bois 2mm','Autre']},
+  {id:'visserie',label:'Visserie',icon:'🔩',unite:'boîte(s)',refs:['Vis 3x20','Vis 4x40','Vis 5x60','Vis MDF','Tourillon 8mm','Domino','Autre']},
+  {id:'charnieres',label:'Charnières',icon:'🔗',unite:'pcs',refs:['Charnière Blum 110°','Charnière Blum 165°','Charnière invisible','Autre']},
+  {id:'coulisses',label:'Coulisses',icon:'↔️',unite:'paires',refs:['Coulisse 300mm','Coulisse 400mm','Coulisse 500mm','Coulisse 600mm','Coulisse à fermeture douce','Autre']},
+  {id:'colle',label:'Colle & adhésifs',icon:'🧴',unite:'unité(s)',refs:['Pattex Contact','Colle à bois','Silicone transparent','Double face','Autre']},
+  {id:'quincaillerie',label:'Quincaillerie diverse',icon:'🛠',unite:'pcs/lot',refs:['Poignées','Pieds réglables','Tasseaux','Clips','Équerres','Autre']},
+  {id:'consommables',label:'Consommables',icon:'🪚',unite:'unité(s)',refs:['Lames de scie','Forets','Papier abrasif','Fraises','Autre']},
+];
+
+// ══ ÉTAT ══
+let S={stocks:{},prevProjects:[],fournisseurs:[],outils:[]};
+function sanitize(c){
+  if(!c||typeof c!=='object') c={};
+  if(!c.stocks||typeof c.stocks!=='object') c.stocks={};
+  CATEGORIES.forEach(cat=>{if(!Array.isArray(c.stocks[cat.id])) c.stocks[cat.id]=[];});
+  if(!Array.isArray(c.prevProjects)) c.prevProjects=[];
+  if(!Array.isArray(c.fournisseurs)) c.fournisseurs=[];
+  if(!Array.isArray(c.outils)) c.outils=[];
+  c.prevProjects.forEach(p=>{if(!p.id)p.id=genId();if(!Array.isArray(p.items))p.items=[];});
+  return c;
+}
+
+try{const l=JSON.parse(localStorage.getItem('elence_atelier_v1'));if(l)S=sanitize(l);}catch(e){}
+
+function save(){
+  try{localStorage.setItem('elence_atelier_v1',JSON.stringify(S));}catch(e){}
+  db.ref(FB_PATH).set(JSON.parse(JSON.stringify(S))).catch(e=>console.warn('FB:',e));
+}
+
+db.ref(FB_PATH).on('value',snap=>{
+  try{const d=snap.val();if(d){S=sanitize(d);try{localStorage.setItem('elence_atelier_v1',JSON.stringify(S));}catch(e){}renderAll();}else db.ref(FB_PATH).set(JSON.parse(JSON.stringify(S)));}catch(e){}
+});
+
+// ══ TABS ══
+function showTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ══ STOCKS ══
+function renderStocks(){
+  const statsEl=document.getElementById('stock-stats');
+  let totalItems=0,enStock=0,aCommander=0,enCommande=0;
+  CATEGORIES.forEach(cat=>{
+    const items=S.stocks[cat.id]||[];
+    totalItems+=items.length;
+    items.forEach(i=>{
+      if(i.statut==='stock') enStock++;
+      else if(i.statut==='commander') aCommander++;
+      else if(i.statut==='commande') enCommande++;
+    });
+  });
+  statsEl.innerHTML=`
+    <div class="sstat a-te"><div class="sslabel">En stock</div><div class="ssval te">${enStock}</div></div>
+    <div class="sstat a-re"><div class="sslabel">À commander</div><div class="ssval re">${aCommander}</div></div>
+    <div class="sstat a-or"><div class="sslabel">En commande</div><div class="ssval or">${enCommande}</div></div>
+    <div class="sstat"><div class="sslabel">Total articles</div><div class="ssval">${totalItems}</div></div>`;
+
+  const sectEl=document.getElementById('stock-sections');
+  sectEl.innerHTML=CATEGORIES.map(cat=>{
+    const items=S.stocks[cat.id]||[];
+    return `<div class="card te" style="margin-bottom:1rem">
+      <div class="ch te-bg">
+        <div class="ct">${cat.icon} ${cat.label}</div>
+        <span style="font-size:11px;color:var(--text-light)">${items.length} article(s)</span>
+      </div>
+      <div class="cb" style="padding-top:.5rem">
+        ${items.length?`<table class="stock-table">
+          <thead><tr><th>Référence</th><th>Qté</th><th>Unité</th><th>Prix unit. (€)</th><th>Fournisseur</th><th>Statut</th><th>Notes</th><th></th></tr></thead>
+          <tbody>${items.map((item,ii)=>`<tr>
+            <td><input value="${item.ref||''}" onfocus="window._isEditing=true" onchange="updateStock('${cat.id}',${ii},'ref',this.value)" style="min-width:120px"></td>
+            <td><input type="number" value="${item.qte||''}" onfocus="window._isEditing=true" onchange="updateStock('${cat.id}',${ii},'qte',parseFloat(this.value)||0)" style="width:60px"></td>
+            <td><span style="font-size:11px;color:var(--text-mid)">${cat.unite}</span></td>
+            <td><input type="number" value="${item.prix||''}" placeholder="0" onfocus="window._isEditing=true" onchange="updateStock('${cat.id}',${ii},'prix',parseFloat(this.value)||0)" style="width:70px"></td>
+            <td><input value="${item.fourn||''}" placeholder="—" onfocus="window._isEditing=true" onchange="updateStock('${cat.id}',${ii},'fourn',this.value)" style="min-width:90px"></td>
+            <td><select onchange="updateStock('${cat.id}',${ii},'statut',this.value)">
+              <option value="stock" ${item.statut==='stock'?'selected':''}>En stock</option>
+              <option value="commander" ${item.statut==='commander'?'selected':''}>À commander</option>
+              <option value="commande" ${item.statut==='commande'?'selected':''}>En commande</option>
+            </select></td>
+            <td><input value="${item.notes||''}" placeholder="—" onfocus="window._isEditing=true" onchange="updateStock('${cat.id}',${ii},'notes',this.value)" style="min-width:100px"></td>
+            <td><button class="del-btn" onclick="delStock('${cat.id}',${ii})">×</button></td>
+          </tr>`).join('')}</tbody>
+        </table>`:'<div class="empty">Aucun article — ajouter ci-dessous</div>'}
+        <div class="add-form" style="margin-top:10px">
+          <select id="ref-${cat.id}" style="min-width:160px">
+            ${cat.refs.map(r=>`<option value="${r}">${r}</option>`).join('')}
+          </select>
+          <input type="number" id="qte-${cat.id}" placeholder="Qté" style="width:70px">
+          <input type="number" id="prix-${cat.id}" placeholder="Prix €" style="width:80px">
+          <select id="stat-${cat.id}">
+            <option value="stock">En stock</option>
+            <option value="commander">À commander</option>
+            <option value="commande">En commande</option>
+          </select>
+          <button class="btn-add" onclick="addStock('${cat.id}')">+ Ajouter</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Set editing flags
+  setTimeout(()=>{
+    document.querySelectorAll('.stock-table input, .stock-table select').forEach(el=>{
+      el.addEventListener('blur',()=>{setTimeout(()=>{window._isEditing=false;save();},500);});
+    });
+  },100);
+}
+
+function updateStock(catId,ii,field,val){
+  window._isEditing=true;
+  if(!S.stocks[catId]) S.stocks[catId]=[];
+  S.stocks[catId][ii][field]=val;
+  if(field==='statut') save();
+  else{clearTimeout(window._stockSaveTimer);window._stockSaveTimer=setTimeout(()=>{save();window._isEditing=false;},800);}
+  renderStockStats();
+  renderPrev();
+}
+
+function renderStockStats(){
+  const statsEl=document.getElementById('stock-stats');if(!statsEl)return;
+  let enStock=0,aCommander=0,enCommande=0,total=0;
+  CATEGORIES.forEach(cat=>{(S.stocks[cat.id]||[]).forEach(i=>{total++;if(i.statut==='stock')enStock++;else if(i.statut==='commander')aCommander++;else if(i.statut==='commande')enCommande++;});});
+  statsEl.innerHTML=`
+    <div class="sstat a-te"><div class="sslabel">En stock</div><div class="ssval te">${enStock}</div></div>
+    <div class="sstat a-re"><div class="sslabel">À commander</div><div class="ssval re">${aCommander}</div></div>
+    <div class="sstat a-or"><div class="sslabel">En commande</div><div class="ssval or">${enCommande}</div></div>
+    <div class="sstat"><div class="sslabel">Total articles</div><div class="ssval">${total}</div></div>`;
+}
+
+function addStock(catId){
+  const ref=document.getElementById('ref-'+catId).value;
+  const qte=parseFloat(document.getElementById('qte-'+catId).value)||1;
+  const prix=parseFloat(document.getElementById('prix-'+catId).value)||0;
+  const statut=document.getElementById('stat-'+catId).value;
+  if(!S.stocks[catId]) S.stocks[catId]=[];
+  S.stocks[catId].push({id:genId(),ref,qte,prix,statut,fourn:'',notes:''});
+  save();renderStocks();
+}
+
+function delStock(catId,ii){
+  S.stocks[catId].splice(ii,1);
+  save();renderStocks();
+}
+
+// ══ PRÉVISIONNEL ══
+function addPrevProjet(){
+  const name=prompt('Nom du projet :');
+  if(!name||!name.trim()) return;
+  S.prevProjects.push({id:genId(),name:name.trim(),items:[],_exp:true});
+  save();renderPrev();
+}
+
+function renderPrev(){
+  const el=document.getElementById('prev-list');if(!el)return;
+  if(!S.prevProjects.length){el.innerHTML='<div class="empty">Aucun projet — clique sur "+ Nouveau projet"</div>';return;}
+
+  // Calcule le stock dispo (soustrait les réservations des autres projets)
+  function stockDispo(catId, refName, excludeProjId){
+    const inStock=(S.stocks[catId]||[]).filter(i=>i.ref===refName&&i.statut==='stock').reduce((s,i)=>s+(i.qte||0),0);
+    const reserved=S.prevProjects.filter(p=>p.id!==excludeProjId).reduce((s,p)=>{
+      return s+(p.items||[]).filter(i=>i.catId===catId&&i.ref===refName).reduce((ss,i)=>ss+(i.qte||0),0);
+    },0);
+    return inStock-reserved;
+  }
+
+  el.innerHTML=S.prevProjects.map((proj,pi)=>{
+    const exp=proj._exp;
+    return `<div class="prev-proj-card">
+      <div class="prev-proj-header" onclick="togglePrev(${pi})">
+        <span class="prev-proj-name">${proj.name}</span>
+        <span style="font-size:11px;color:var(--text-mid)">${proj.items.length} matériau(x)</span>
+        <button onclick="event.stopPropagation();delPrevProjet(${pi})" style="font-size:12px;color:var(--text-light);background:none;border:none;cursor:pointer">×</button>
+        <span class="prev-chev${exp?' open':''}">▾</span>
+      </div>
+      <div class="prev-proj-body${exp?' open':''}">
+        ${proj.items.length?`<table class="prev-table">
+          <thead><tr><th>Catégorie</th><th>Référence</th><th>Qté nécessaire</th><th>Stock dispo</th><th>Statut</th><th></th></tr></thead>
+          <tbody>${proj.items.map((item,ii)=>{
+            const dispo=stockDispo(item.catId,item.ref,proj.id);
+            const needed=item.qte||0;
+            const statusTxt=dispo>=needed?`<span class="stock-ok">✓ OK (${dispo} dispo)</span>`:dispo>0?`<span class="stock-partial">⚠ Partiel (${dispo}/${needed})</span>`:`<span class="stock-warn">✗ À commander</span>`;
+            return `<tr>
+              <td>${CATEGORIES.find(c=>c.id===item.catId)?.label||item.catId}</td>
+              <td>${item.ref}</td>
+              <td><input type="number" value="${needed}" onchange="updatePrevItem(${pi},${ii},parseFloat(this.value)||0)" style="width:70px;font-size:12px;padding:3px 6px;border:1px solid var(--border-strong);border-radius:4px;background:var(--cream)"></td>
+              <td>${dispo}</td>
+              <td>${statusTxt}</td>
+              <td><button class="del-btn" style="opacity:1" onclick="delPrevItem(${pi},${ii})">×</button></td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>`:'<div class="empty">Aucun matériau — ajouter ci-dessous</div>'}
+        <div class="add-form" style="margin-top:8px">
+          <select id="prev-cat-${pi}" onchange="updatePrevRefs(${pi})" style="min-width:130px">
+            ${CATEGORIES.map(c=>`<option value="${c.id}">${c.label}</option>`).join('')}
+          </select>
+          <select id="prev-ref-${pi}" style="min-width:150px">
+            ${(CATEGORIES[0].refs).map(r=>`<option value="${r}">${r}</option>`).join('')}
+          </select>
+          <input type="number" id="prev-qte-${pi}" placeholder="Qté" style="width:70px">
+          <button class="btn-add or" onclick="addPrevItem(${pi})">+ Ajouter</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function togglePrev(pi){S.prevProjects[pi]._exp=!S.prevProjects[pi]._exp;renderPrev();}
+function delPrevProjet(pi){if(!confirm('Supprimer ce prévisionnel ?'))return;S.prevProjects.splice(pi,1);save();renderPrev();}
+function updatePrevRefs(pi){
+  const catId=document.getElementById('prev-cat-'+pi).value;
+  const cat=CATEGORIES.find(c=>c.id===catId);
+  const refSel=document.getElementById('prev-ref-'+pi);
+  if(refSel&&cat) refSel.innerHTML=cat.refs.map(r=>`<option value="${r}">${r}</option>`).join('');
+}
+function addPrevItem(pi){
+  const catId=document.getElementById('prev-cat-'+pi).value;
+  const ref=document.getElementById('prev-ref-'+pi).value;
+  const qte=parseFloat(document.getElementById('prev-qte-'+pi).value)||1;
+  S.prevProjects[pi].items.push({catId,ref,qte});
+  save();renderPrev();
+}
+function updatePrevItem(pi,ii,val){S.prevProjects[pi].items[ii].qte=val;save();renderPrev();}
+function delPrevItem(pi,ii){S.prevProjects[pi].items.splice(ii,1);save();renderPrev();}
+
+// ══ FOURNISSEURS ══
+function renderFournisseurs(){
+  const el=document.getElementById('fourn-list');if(!el)return;
+  if(!S.fournisseurs.length){el.innerHTML='<div class="empty">Aucun fournisseur — ajouter ci-dessous</div>';return;}
+  // Favoris en premier
+  const sorted=[...S.fournisseurs].sort((a,b)=>(b.fav?1:0)-(a.fav?1:0));
+  el.innerHTML=sorted.map((f,fi)=>{
+    const ri=S.fournisseurs.indexOf(f);
+    return `<div class="fourn-card">
+      <div>
+        <div class="fourn-name">${f.fav?'⭐ ':''}<strong>${f.name}</strong></div>
+        <div class="fourn-spec">${f.spec}</div>
+        ${f.contact?`<div class="fourn-contact">📞 ${f.contact}</div>`:''}
+        ${f.url?`<a href="${f.url}" target="_blank" class="fourn-link">🔗 Site web</a>`:''}
+        ${f.notes?`<div style="font-size:11px;color:var(--text-light);margin-top:4px">${f.notes}</div>`:''}
+      </div>
+      <div class="fourn-actions">
+        <button class="fourn-fav" onclick="toggleFav(${ri})" title="${f.fav?'Retirer des favoris':'Ajouter aux favoris'}">${f.fav?'⭐':'☆'}</button>
+        <button class="fourn-del" onclick="delFourn(${ri})">Supprimer</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openFournModal(){document.getElementById('fourn-modal').style.display='flex';}
+function closeFournModal(){document.getElementById('fourn-modal').style.display='none';}
+function saveFourn(){
+  const name=document.getElementById('fn-name').value.trim();if(!name)return;
+  S.fournisseurs.push({id:genId(),name,spec:document.getElementById('fn-spec').value,contact:document.getElementById('fn-contact').value.trim(),url:document.getElementById('fn-url').value.trim(),notes:document.getElementById('fn-notes').value.trim(),fav:false});
+  save();closeFournModal();renderFournisseurs();
+  ['fn-name','fn-contact','fn-url','fn-notes'].forEach(id=>document.getElementById(id).value='');
+}
+function delFourn(ri){if(!confirm('Supprimer ce fournisseur ?'))return;S.fournisseurs.splice(ri,1);save();renderFournisseurs();}
+function toggleFav(ri){S.fournisseurs[ri].fav=!S.fournisseurs[ri].fav;save();renderFournisseurs();}
+
+// ══ OUTILS ══
+function renderOutils(){
+  const el=document.getElementById('outil-list');if(!el)return;
+  if(!S.outils.length){el.innerHTML='<div class="empty">Aucun outil — ajouter ci-dessous</div>';return;}
+  const sorted=[...S.outils].sort((a,b)=>{const o={hs:0,attention:1,ok:2};return (o[a.etat]||2)-(o[b.etat]||2);});
+  el.innerHTML=sorted.map((o)=>{
+    const ri=S.outils.indexOf(o);
+    const etatCls={ok:'etat-ok',attention:'etat-attention',hs:'etat-hs'}[o.etat]||'etat-ok';
+    const etatLabel={ok:'✓ OK',attention:'⚠ Attention',hs:'✗ H.S.'}[o.etat]||'OK';
+    return `<div class="outil-card">
+      <div class="outil-header">
+        <div>
+          <span class="outil-name">${o.name}</span>
+          ${o.modele?`<span style="font-size:11px;color:var(--text-light);margin-left:8px">${o.modele}</span>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <select onchange="updateOutilEtat(${ri},this.value)" style="font-size:11px;padding:3px 6px;border:1px solid var(--border-strong);border-radius:5px;background:var(--cream);font-family:'DM Sans',sans-serif">
+            <option value="ok" ${o.etat==='ok'?'selected':''}>✓ OK</option>
+            <option value="attention" ${o.etat==='attention'?'selected':''}>⚠ Attention</option>
+            <option value="hs" ${o.etat==='hs'?'selected':''}>✗ H.S.</option>
+          </select>
+          <button class="outil-del" onclick="delOutil(${ri})">Supprimer</button>
+        </div>
+      </div>
+      ${o.notes?`<div class="outil-notes">${o.notes}</div>`:''}
+      <textarea placeholder="Notes, pièces à racheter…" onfocus="window._isEditing=true" onchange="updateOutilNotes(${ri},this.value)" style="width:100%;font-size:12px;font-family:'DM Sans',sans-serif;padding:6px 9px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);resize:none;height:50px;margin-top:6px;outline:none">${o.notes||''}</textarea>
+    </div>`;
+}
+).join('');
+}
+
+function openOutilModal(){document.getElementById('outil-modal').style.display='flex';}
+function closeOutilModal(){document.getElementById('outil-modal').style.display='none';}
+function saveOutil(){
+  const name=document.getElementById('ot-name').value.trim();if(!name)return;
+  S.outils.push({id:genId(),name,modele:document.getElementById('ot-modele').value.trim(),etat:document.getElementById('ot-etat').value,notes:document.getElementById('ot-notes').value.trim()});
+  save();closeOutilModal();renderOutils();
+  ['ot-name','ot-modele','ot-notes'].forEach(id=>document.getElementById(id).value='');
+}
+function delOutil(ri){if(!confirm('Supprimer cet outil ?'))return;S.outils.splice(ri,1);save();renderOutils();}
+function updateOutilEtat(ri,v){S.outils[ri].etat=v;save();renderOutils();}
+function updateOutilNotes(ri,v){
+  window._isEditing=true;S.outils[ri].notes=v;
+  clearTimeout(window._outilTimer);window._outilTimer=setTimeout(()=>{save();window._isEditing=false;},800);
+}
+
+// ══ MODALS close on overlay click ══
+['fourn-modal','outil-modal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this){this.style.display='none';}});
+});
+
+// ══ SYNC iOS ══
+function forceFirebaseSync(){
+  db.ref(FB_PATH).once('value',snap=>{
+    try{const d=snap.val();if(d){S=sanitize(d);try{localStorage.setItem('elence_atelier_v1',JSON.stringify(S));}catch(e){}renderAll();}}catch(e){}
+  });
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)forceFirebaseSync();});
+window.addEventListener('focus',forceFirebaseSync);
+
+function renderAll(){renderStocks();renderPrev();renderFournisseurs();renderOutils();}
+renderAll();
+</script>
+</body>
+</html>
