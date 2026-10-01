@@ -221,6 +221,7 @@ function getCore(){
 }
 function saveCore(c){
   _coreCache = JSON.parse(JSON.stringify(c));
+  c._lastModified=Date.now();
   try{localStorage.setItem(CORE_KEY,JSON.stringify(c));}catch(e){}
   db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(c))).catch(e=>console.warn('Firebase:',e));
 }
@@ -233,20 +234,27 @@ let _saveTimeout = null;
 db.ref(FIREBASE_PATH).on('value',snap=>{
   const fbData=snap.val();
   if(fbData&&fbData.projects){
-    _coreCache = sanitizeCore(JSON.parse(JSON.stringify(fbData)));
-    try{localStorage.setItem(CORE_KEY,JSON.stringify(_coreCache));}catch(e){}
-    renderList();
-    // Ne re-render la fiche QUE si on n'est pas en train d'éditer
-    if(!_isEditing){
+    const fbTime=fbData._lastModified||0;
+    const localTime=(_coreCache&&_coreCache._lastModified)||0;
+    if(fbTime>localTime){
+      _coreCache=sanitizeCore(fbData);
+      try{localStorage.setItem(CORE_KEY,JSON.stringify(_coreCache));}catch(e){}
+      renderList();
       const ui=getUI();
-      if(ui.activeId) renderFiche();
+      if(ui.activeId&&!ui.activeId.startsWith('mask_')&&!_isEditing) renderFiche();
+    } else if(fbTime<localTime&&_coreCache){
+      db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(_coreCache)));
     }
   } else {
     let local=null;
     try{local=JSON.parse(localStorage.getItem(CORE_KEY));}catch(e){}
-    if(!local) ['elence_planner_v4','elence_planner_v3'].forEach(k=>{
-      if(!local) try{const d=JSON.parse(localStorage.getItem(k));if(d&&d.projects&&d.projects.length>0)local=d;}catch(e){}
-    });
+    if(local&&local.projects&&local.projects.length>0){
+      _coreCache=sanitizeCore(local);
+      db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(_coreCache)));
+    }
+    renderList();
+  }
+});
     if(local&&local.projects&&local.projects.length>0){
       _coreCache=sanitizeCore(local);
       db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(_coreCache)));
@@ -759,14 +767,18 @@ function forceFirebaseSync(){
     try{
       const d=snap.val();
       if(d&&d.projects){
-        _coreCache=sanitizeCore(d);
-        try{localStorage.setItem(CORE_KEY,JSON.stringify(_coreCache));}catch(e){}
-        renderList();
-        const ui=getUI();if(ui.activeId&&!ui.activeId.startsWith('mask_'))renderFiche();
+        const fbTime=d._lastModified||0;
+        const localTime=(_coreCache&&_coreCache._lastModified)||0;
+        if(fbTime>localTime){
+          _coreCache=sanitizeCore(d);
+          try{localStorage.setItem(CORE_KEY,JSON.stringify(_coreCache));}catch(e){}
+          renderList();const ui=getUI();if(ui.activeId&&!ui.activeId.startsWith('mask_'))renderFiche();
+        } else if(fbTime<localTime&&_coreCache){
+          db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(_coreCache)));
+        }
       }
     }catch(e){}
   });
-  // Sync MASK aussi
   db.ref('elence_temps').once('value',snap=>{
     try{const d=snap.val();if(d&&d.maskProjects){_maskCache=d.maskProjects;renderList();}}catch(e){}
   });

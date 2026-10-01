@@ -221,6 +221,8 @@ try{const l=JSON.parse(localStorage.getItem('elence_temps_v1'));if(l) S=sanitize
 
 function save(){
   try{localStorage.setItem('elence_temps_v1',JSON.stringify(S));}catch(e){}
+  S._lastModified=Date.now();
+  try{localStorage.setItem('elence_temps_v1',JSON.stringify(S));}catch(e){}
   if(!_isEditing) db.ref(FB_TEMPS_PATH).set(JSON.parse(JSON.stringify(S))).catch(e=>console.warn('FB:',e));
 }
 
@@ -228,8 +230,17 @@ function save(){
 db.ref(FB_TEMPS_PATH).on('value',snap=>{
   try{
     const d=snap.val();
-    if(d&&!_isEditing){S=sanitize(d);try{localStorage.setItem('elence_temps_v1',JSON.stringify(S));}catch(e){}renderAll();}
-    else if(!d) db.ref(FB_TEMPS_PATH).set(JSON.parse(JSON.stringify(S)));
+    if(d&&!_isEditing){
+      const fbTime=d._lastModified||0;
+      const localTime=S._lastModified||0;
+      if(fbTime>localTime){
+        S=sanitize(d);
+        try{localStorage.setItem('elence_temps_v1',JSON.stringify(S));}catch(e){}
+        renderAll();
+      } else if(fbTime<localTime){
+        db.ref(FB_TEMPS_PATH).set(JSON.parse(JSON.stringify(S)));
+      }
+    } else if(!d) db.ref(FB_TEMPS_PATH).set(JSON.parse(JSON.stringify(S)));
   }catch(e){console.warn('FB temps:',e);}
 });
 
@@ -506,7 +517,15 @@ document.getElementById('mask-modal-overlay').addEventListener('click',function(
 function forceFirebaseSync(){
   if(_isEditing) return;
   db.ref(FB_TEMPS_PATH).once('value',snap=>{
-    try{const d=snap.val();if(d){S=sanitize(d);try{localStorage.setItem('elence_temps_v1',JSON.stringify(S));}catch(e){}renderAll();}}catch(e){}
+    try{
+      const d=snap.val();
+      if(d){
+        const fbTime=d._lastModified||0;
+        const localTime=S._lastModified||0;
+        if(fbTime>localTime){S=sanitize(d);try{localStorage.setItem('elence_temps_v1',JSON.stringify(S));}catch(e){}renderAll();}
+        else if(fbTime<localTime) db.ref(FB_TEMPS_PATH).set(JSON.parse(JSON.stringify(S)));
+      }
+    }catch(e){}
   });
   db.ref('elence').once('value',snap=>{
     try{const d=snap.val();if(d&&d.projects){_coreProjects=d.projects.filter(p=>p.status!=='done');renderProjSections();renderStats();}}catch(e){}

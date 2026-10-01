@@ -242,6 +242,7 @@ if(!S.fixes) S.fixes=DEP_FIXES_DEF.map(d=>({...d}));
 if(!S.ponct) S.ponct=DEP_PONCT_DEF.map(d=>({...d}));
 
 function save(){
+  S._lastModified=Date.now();
   try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
   dbCA.ref(FB_CA_PATH).set(JSON.parse(JSON.stringify(S))).catch(e=>console.warn('FB CA:',e));
 }
@@ -470,7 +471,19 @@ let _caSaveTimeout=null;
 dbCA.ref(FB_CA_PATH).on('value',snap=>{
   const fbData=snap.val();
   if(fbData&&fbData.ca&&!_caEditing){
-    Object.keys(fbData).forEach(k=>{S[k]=fbData[k];});
+    const fbTime=fbData._lastModified||0;
+    const localTime=S._lastModified||0;
+    if(fbTime>localTime){
+      Object.keys(fbData).forEach(k=>{S[k]=fbData[k];});
+      try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+      renderAll();
+    } else if(fbTime<localTime){
+      dbCA.ref(FB_CA_PATH).set(JSON.parse(JSON.stringify(S)));
+    }
+  } else if(!fbData&&S&&S.ca){
+    dbCA.ref(FB_CA_PATH).set(JSON.parse(JSON.stringify(S)));
+  }
+});
     try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
     renderAll();
   } else if(!fbData&&S&&S.ca){
@@ -485,7 +498,12 @@ function forceFirebaseSync(){
   dbCA.ref(FB_CA_PATH).once('value',snap=>{
     try{
       const d=snap.val();
-      if(d&&d.ca){Object.keys(d).forEach(k=>{S[k]=d[k];});try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}renderAll();}
+      if(d&&d.ca){
+        const fbTime=d._lastModified||0;
+        const localTime=S._lastModified||0;
+        if(fbTime>localTime){Object.keys(d).forEach(k=>{S[k]=d[k];});try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}renderAll();}
+        else if(fbTime<localTime) dbCA.ref(FB_CA_PATH).set(JSON.parse(JSON.stringify(S)));
+      }
     }catch(e){}
   });
 }

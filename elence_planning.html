@@ -329,6 +329,7 @@ try{
 }catch(e){console.warn('localStorage load error:',e);}
 
 function save(){
+  S._lastModified = Date.now();
   try{localStorage.setItem(CORE_KEY,JSON.stringify(S));}catch(e){}
   db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(S))).catch(e=>console.warn('FB save:',e));
 }
@@ -338,16 +339,19 @@ db.ref(FIREBASE_PATH).on('value',snap=>{
   try{
     const d=snap.val();
     if(d&&d.projects){
-      const merged=sanitize(d);
-      if(!window._isEditing){
-        S=merged;
+      const fbTime=d._lastModified||0;
+      const localTime=S._lastModified||0;
+      if(fbTime>localTime&&!window._isEditing){
+        S=sanitize(d);
         try{localStorage.setItem(CORE_KEY,JSON.stringify(S));}catch(e){}
         renderAll();
+      } else if(fbTime<localTime){
+        db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(S)));
       }
-    } else if(S.projects.length>0||S.tasks.today.length>0){
+    } else if(S.projects&&S.projects.length>0){
       db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(S)));
     }
-  }catch(e){console.warn('FB listener error:',e);}
+  }catch(e){console.warn('FB listener:',e);}
 });
 
 function toast(msg){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}
@@ -594,7 +598,12 @@ function forceFirebaseSync(){
   db.ref(FIREBASE_PATH).once('value',snap=>{
     try{
       const d=snap.val();
-      if(d&&d.projects){S=sanitize(d);try{localStorage.setItem(CORE_KEY,JSON.stringify(S));}catch(e){}renderAll();}
+      if(d&&d.projects){
+        const fbTime=d._lastModified||0;
+        const localTime=S._lastModified||0;
+        if(fbTime>localTime){S=sanitize(d);try{localStorage.setItem(CORE_KEY,JSON.stringify(S));}catch(e){}renderAll();}
+        else if(fbTime<localTime) db.ref(FIREBASE_PATH).set(JSON.parse(JSON.stringify(S)));
+      }
     }catch(e){}
   });
 }
