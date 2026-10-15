@@ -239,13 +239,14 @@ function genId(){return 'a_'+Date.now()+'_'+Math.random().toString(36).substr(2,
 
 // ══ CATÉGORIES DE STOCK ══
 const CATEGORIES=[
-  {id:'panneaux',label:'Panneaux',icon:'🪵',unite:'panneau(x)',refs:['Mélaminé blanc 19mm','Mélaminé chêne 19mm','MDF 19mm','Contreplaqué 15mm','OSB','Autre']},
+  {id:'panneaux',label:'Panneaux',icon:'🪵',unite:'panneau(x)',special:'panneaux',refs:['Mélaminé blanc','Mélaminé chêne','MDF','Contreplaqué','OSB','Aggloméré','Médium','Autre']},
+  {id:'tasseaux',label:'Tasseaux & baguettes',icon:'📐',unite:'pièce(s)',special:'tasseaux',refs:['Pin','Sapin','Chêne','Hêtre','MDF','Autre']},
   {id:'chant',label:'Bandes de chant',icon:'📏',unite:'rouleau(x)',refs:['Chant ABS blanc 0.4mm','Chant ABS chêne 0.4mm','Chant ABS blanc 2mm','Chant ABS bois 2mm','Autre']},
   {id:'visserie',label:'Visserie',icon:'🔩',unite:'boîte(s)',refs:['Vis 3x20','Vis 4x40','Vis 5x60','Vis MDF','Tourillon 8mm','Domino','Autre']},
   {id:'charnieres',label:'Charnières',icon:'🔗',unite:'pcs',refs:['Charnière Blum 110°','Charnière Blum 165°','Charnière invisible','Autre']},
   {id:'coulisses',label:'Coulisses',icon:'↔️',unite:'paires',refs:['Coulisse 300mm','Coulisse 400mm','Coulisse 500mm','Coulisse 600mm','Coulisse à fermeture douce','Autre']},
   {id:'colle',label:'Colle & adhésifs',icon:'🧴',unite:'unité(s)',refs:['Pattex Contact','Colle à bois','Silicone transparent','Double face','Autre']},
-  {id:'quincaillerie',label:'Quincaillerie diverse',icon:'🛠',unite:'pcs/lot',refs:['Poignées','Pieds réglables','Tasseaux','Clips','Équerres','Autre']},
+  {id:'quincaillerie',label:'Quincaillerie diverse',icon:'🛠',unite:'pcs/lot',refs:['Poignées','Pieds réglables','Clips','Équerres','Autre']},
   {id:'consommables',label:'Consommables',icon:'🪚',unite:'unité(s)',refs:['Lames de scie','Forets','Papier abrasif','Fraises','Autre']},
 ];
 
@@ -318,6 +319,103 @@ function renderStocks(){
   const sectEl=document.getElementById('stock-sections');
   sectEl.innerHTML=CATEGORIES.map(cat=>{
     const items=S.stocks[cat.id]||[];
+
+    // ── PANNEAUX (affichage spécial avec épaisseur + chutes) ──
+    if(cat.special==='panneaux'){
+      return `<div class="card te" style="margin-bottom:1rem">
+        <div class="ch te-bg">
+          <div class="ct">${cat.icon} ${cat.label}</div>
+          <span style="font-size:11px;color:var(--text-light)">${items.length} type(s)</span>
+        </div>
+        <div class="cb" style="padding-top:.5rem">
+          ${items.length?items.map((item,ii)=>`
+            <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:var(--cream)">
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
+                <input value="${item.ref||''}" placeholder="Type (ex: Mélaminé blanc)" onfocus="window._isEditing=true" onchange="updateStock('panneaux',${ii},'ref',this.value)" style="min-width:140px;font-weight:500">
+                <label style="font-size:11px;color:var(--text-mid)">Ép.</label>
+                <input value="${item.ep||''}" placeholder="ex: 19" onfocus="window._isEditing=true" onchange="updateStock('panneaux',${ii},'ep',this.value)" style="width:55px">
+                <span style="font-size:11px;color:var(--text-mid)">mm</span>
+                <input value="${item.fourn||''}" placeholder="Fournisseur" onfocus="window._isEditing=true" onchange="updateStock('panneaux',${ii},'fourn',this.value)" style="min-width:110px">
+                <select onchange="updateStock('panneaux',${ii},'statut',this.value)">
+                  <option value="stock" ${item.statut==='stock'?'selected':''}>En stock</option>
+                  <option value="commander" ${item.statut==='commander'?'selected':''}>À commander</option>
+                  <option value="commande" ${item.statut==='commande'?'selected':''}>En commande</option>
+                </select>
+                <input value="${item.prix||''}" placeholder="Prix €" type="number" onfocus="window._isEditing=true" onchange="updateStock('panneaux',${ii},'prix',parseFloat(this.value)||0)" style="width:70px">
+                <button class="del-btn" onclick="delStock('panneaux',${ii})">×</button>
+              </div>
+              <div style="margin-left:4px">
+                <div style="font-size:11px;color:var(--text-mid);margin-bottom:4px">📐 Chutes disponibles :</div>
+                ${(item.chutes||[]).map((c,ci)=>`
+                  <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px">
+                    <input value="${c.larg||''}" placeholder="Larg." onfocus="window._isEditing=true" onchange="updateChute('panneaux',${ii},${ci},'larg',this.value)" style="width:65px">
+                    <span style="font-size:11px;color:var(--text-mid)">×</span>
+                    <input value="${c.haut||''}" placeholder="Haut." onfocus="window._isEditing=true" onchange="updateChute('panneaux',${ii},${ci},'haut',this.value)" style="width:65px">
+                    <span style="font-size:11px;color:var(--text-mid)">mm</span>
+                    <input value="${c.notes||''}" placeholder="Note (ex: chute droite)" onfocus="window._isEditing=true" onchange="updateChute('panneaux',${ii},${ci},'notes',this.value)" style="min-width:130px">
+                    <button class="del-btn" onclick="delChute('panneaux',${ii},${ci})" style="font-size:10px">×</button>
+                  </div>`).join('')}
+                <button class="btn-add" onclick="addChute('panneaux',${ii})" style="font-size:11px;padding:3px 10px;margin-top:2px">+ Ajouter chute</button>
+              </div>
+            </div>`).join(''):'<div class="empty">Aucun panneau — ajouter ci-dessous</div>'}
+          <div class="add-form" style="margin-top:10px">
+            <select id="ref-panneaux" style="min-width:150px">${cat.refs.map(r=>`<option>${r}</option>`).join('')}</select>
+            <input id="ep-panneaux" placeholder="Épaisseur (mm)" style="width:120px">
+            <select id="stat-panneaux"><option value="stock">En stock</option><option value="commander">À commander</option><option value="commande">En commande</option></select>
+            <button class="btn-add" onclick="addPanneau()">+ Ajouter</button>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // ── TASSEAUX (affichage spécial avec section + longueurs) ──
+    if(cat.special==='tasseaux'){
+      return `<div class="card te" style="margin-bottom:1rem">
+        <div class="ch te-bg">
+          <div class="ct">${cat.icon} ${cat.label}</div>
+          <span style="font-size:11px;color:var(--text-light)">${items.length} type(s)</span>
+        </div>
+        <div class="cb" style="padding-top:.5rem">
+          ${items.length?items.map((item,ii)=>`
+            <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:var(--cream)">
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
+                <input value="${item.ref||''}" placeholder="Essence (ex: Pin)" onfocus="window._isEditing=true" onchange="updateStock('tasseaux',${ii},'ref',this.value)" style="min-width:110px;font-weight:500">
+                <label style="font-size:11px;color:var(--text-mid)">Section</label>
+                <input value="${item.section||''}" placeholder="ex: 50×25" onfocus="window._isEditing=true" onchange="updateStock('tasseaux',${ii},'section',this.value)" style="width:80px">
+                <span style="font-size:11px;color:var(--text-mid)">mm</span>
+                <input value="${item.fourn||''}" placeholder="Fournisseur" onfocus="window._isEditing=true" onchange="updateStock('tasseaux',${ii},'fourn',this.value)" style="min-width:110px">
+                <select onchange="updateStock('tasseaux',${ii},'statut',this.value)">
+                  <option value="stock" ${item.statut==='stock'?'selected':''}>En stock</option>
+                  <option value="commander" ${item.statut==='commander'?'selected':''}>À commander</option>
+                  <option value="commande" ${item.statut==='commande'?'selected':''}>En commande</option>
+                </select>
+                <button class="del-btn" onclick="delStock('tasseaux',${ii})">×</button>
+              </div>
+              <div style="margin-left:4px">
+                <div style="font-size:11px;color:var(--text-mid);margin-bottom:4px">📏 Longueurs disponibles :</div>
+                ${(item.longueurs||[]).map((l,li)=>`
+                  <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px">
+                    <input value="${l.val||''}" placeholder="Longueur" onfocus="window._isEditing=true" onchange="updateLongueur(${ii},${li},'val',this.value)" style="width:80px">
+                    <span style="font-size:11px;color:var(--text-mid)">mm</span>
+                    <input value="${l.qte||''}" placeholder="Qté" type="number" onfocus="window._isEditing=true" onchange="updateLongueur(${ii},${li},'qte',this.value)" style="width:50px">
+                    <span style="font-size:11px;color:var(--text-mid)">pcs</span>
+                    <input value="${l.notes||''}" placeholder="Note" onfocus="window._isEditing=true" onchange="updateLongueur(${ii},${li},'notes',this.value)" style="min-width:130px">
+                    <button class="del-btn" onclick="delLongueur(${ii},${li})" style="font-size:10px">×</button>
+                  </div>`).join('')}
+                <button class="btn-add" onclick="addLongueur(${ii})" style="font-size:11px;padding:3px 10px;margin-top:2px">+ Ajouter longueur</button>
+              </div>
+            </div>`).join(''):'<div class="empty">Aucun tasseau — ajouter ci-dessous</div>'}
+          <div class="add-form" style="margin-top:10px">
+            <select id="ref-tasseaux" style="min-width:120px">${cat.refs.map(r=>`<option>${r}</option>`).join('')}</select>
+            <input id="section-tasseaux" placeholder="Section (ex: 50×25)" style="width:140px">
+            <select id="stat-tasseaux"><option value="stock">En stock</option><option value="commander">À commander</option><option value="commande">En commande</option></select>
+            <button class="btn-add" onclick="addTasseau()">+ Ajouter</button>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // ── CATÉGORIES STANDARD ──
     return `<div class="card te" style="margin-bottom:1rem">
       <div class="ch te-bg">
         <div class="ct">${cat.icon} ${cat.label}</div>
@@ -395,6 +493,62 @@ function addStock(catId){
   if(!S.stocks[catId]) S.stocks[catId]=[];
   S.stocks[catId].push({id:genId(),ref,qte,prix,statut,fourn:'',notes:''});
   save();renderStocks();
+}
+
+function addPanneau(){
+  const ref=document.getElementById('ref-panneaux').value;
+  const ep=document.getElementById('ep-panneaux').value;
+  const statut=document.getElementById('stat-panneaux').value;
+  if(!S.stocks.panneaux) S.stocks.panneaux=[];
+  S.stocks.panneaux.push({id:genId(),ref,ep,statut,fourn:'',prix:0,chutes:[]});
+  save();renderStocks();
+}
+
+function addTasseau(){
+  const ref=document.getElementById('ref-tasseaux').value;
+  const section=document.getElementById('section-tasseaux').value;
+  const statut=document.getElementById('stat-tasseaux').value;
+  if(!S.stocks.tasseaux) S.stocks.tasseaux=[];
+  S.stocks.tasseaux.push({id:genId(),ref,section,statut,fourn:'',longueurs:[]});
+  save();renderStocks();
+}
+
+function addChute(catId,ii){
+  if(!S.stocks[catId][ii].chutes) S.stocks[catId][ii].chutes=[];
+  S.stocks[catId][ii].chutes.push({larg:'',haut:'',notes:''});
+  save();renderStocks();
+}
+
+function delChute(catId,ii,ci){
+  S.stocks[catId][ii].chutes.splice(ci,1);
+  save();renderStocks();
+}
+
+function updateChute(catId,ii,ci,field,val){
+  window._isEditing=true;
+  if(!S.stocks[catId][ii].chutes) S.stocks[catId][ii].chutes=[];
+  S.stocks[catId][ii].chutes[ci][field]=val;
+  clearTimeout(window._stockSaveTimer);
+  window._stockSaveTimer=setTimeout(()=>{save();window._isEditing=false;},800);
+}
+
+function addLongueur(ii){
+  if(!S.stocks.tasseaux[ii].longueurs) S.stocks.tasseaux[ii].longueurs=[];
+  S.stocks.tasseaux[ii].longueurs.push({val:'',qte:1,notes:''});
+  save();renderStocks();
+}
+
+function delLongueur(ii,li){
+  S.stocks.tasseaux[ii].longueurs.splice(li,1);
+  save();renderStocks();
+}
+
+function updateLongueur(ii,li,field,val){
+  window._isEditing=true;
+  if(!S.stocks.tasseaux[ii].longueurs) S.stocks.tasseaux[ii].longueurs=[];
+  S.stocks.tasseaux[ii].longueurs[li][field]=val;
+  clearTimeout(window._stockSaveTimer);
+  window._stockSaveTimer=setTimeout(()=>{save();window._isEditing=false;},800);
 }
 
 function delStock(catId,ii){

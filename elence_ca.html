@@ -231,13 +231,36 @@ const DEP_PONCT_DEF=[
   {name:'Divers',mois:0},
 ];
 
+// Données de secours — injectées directement pour éviter perte lors de sync Firebase
+const BACKUP_DATA = {
+  ca:[0,1545,3231.4,1775.55,1764.2,1423.4,935,572.05,0,0,0,0],
+  projects:[
+    {id:'p1',name:'Carport / extension',amount:629.95,month:'Juin',status:'facture'},
+    {id:'p2',name:'Mask',amount:793.45,month:'Juin',status:'facture'},
+    {id:'p3',name:'MASK',amount:935,month:'Juillet',status:'facture'}
+  ],
+  depPonctMens:Array(12).fill(0),
+  fixes:DEP_FIXES_DEF.map(d=>({...d})),
+  ponct:DEP_PONCT_DEF.map(d=>({...d})),
+  activeMois:new Date().getMonth(),
+  annuelOpen:false,
+  projFilter:'all',
+  _lastModified:1728999999999
+};
+
 let S;
 // Migration : cherche v4, puis v3, puis v2
 try{S=JSON.parse(localStorage.getItem(KEY))||null;}catch(e){S=null;}
 if(!S){try{S=JSON.parse(localStorage.getItem('elence_ca_v3'))||null;}catch(e){S=null;}}
 if(!S){try{S=JSON.parse(localStorage.getItem('elence_ca_v2'))||null;}catch(e){S=null;}}
+// Si aucune donnée locale ou données vides, utilise le backup
+if(!S||!S.ca||S.ca.every(v=>v===0)){
+  const backupTime=BACKUP_DATA._lastModified;
+  const localTime=(S&&S._lastModified)||0;
+  if(backupTime>localTime) S=JSON.parse(JSON.stringify(BACKUP_DATA));
+}
 if(S){localStorage.setItem(KEY,JSON.stringify(S));}
-if(!S) S={ca:Array(12).fill(0),depPonctMens:Array(12).fill(0),fixes:DEP_FIXES_DEF.map(d=>({...d})),ponct:DEP_PONCT_DEF.map(d=>({...d})),projects:[],activeMois:new Date().getMonth(),annuelOpen:false,projFilter:'all'};
+if(!S) S=JSON.parse(JSON.stringify(BACKUP_DATA));
 if(!S.fixes) S.fixes=DEP_FIXES_DEF.map(d=>({...d}));
 if(!S.ponct) S.ponct=DEP_PONCT_DEF.map(d=>({...d}));
 
