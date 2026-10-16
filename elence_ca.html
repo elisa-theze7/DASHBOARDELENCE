@@ -507,12 +507,6 @@ dbCA.ref(FB_CA_PATH).on('value',snap=>{
     dbCA.ref(FB_CA_PATH).set(JSON.parse(JSON.stringify(S)));
   }
 });
-    try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
-    renderAll();
-  } else if(!fbData&&S&&S.ca){
-    dbCA.ref(FB_CA_PATH).set(JSON.parse(JSON.stringify(S)));
-  }
-});
 renderAll();
 
 // ── SYNC AUTO iOS ──
