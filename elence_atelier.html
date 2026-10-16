@@ -57,6 +57,14 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 1
 .cat-count{font-size:11px;color:var(--text-light)}
 
 /* ADD FORM */
+.pn-card{border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px;background:var(--cream)}
+.pn-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.pn-in{font-size:12.5px;font-family:'DM Sans',sans-serif;padding:5px 8px;border:1px solid var(--border-strong);border-radius:6px;background:white;color:var(--text);outline:none}
+.pn-in:focus{border-color:var(--teal)}
+.pn-lab{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--text-mid)}
+.pn-x{font-size:11px;color:var(--text-mid)}
+.pn-chutes{border-top:1px dashed var(--border-strong);padding-top:8px;margin-top:2px}
+.pn-sub{font-size:11px;color:var(--text-mid);margin-bottom:6px}
 .add-form{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:flex-end}
 .add-form input,.add-form select{font-size:12px;font-family:'DM Sans',sans-serif;padding:6px 8px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none}
 .add-form input:focus,.add-form select:focus{border-color:var(--teal)}
@@ -66,6 +74,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 1
 .btn-add.pu{background:var(--purple)}.btn-add.pu:hover{background:#5a4fa0}
 .del-btn{font-size:13px;color:var(--text-light);cursor:pointer;background:none;border:none;padding:0 3px;opacity:0;transition:opacity .15s}
 .stock-table tr:hover .del-btn{opacity:1}
+.pn-card .del-btn{opacity:1}
 
 /* PREVISIONNEL */
 .prev-proj-card{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;overflow:hidden}
@@ -129,6 +138,7 @@ header{background:var(--white);border-bottom:1px solid var(--border);padding:0 1
     <a href="elence_temps.html" class="nav-btn">Temps</a>
     <a href="elence_devis_atelier.html" class="nav-btn">Devis atelier</a>
     <a href="elence_atelier.html" class="nav-btn active">Gestion atelier</a>
+    <a href="elence_quincaillerie.html" class="nav-btn">Quincaillerie</a>
   </div>
 </header>
 
@@ -320,47 +330,59 @@ function renderStocks(){
   sectEl.innerHTML=CATEGORIES.map(cat=>{
     const items=S.stocks[cat.id]||[];
 
-    // ── PANNEAUX (affichage spécial avec épaisseur + chutes) ──
+    // ── PANNEAUX (type, épaisseur, format, quantité + chutes avec dimensions) ──
     if(cat.special==='panneaux'){
+      const m2=(L,l,q)=>(parseFloat(L)||0)*(parseFloat(l)||0)*(parseFloat(q)||0)/1e6;
+      const fmtM2=v=>v?v.toLocaleString('fr-FR',{maximumFractionDigits:2})+' m²':'—';
       return `<div class="card te" style="margin-bottom:1rem">
         <div class="ch te-bg">
           <div class="ct">${cat.icon} ${cat.label}</div>
           <span style="font-size:11px;color:var(--text-light)">${items.length} type(s)</span>
         </div>
         <div class="cb" style="padding-top:.5rem">
-          ${items.length?items.map((item,ii)=>`
-            <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;background:var(--cream)">
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
-                <input value="${item.ref||''}" placeholder="Type (ex: Mélaminé blanc)" onfocus="window._isEditing=true" onchange="updateStock('panneaux',${ii},'ref',this.value)" style="min-width:140px;font-weight:500">
-                <label style="font-size:11px;color:var(--text-mid)">Ép.</label>
-                <input value="${item.ep||''}" placeholder="ex: 19" onfocus="window._isEditing=true" onchange="updateStock('panneaux',${ii},'ep',this.value)" style="width:55px">
-                <span style="font-size:11px;color:var(--text-mid)">mm</span>
-                <input value="${item.fourn||''}" placeholder="Fournisseur" onfocus="window._isEditing=true" onchange="updateStock('panneaux',${ii},'fourn',this.value)" style="min-width:110px">
-                <select onchange="updateStock('panneaux',${ii},'statut',this.value)">
+          ${items.length?items.map((item,ii)=>{
+            const chutes=item.chutes||[];
+            const surf=m2(item.L,item.l,item.qte)+chutes.reduce((t,c)=>t+m2(c.larg,c.haut,c.qte==null||c.qte===''?1:c.qte),0);
+            return `
+            <div class="pn-card">
+              <div class="pn-row">
+                <input class="pn-in" value="${item.ref||''}" placeholder="Type (ex: Mélaminé blanc)" onfocus="window._isEditing=true" onchange="updateStock('panneaux',${ii},'ref',this.value)" style="flex:1;min-width:150px;font-weight:500">
+                <select class="pn-in" onchange="updateStock('panneaux',${ii},'statut',this.value)">
                   <option value="stock" ${item.statut==='stock'?'selected':''}>En stock</option>
                   <option value="commander" ${item.statut==='commander'?'selected':''}>À commander</option>
                   <option value="commande" ${item.statut==='commande'?'selected':''}>En commande</option>
                 </select>
-                <input value="${item.prix||''}" placeholder="Prix €" type="number" onfocus="window._isEditing=true" onchange="updateStock('panneaux',${ii},'prix',parseFloat(this.value)||0)" style="width:70px">
                 <button class="del-btn" onclick="delStock('panneaux',${ii})">×</button>
               </div>
-              <div style="margin-left:4px">
-                <div style="font-size:11px;color:var(--text-mid);margin-bottom:4px">📐 Chutes disponibles :</div>
-                ${(item.chutes||[]).map((c,ci)=>`
-                  <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px">
-                    <input value="${c.larg||''}" placeholder="Larg." onfocus="window._isEditing=true" onchange="updateChute('panneaux',${ii},${ci},'larg',this.value)" style="width:65px">
-                    <span style="font-size:11px;color:var(--text-mid)">×</span>
-                    <input value="${c.haut||''}" placeholder="Haut." onfocus="window._isEditing=true" onchange="updateChute('panneaux',${ii},${ci},'haut',this.value)" style="width:65px">
-                    <span style="font-size:11px;color:var(--text-mid)">mm</span>
-                    <input value="${c.notes||''}" placeholder="Note (ex: chute droite)" onfocus="window._isEditing=true" onchange="updateChute('panneaux',${ii},${ci},'notes',this.value)" style="min-width:130px">
-                    <button class="del-btn" onclick="delChute('panneaux',${ii},${ci})" style="font-size:10px">×</button>
-                  </div>`).join('')}
-                <button class="btn-add" onclick="addChute('panneaux',${ii})" style="font-size:11px;padding:3px 10px;margin-top:2px">+ Ajouter chute</button>
+              <div class="pn-row">
+                <label class="pn-lab">Ép.<input class="pn-in" type="number" inputmode="decimal" value="${item.ep||''}" placeholder="19" onfocus="window._isEditing=true" onchange="updateStock('panneaux',${ii},'ep',this.value)" style="width:58px"> mm</label>
+                <label class="pn-lab">Panneau entier<input class="pn-in" type="number" inputmode="decimal" value="${item.L||''}" placeholder="2800" onfocus="window._isEditing=true" onchange="updateStock('panneaux',${ii},'L',this.value);renderStocks()" style="width:72px">×<input class="pn-in" type="number" inputmode="decimal" value="${item.l||''}" placeholder="2070" onfocus="window._isEditing=true" onchange="updateStock('panneaux',${ii},'l',this.value);renderStocks()" style="width:72px"> mm</label>
+                <label class="pn-lab">Qté<input class="pn-in" type="number" inputmode="numeric" min="0" value="${item.qte??''}" placeholder="0" onfocus="window._isEditing=true" onchange="updateStock('panneaux',${ii},'qte',parseFloat(this.value)||0);renderStocks()" style="width:55px"></label>
+                <input class="pn-in" value="${item.fourn||''}" placeholder="Fournisseur" onfocus="window._isEditing=true" onchange="updateStock('panneaux',${ii},'fourn',this.value)" style="width:120px">
+                <input class="pn-in" value="${item.prix||''}" placeholder="Prix €" type="number" onfocus="window._isEditing=true" onchange="updateStock('panneaux',${ii},'prix',parseFloat(this.value)||0)" style="width:75px">
               </div>
-            </div>`).join(''):'<div class="empty">Aucun panneau — ajouter ci-dessous</div>'}
+              <div class="pn-chutes">
+                <div class="pn-sub">📐 Chutes / morceaux restants <span style="float:right">Surface dispo : <strong>${fmtM2(surf)}</strong></span></div>
+                ${chutes.length?chutes.map((c,ci)=>`
+                  <div class="pn-row" style="margin-bottom:5px">
+                    <input class="pn-in" type="number" inputmode="decimal" value="${c.larg||''}" placeholder="Longueur" onfocus="window._isEditing=true" onchange="updateChute('panneaux',${ii},${ci},'larg',this.value)" style="width:80px">
+                    <span class="pn-x">×</span>
+                    <input class="pn-in" type="number" inputmode="decimal" value="${c.haut||''}" placeholder="Largeur" onfocus="window._isEditing=true" onchange="updateChute('panneaux',${ii},${ci},'haut',this.value)" style="width:80px">
+                    <span class="pn-x">mm ×</span>
+                    <input class="pn-in" type="number" inputmode="numeric" min="1" value="${c.qte==null||c.qte===''?1:c.qte}" onfocus="window._isEditing=true" onchange="updateChute('panneaux',${ii},${ci},'qte',parseFloat(this.value)||1)" style="width:50px" aria-label="Quantité">
+                    <input class="pn-in" value="${c.notes||''}" placeholder="Note (ex: chant sur un côté)" onfocus="window._isEditing=true" onchange="updateChute('panneaux',${ii},${ci},'notes',this.value)" style="flex:1;min-width:120px">
+                    <button class="del-btn" onclick="delChute('panneaux',${ii},${ci})">×</button>
+                  </div>`).join(''):'<div class="empty" style="padding:4px 0">Aucune chute enregistrée</div>'}
+                <button class="btn-add" onclick="addChute('panneaux',${ii})" style="font-size:11px;padding:3px 10px;margin-top:4px">+ Ajouter une chute</button>
+              </div>
+            </div>`;}).join(''):'<div class="empty">Aucun panneau — ajouter ci-dessous</div>'}
           <div class="add-form" style="margin-top:10px">
             <select id="ref-panneaux" style="min-width:150px">${cat.refs.map(r=>`<option>${r}</option>`).join('')}</select>
-            <input id="ep-panneaux" placeholder="Épaisseur (mm)" style="width:120px">
+            <input id="ep-panneaux" type="number" inputmode="decimal" placeholder="Ép. (mm)" style="width:80px">
+            <input id="L-panneaux" type="number" inputmode="decimal" placeholder="Longueur (mm)" style="width:115px">
+            <input id="l-panneaux" type="number" inputmode="decimal" placeholder="Largeur (mm)" style="width:110px">
+            <input id="qte-panneaux" type="number" inputmode="numeric" placeholder="Qté" style="width:60px">
+            <select id="type-panneaux"><option value="entier">Panneau(x) entier(s)</option><option value="chute">Chute / reste</option></select>
             <select id="stat-panneaux"><option value="stock">En stock</option><option value="commander">À commander</option><option value="commande">En commande</option></select>
             <button class="btn-add" onclick="addPanneau()">+ Ajouter</button>
           </div>
@@ -496,11 +518,19 @@ function addStock(catId){
 }
 
 function addPanneau(){
-  const ref=document.getElementById('ref-panneaux').value;
-  const ep=document.getElementById('ep-panneaux').value;
-  const statut=document.getElementById('stat-panneaux').value;
+  const v=id=>document.getElementById(id).value;
+  const ref=v('ref-panneaux'), ep=v('ep-panneaux'), L=v('L-panneaux'), l=v('l-panneaux');
+  const qte=parseFloat(v('qte-panneaux'))||1, type=v('type-panneaux'), statut=v('stat-panneaux');
   if(!S.stocks.panneaux) S.stocks.panneaux=[];
-  S.stocks.panneaux.push({id:genId(),ref,ep,statut,fourn:'',prix:0,chutes:[]});
+  // Une chute s'ajoute au panneau existant du même type et de la même épaisseur s'il existe
+  if(type==='chute'){
+    let p=S.stocks.panneaux.find(x=>x.ref===ref&&String(x.ep||'')===String(ep||''));
+    if(!p){p={id:genId(),ref,ep,statut,fourn:'',prix:0,L:'',l:'',qte:0,chutes:[]};S.stocks.panneaux.push(p);}
+    if(!p.chutes) p.chutes=[];
+    p.chutes.push({larg:L,haut:l,qte,notes:''});
+  } else {
+    S.stocks.panneaux.push({id:genId(),ref,ep,statut,fourn:'',prix:0,L,l,qte,chutes:[]});
+  }
   save();renderStocks();
 }
 
@@ -515,7 +545,7 @@ function addTasseau(){
 
 function addChute(catId,ii){
   if(!S.stocks[catId][ii].chutes) S.stocks[catId][ii].chutes=[];
-  S.stocks[catId][ii].chutes.push({larg:'',haut:'',notes:''});
+  S.stocks[catId][ii].chutes.push({larg:'',haut:'',qte:1,notes:''});
   save();renderStocks();
 }
 
@@ -529,7 +559,7 @@ function updateChute(catId,ii,ci,field,val){
   if(!S.stocks[catId][ii].chutes) S.stocks[catId][ii].chutes=[];
   S.stocks[catId][ii].chutes[ci][field]=val;
   clearTimeout(window._stockSaveTimer);
-  window._stockSaveTimer=setTimeout(()=>{save();window._isEditing=false;},800);
+  window._stockSaveTimer=setTimeout(()=>{save();window._isEditing=false;renderStocks();},800);
 }
 
 function addLongueur(ii){
