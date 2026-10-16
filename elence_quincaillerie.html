@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Élence — Quincaillerie</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--orange:#E8622A;--orange-light:#FDF0E9;--teal:#3BBFAD;--teal-light:#E4F7F5;--cream:#FAF8F5;--sand:#F0EDE7;--text:#2A2420;--text-mid:#7A6E68;--text-light:#B0A49C;--white:#FFFFFF;--border:rgba(42,36,32,0.10);--border-strong:rgba(42,36,32,0.18);--radius:14px;--radius-sm:8px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh}
+header{background:var(--white);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;min-height:60px;position:sticky;top:0;z-index:100;gap:10px;flex-wrap:wrap}
+.logo{font-family:'DM Serif Display',serif;font-size:20px;color:var(--orange);display:flex;align-items:center;gap:8px}
+.logo span{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:300;color:var(--text-mid);letter-spacing:0.12em;text-transform:uppercase}
+.nav-links{display:flex;gap:6px;flex-wrap:wrap;padding:6px 0}
+.nav-btn{padding:4px 10px;font-size:11px;font-family:'DM Sans',sans-serif;border:1px solid var(--border-strong);border-radius:20px;background:transparent;color:var(--text-mid);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;white-space:nowrap}
+.nav-btn:hover{background:var(--sand)}.nav-btn.active{background:var(--teal);color:white;border-color:var(--teal)}
+.page{max-width:980px;margin:0 auto;padding:2rem 1.5rem 4rem}
+h1{font-family:'DM Serif Display',serif;font-size:28px;font-weight:normal}
+.sub{font-size:13px;color:var(--text-mid);margin-top:4px}
+.section{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem}
+.section.teal{border-top:2.5px solid var(--teal)}.section.orange{border-top:2.5px solid var(--orange)}.section.neutral{border-top:2.5px solid var(--text-light)}
+.section-head{padding:.875rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--teal-light);gap:8px;flex-wrap:wrap}
+.section.orange .section-head{background:var(--orange-light)}.section.neutral .section-head{background:var(--sand)}
+.section-title{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text-mid);display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}.dot-teal{background:var(--teal)}.dot-orange{background:var(--orange)}.dot-sand{background:var(--text-light)}
+.section-body{padding:1rem 1.25rem 1.25rem}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+.field label{font-size:11px;color:var(--text-mid);letter-spacing:.07em;text-transform:uppercase;display:block;margin-bottom:4px}
+.field input,.field select{width:100%;font-size:13px;font-family:'DM Sans',sans-serif;padding:7px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--cream);color:var(--text);outline:none}
+.field input:focus,.field select:focus{border-color:var(--teal);background:white}
+.check{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text);padding-top:20px;cursor:pointer}
+.check input{width:16px;height:16px;accent-color:var(--teal)}
+.cais{border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;background:var(--cream)}
+.cais-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.cais-head input{flex:1;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;padding:6px 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:white;color:var(--text);outline:none}
+.cais .field input,.cais .field select{background:white}
+.cais .grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}
+.grp{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-light);margin:10px 0 6px}
+.icon-btn{font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text-mid);background:white;border:1px solid var(--border-strong);border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap}
+.icon-btn:hover{background:var(--sand)}.icon-btn.del:hover{color:#E74C3C;border-color:#E74C3C}
+.btn-add-row{font-size:12px;font-family:'DM Sans',sans-serif;padding:7px 14px;border:1px dashed var(--border-strong);border-radius:var(--radius-sm);background:transparent;color:var(--text-mid);cursor:pointer}
+.btn-add-row:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-light)}
+.btn{padding:8px 18px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--teal);color:white;border:none;border-radius:20px;cursor:pointer;font-weight:500}
+.btn:hover{filter:brightness(.95)}.btn.orange{background:var(--orange)}
+.btn.ghost{background:transparent;color:var(--text-mid);border:1px solid var(--border-strong);font-weight:400}
+.res-table{width:100%;border-collapse:collapse}
+.res-table th{font-size:10.5px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--text-light);padding:7px 8px;text-align:left;border-bottom:1px solid var(--border)}
+.res-table td{padding:7px 8px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:top}
+.res-table td.num{text-align:center;white-space:nowrap}
+.res-table tr.fam td{background:var(--sand);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-mid);font-weight:500;padding:5px 8px}
+.res-table .ref{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.res-table .why{font-size:11.5px;color:var(--text-mid)}
+.res-table input{width:90px;font-size:12px;font-family:'DM Sans',sans-serif;padding:3px 6px;border:1px solid var(--border-strong);border-radius:4px;background:var(--cream)}
+.table-wrap{overflow-x:auto}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:1rem}
+.kpi{background:var(--teal-light);border-radius:var(--radius-sm);padding:10px 12px}
+.kpi .l{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-mid)}
+.kpi .v{font-family:'DM Serif Display',serif;font-size:24px;line-height:1.2}
+.note{font-size:12px;color:var(--text-mid);background:var(--sand);border-radius:var(--radius-sm);padding:10px 12px;margin-top:12px;line-height:1.7}
+.warn{color:var(--orange)}
+.saved-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.saved-name{font-size:13px;font-weight:500}.saved-meta{font-size:11px;color:var(--text-light)}
+details summary{cursor:pointer;list-style:none}
+details summary::-webkit-details-marker{display:none}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:1rem}
+@media(max-width:600px){.page{padding:1.25rem .9rem 3rem}.section-body{padding:.9rem}}
+@media print{header,.actions,.no-print,.btn-add-row,.icon-btn{display:none!important}body{background:white}.section{break-inside:avoid;border:1px solid #ccc}}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+</head>
+<body>
+<header>
+  <div class="logo">Élence <span>quincaillerie</span></div>
+  <div class="nav-links">
+    <a href="elence_planning.html" class="nav-btn">Planning</a>
+    <a href="elence_ca.html" class="nav-btn">CA</a>
+    <a href="elence_projets.html" class="nav-btn">Projets</a>
+    <a href="elence_temps.html" class="nav-btn">Temps</a>
+    <a href="elence_devis_archi.html" class="nav-btn">Devis archi</a>
+    <a href="elence_devis_atelier.html" class="nav-btn">Devis atelier</a>
+    <a href="elence_atelier.html" class="nav-btn">Gestion atelier</a>
+    <a href="elence_quincaillerie.html" class="nav-btn active">Quincaillerie</a>
+  </div>
+</header>
+
+<div class="page">
+  <div style="margin-bottom:1.5rem">
+    <h1>Calcul de quincaillerie</h1>
+    <p class="sub">Décris les caissons du projet, le quantitatif Blum + Foussier se calcule tout seul.</p>
+  </div>
+
+  <!-- PROJET -->
+  <div class="section teal">
+    <div class="section-head"><div class="section-title"><span class="dot dot-teal"></span>Projet & options générales</div></div>
+    <div class="section-body">
+      <div class="grid" style="margin-bottom:12px">
+        <div class="field"><label>Projet</label><input id="p-nom" list="proj-list" placeholder="Nom du projet" data-k="nom"><datalist id="proj-list"></datalist></div>
+        <div class="field"><label>Client</label><input id="p-client" placeholder="Client" data-k="client"></div>
+        <div class="field"><label>Épaisseur panneaux</label><select data-k="ep"><option value="19">19 mm</option><option value="18">18 mm</option><option value="16">16 mm</option></select></div>
+        <div class="field"><label>Gamme / budget</label><select data-k="gamme"><option value="haut">Budget haut (BLUMOTION)</option><option value="bas">Budget bas</option></select></div>
+      </div>
+      <div class="grid" style="margin-bottom:12px">
+        <div class="field"><label>Façades</label><select data-k="facade"><option value="applique">En applique</option><option value="encastree">Encastrées</option></select></div>
+        <div class="field"><label>Ouverture</label><select data-k="ouverture"><option value="poignee">Poignées</option><option value="tipon">TIP-ON (sans poignée)</option><option value="aucune">Prise de main usinée</option></select></div>
+        <div class="field"><label>Pieds (caissons au sol)</label><select data-k="pieds"><option value="plinthe">Pieds + plinthe clipsée</option><option value="verins">Vérins de compensation</option><option value="aucun">Rien (posé au sol)</option></select></div>
+        <div class="field"><label>Hauteur plinthe</label><select data-k="hPlinthe"><option value="251436">80 à 95 mm</option><option value="251443">100 à 115 mm</option><option value="251450">120 à 135 mm</option><option value="246875">130 à 145 mm</option></select></div>
+      </div>
+      <div class="grid">
+        <div class="field"><label>Assemblage caissons</label><select data-k="assemblage"><option value="vis">Vissé</option><option value="lamelles">Lamelles + colle</option></select></div>
+        <div class="field"><label>Fond</label><select data-k="fond"><option value="vis19">Fond 19 mm vissé</option><option value="mince">Fond mince vissé</option><option value="rainure">Fond en rainure</option><option value="aucun">Pas de fond</option></select></div>
+        <div class="field"><label>Bandes de chant</label><select data-k="chants"><option value="colle">À coller (néoprène)</option><option value="preencolle">Pré-encollées / plaqueuse</option><option value="aucun">Pas de chant</option></select></div>
+        <label class="check"><input type="checkbox" data-k="jonctions">Caissons vissés entre eux</label>
+        <label class="check"><input type="checkbox" data-k="murale">Fixation murale (équerres)</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAISSONS -->
+  <div class="section teal">
+    <div class="section-head">
+      <div class="section-title"><span class="dot dot-teal"></span>Caissons</div>
+      <span class="sub" style="margin:0;font-size:11.5px">Dimensions hors-tout en mm · H × L × P</span>
+    </div>
+    <div class="section-body">
+      <div id="caissons"></div>
+      <button class="btn-add-row" onclick="addCaisson()">+ Ajouter un caisson</button>
+    </div>
+  </div>
+
+  <!-- RÉSULTAT -->
+  <div class="section orange" id="result">
+    <div class="section-head">
+      <div class="section-title"><span class="dot dot-orange"></span>Quantitatif</div>
+      <span class="sub" id="r-titre" style="margin:0;font-size:12px"></span>
+    </div>
+    <div class="section-body">
+      <div class="kpis" id="kpis"></div>
+      <div class="table-wrap"><table class="res-table">
+        <thead><tr><th>Désignation</th><th>Réf. fab.</th><th>Réf. Foussier</th><th>Besoin</th><th>À commander</th><th>Total HT</th></tr></thead>
+        <tbody id="res-body"></tbody>
+      </table></div>
+      <div class="note" id="res-notes"></div>
+      <div class="actions">
+        <button class="btn" onclick="saveQuanti()">Enregistrer</button>
+        <button class="btn orange" onclick="exportCSV()">Export Excel (.csv)</button>
+        <button class="btn ghost" onclick="window.print()">Imprimer</button>
+        <button class="btn ghost" onclick="resetForm()">Nouveau projet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATALOGUE -->
+  <details class="section neutral no-print">
+    <summary class="section-head"><div class="section-title"><span class="dot dot-sand"></span>Catalogue & tarifs (modifiable)</div><span class="sub" style="margin:0;font-size:11.5px">Clique pour ouvrir</span></summary>
+    <div class="section-body">
+      <p class="sub" style="margin:0 0 10px">Renseigne tes prix Foussier (HT, par conditionnement) une fois : ils sont gardés et le total se calcule. Tu peux aussi corriger une référence.</p>
+      <div class="table-wrap"><table class="res-table"><thead><tr><th>Article</th><th>Réf. fab.</th><th>Réf. Foussier</th><th>Cond.</th><th>Prix HT / cond.</th></tr></thead><tbody id="cat-body"></tbody></table></div>
+    </div>
+  </details>
+
+  <!-- ENREGISTRÉS -->
+  <div class="section neutral no-print">
+    <div class="section-head"><div class="section-title"><span class="dot dot-sand"></span>Quantitatifs enregistrés</div></div>
+    <div class="section-body" id="saved-list"></div>
+  </div>
+</div>
+
+<script>
+// ══ FIREBASE ══
+const FB_PATH='elence_quincaillerie';
+const LS_KEY='elence_quinca_v1';
+if(!window._fbInit){
+  firebase.initializeApp({apiKey:"AIzaSyBhZKYT-3BTqmqpDv-6LWfnTqnEQmmHVL4",authDomain:"elence-dashboard.firebaseapp.com",databaseURL:"https://elence-dashboard-default-rtdb.firebaseio.com",projectId:"elence-dashboard",storageBucket:"elence-dashboard.firebasestorage.app",messagingSenderId:"206545221004",appId:"1:206545221004:web:79c1d36fd389bad59a92a9"});
+  window._fbInit=true;
+}
+const db=firebase.database();
+function genId(){return 'q_'+Date.now()+'_'+Math.random().toString(36).substr(2,4);}
+
+// ══ CATALOGUE (références relevées sur foussier.fr, oct. 2026) ══
+// f = famille, d = désignation, m = marque, rf = réf. fabricant, ref = réf. Foussier, c = conditionnement, u = unité de besoin
+const MOV={250:'241028',270:'241033',300:'241053',320:'241063',350:'241068',380:'241088',400:'241098',420:'241103',450:'241123',480:'241133',500:'241138',520:'241158',550:'241168',600:'241173'};
+const TDB={250:'240347',270:'240367',300:'240377',350:'240382',400:'240402',450:'240412',500:'240417',550:'240437',600:'240447'};
+const TDT={250:'120769',270:'120770',300:'120774',350:'120776',400:'120782',450:'120783',500:'120784',550:'120788',600:'120789'};
+const CAT={
+  ch_bm_app:{f:'Charnières',d:'Charnière CLIP top BLUMOTION 110° applique, INSERTA',m:'Blum',rf:'71B3590',ref:'210057',c:20,u:'pce'},
+  ch_bm_enc:{f:'Charnières',d:'Charnière CLIP top BLUMOTION 110° encastrée, INSERTA',m:'Blum',rf:'71B3790',ref:'283250',c:20,u:'pce'},
+  ch_107_app:{f:'Charnières',d:'Charnière CLIP top 107° applique, INSERTA (sans frein)',m:'Blum',rf:'75T1590',ref:'284944',c:20,u:'pce'},
+  ch_107_enc:{f:'Charnières',d:'Charnière CLIP top 107° encastrée, INSERTA (sans frein)',m:'Blum',rf:'75T1790',ref:'284979',c:20,u:'pce'},
+  ch_tl_app:{f:'Charnières',d:'Charnière CLIP top 110° SANS ressort (pour TIP-ON), applique',m:'Blum',rf:'70T3590.TL',ref:'210064',c:1,u:'pce'},
+  ch_tl_enc:{f:'Charnières',d:'Charnière CLIP top 110° SANS ressort (pour TIP-ON), encastrée',m:'Blum',rf:'70T3790.TL',ref:'',c:1,u:'pce'},
+  embase:{f:'Charnières',d:'Embase en croix à visser 0 mm',m:'Blum',rf:'173L6100',ref:'281959',c:20,u:'pce'},
+  tipon_porte:{f:'Ouverture',d:'TIP-ON version longue avec butée, ressort standard (gris platine)',m:'Blum',rf:'956A1006R736',ref:'226702',c:1,u:'pce'},
+  tipon_support:{f:'Ouverture',d:'Support droit TIP-ON version longue 20/32 (gris platine)',m:'Blum',rf:'956A1201 R736',ref:'226772',c:1,u:'pce'},
+  poignee:{f:'Ouverture',d:'Poignée (modèle à choisir, vis fournies)',m:'—',rf:'',ref:'',c:1,u:'pce'},
+  acc_mov_g:{f:'Coulisses',d:'Accouplement MOVENTO réglage latéral, gauche',m:'Blum',rf:'T51.7601',ref:'245381',c:1,u:'pce'},
+  acc_mov_d:{f:'Coulisses',d:'Accouplement MOVENTO réglage latéral, droit',m:'Blum',rf:'T51.7601',ref:'245388',c:1,u:'pce'},
+  acc_tdm_g:{f:'Coulisses',d:'Clip d\'accouplement TANDEM, gauche',m:'Blum',rf:'T51.1700.04L',ref:'245959',c:1,u:'pce'},
+  acc_tdm_d:{f:'Coulisses',d:'Clip d\'accouplement TANDEM, droit',m:'Blum',rf:'T51.1700.04R',ref:'245966',c:1,u:'pce'},
+  taquet:{f:'Étagères',d:'Taquet demi-lune à tige Ø5, brut',m:'Foussier',rf:'',ref:'234451',c:10,u:'pce'},
+  pied_plinthe:{f:'Pieds',d:'Pied de cuisine 323 métal avec platine (jeu de 4)',m:'Foussier',rf:'',ref:'251436',c:4,u:'pce'},
+  clip_plinthe:{f:'Pieds',d:'Clips de plinthe (sachet 10 clips + 10 vis)',m:'Foussier',rf:'',ref:'253287',c:10,u:'pce'},
+  verin:{f:'Pieds',d:'Vérin compensateur réglable, L 32 mm',m:'Foussier',rf:'',ref:'255713',c:1,u:'pce'},
+  serrure_porte:{f:'Serrures',d:'Serrure 1 point à plaquer UNO, porte (droite)',m:'Foussier',rf:'',ref:'216916',c:1,u:'pce'},
+  serrure_tiroir:{f:'Serrures',d:'Serrure 1 point à plaquer UNO, tiroir',m:'Foussier',rf:'',ref:'216930',c:1,u:'pce'},
+  equerre:{f:'Fixation murale',d:'Équerre d\'assemblage acier zingué',m:'Foussier',rf:'',ref:'230426',c:10,u:'pce'},
+  cheville6:{f:'Fixation murale',d:'Cheville DUOPOWER 6×30',m:'Fischer',rf:'',ref:'141237',c:100,u:'pce'},
+  vis_cyl_45x40:{f:'Fixation murale',d:'Vis EXCLUSIVE tête cylindrique Torx 4,5×40',m:'Foussier',rf:'',ref:'346822',c:500,u:'pce'},
+  vis_cyl_35x16:{f:'Visserie',d:'Vis EXCLUSIVE tête cylindrique Torx 3,5×16 (embases, coulisses, équerres)',m:'Foussier',rf:'',ref:'344484',c:500,u:'pce'},
+  vis_tf_35x15:{f:'Visserie',d:'Vis EXCLUSIVE TF Torx 3,5×15 (fond mince)',m:'Foussier',rf:'',ref:'338478',c:500,u:'pce'},
+  vis_4x50:{f:'Visserie',d:'Vis EXCLUSIVE TF Torx 4×50/30 (assemblage caissons)',m:'Foussier',rf:'',ref:'338611',c:500,u:'pce'},
+  vis_4x40:{f:'Visserie',d:'Vis EXCLUSIVE TF Torx 4×40',m:'Foussier',rf:'',ref:'338597',c:500,u:'pce'},
+  vis_4x35:{f:'Visserie',d:'Vis EXCLUSIVE TF Torx 4×35 (jonction entre caissons)',m:'Foussier',rf:'',ref:'338590',c:500,u:'pce'},
+  lamelle20:{f:'Assemblage',d:'Lamelle d\'assemblage Lamello n°20',m:'Lamello',rf:'',ref:'234479',c:1000,u:'pce'},
+  lamelle10:{f:'Assemblage',d:'Lamelle d\'assemblage Lamello n°10',m:'Lamello',rf:'',ref:'234486',c:1000,u:'pce'},
+  colle_vin:{f:'Assemblage',d:'Colle vinylique D4, biberon 1 kg',m:'Foussier',rf:'',ref:'443905',c:1,u:'biberon'},
+  chant:{f:'Chants',d:'Bande de chant (largeur selon épaisseur panneau)',m:'—',rf:'',ref:'',c:1,u:'ml'},
+  colle_neo:{f:'Chants',d:'Colle néoprène liquide, bidon 5 L',m:'Foussier',rf:'',ref:'427994',c:5,u:'L'}
+};
+Object.keys(MOV).forEach(nl=>CAT['mov_'+nl]={f:'Coulisses',d:'Coulisse MOVENTO BLUMOTION S 40 kg sortie totale, NL '+nl+' (paire)',m:'Blum',rf:'760H'+String(nl).padStart(3,'0')+'0S',ref:MOV[nl],c:1,u:'paire'});
+Object.keys(TDB).forEach(nl=>CAT['tdb_'+nl]={f:'Coulisses',d:'Coulisse TANDEM BLUMOTION 30 kg sortie totale, NL '+nl+' (paire)',m:'Blum',rf:'560F'+String(nl).padStart(3,'0')+'0B',ref:TDB[nl],c:1,u:'paire'});
+Object.keys(TDT).forEach(nl=>CAT['tdt_'+nl]={f:'Coulisses',d:'Coulisse TANDEM TIP-ON intégré 30 kg sortie totale, NL '+nl+' (paire)',m:'Blum',rf:'560F'+String(nl).padStart(3,'0')+'0T',ref:TDT[nl],c:1,u:'paire'});
+const FAM_ORDER=['Charnières','Coulisses','Ouverture','Étagères','Serrures','Pieds','Assemblage','Visserie','Fixation murale','Chants'];
+const PLINTHE_LABEL={'251436':'80 à 95 mm','251443':'100 à 115 mm','251450':'120 à 135 mm','246875':'130 à 145 mm'};
+
+// ══ ÉTAT ══
+function defProjet(){return {nom:'',client:'',ep:'19',gamme:'haut',facade:'applique',ouverture:'poignee',pieds:'plinthe',hPlinthe:'251436',assemblage:'vis',fond:'vis19',chants:'colle',jonctions:true,murale:true};}
+function defCaisson(n){return {id:genId(),nom:'Caisson '+n,qte:1,H:720,L:600,P:580,portes:2,hPorte:'',tiroirs:0,etFixes:0,etMobiles:1,etCoul:0,serrure:false,sol:true};}
+let S={projet:defProjet(),caissons:[],cat:{},saved:[]};
+function sanitize(c){
+  if(!c||typeof c!=='object') c={};
+  c.projet=Object.assign(defProjet(),c.projet||{});
+  if(!Array.isArray(c.caissons)) c.caissons=[];
+  if(!c.cat||typeof c.cat!=='object') c.cat={};
+  if(!Array.isArray(c.saved)) c.saved=[];
+  return c;
+}
+try{const l=JSON.parse(localStorage.getItem(LS_KEY));if(l)S=sanitize(l);}catch(e){}
+if(!S.caissons.length) S.caissons.push(defCaisson(1));
+
+function save(){
+  S._lastModified=Date.now();
+  try{localStorage.setItem(LS_KEY,JSON.stringify(S));}catch(e){}
+  db.ref(FB_PATH).set(JSON.parse(JSON.stringify(S))).catch(e=>console.warn('FB:',e));
+}
+let saveTimer=null;
+function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(save,700);}
+
+function syncFrom(d){
+  if(!d) {db.ref(FB_PATH).set(JSON.parse(JSON.stringify(S)));return;}
+  const fbTime=d._lastModified||0, localTime=S._lastModified||0;
+  if(fbTime>localTime && !window._isEditing){S=sanitize(d);try{localStorage.setItem(LS_KEY,JSON.stringify(S));}catch(e){}renderAll();}
+  else if(fbTime<localTime) db.ref(FB_PATH).set(JSON.parse(JSON.stringify(S)));
+}
+db.ref(FB_PATH).on('value',snap=>{try{syncFrom(snap.val());}catch(e){}});
+function forceFirebaseSync(){db.ref(FB_PATH).once('value',snap=>{try{syncFrom(snap.val());}catch(e){}});}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)forceFirebaseSync();});
+window.addEventListener('focus',forceFirebaseSync);
+
+// Liste des projets existants (lecture seule depuis le planning)
+db.ref('elence/projects').once('value',snap=>{
+  const ps=snap.val()||[]; const arr=Array.isArray(ps)?ps:Object.values(ps);
+  document.getElementById('proj-list').innerHTML=arr.filter(p=>p&&p.name).map(p=>`<option value="${esc(p.name)}">${esc(p.client||'')}</option>`).join('');
+});
+
+// ══ UTILITAIRES ══
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function num(v,d){const n=parseFloat(String(v).replace(',','.'));return isNaN(n)?(d||0):n;}
+function art(id){const a=Object.assign({},CAT[id]);if(id==='pied_plinthe'){a.ref=S.projet.hPlinthe||a.ref;a.d='Pied de cuisine 323 métal avec platine, réglage '+(PLINTHE_LABEL[a.ref]||'')+' (jeu de 4)';}const o=S.cat[id]||{};if(o.ref!==undefined&&o.ref!=='')a.ref=o.ref;a.prix=num(o.prix,0);return a;}
+function fmtE(v){return v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';}
+function charnieresParPorte(h,w){let n=h<=900?2:h<=1600?3:h<=2000?4:5;if(w>600)n++;return n;}
+function choisirNL(liste,pint){const ok=Object.keys(liste).map(Number).filter(nl=>nl<=pint-10).sort((a,b)=>b-a);return ok.length?ok[0]:null;}
+
+// ══ CALCUL ══
+function calcul(){
+  const P=S.projet, ep=num(P.ep,19);
+  const need={}, why={}, notes=[];
+  const add=(id,q,txt)=>{if(!q||q<=0)return;need[id]=(need[id]||0)+q;if(txt){(why[id]=why[id]||[]).push(txt);}};
+  let nbCais=0, mlChant=0, nbPortes=0, nbTiroirs=0, nbCh=0;
+
+  S.caissons.forEach(c=>{
+    const n=Math.max(0,Math.round(num(c.qte,1)));
+    if(!n) return;
+    nbCais+=n;
+    const H=num(c.H),L=num(c.L),Pf=num(c.P);
+    const nom=c.nom||'Caisson';
+    const nd=Math.max(0,Math.round(num(c.portes))), nt=Math.max(0,Math.round(num(c.tiroirs)));
+    const hP=num(c.hPorte,0)||(nt>0&&nd>0?H/2:H);
+    const etF=Math.round(num(c.etFixes)), etM=Math.round(num(c.etMobiles)), etC=Math.round(num(c.etCoul));
+    const tag=(q)=>`${nom}${n>1?' ×'+n:''} : ${q}`;
+
+    // Portes & charnières
+    if(nd>0){
+      const wP=L/nd, cpp=charnieresParPorte(hP,wP), tot=cpp*nd*n;
+      nbPortes+=nd*n; nbCh+=tot;
+      let chId;
+      if(P.ouverture==='tipon') chId=P.facade==='encastree'?'ch_tl_enc':'ch_tl_app';
+      else if(P.gamme==='haut') chId=P.facade==='encastree'?'ch_bm_enc':'ch_bm_app';
+      else chId=P.facade==='encastree'?'ch_107_enc':'ch_107_app';
+      add(chId,tot,tag(`${nd*n} porte(s) ${Math.round(hP)}×${Math.round(wP)} → ${cpp}/porte`));
+      add('embase',tot,tag(tot+' embases'));
+      add('vis_cyl_35x16',tot*2,tag('2 vis / embase'));
+      if(P.ouverture==='tipon'){add('tipon_porte',nd*n,tag('1 / porte'));add('tipon_support',nd*n,tag('1 / porte'));}
+      if(P.ouverture==='poignee') add('poignee',nd*n,tag('portes'));
+      if(c.serrure) add('serrure_porte',n,tag('1 / caisson'));
+      mlChant+=nd*n*2*(hP+wP)/1000;
+    }
+    // Tiroirs & étagères coulissantes
+    const pint=Pf-(P.fond==='vis19'?ep:P.fond==='mince'?5:P.fond==='rainure'?15:0)-(P.facade==='encastree'?ep:0);
+    const coulisse=(qte,tipon,label)=>{
+      if(!qte) return;
+      let liste,pref,accG,accD;
+      if(tipon){liste=TDT;pref='tdt_';accG='acc_tdm_g';accD='acc_tdm_d';}
+      else if(P.gamme==='haut'){liste=MOV;pref='mov_';accG='acc_mov_g';accD='acc_mov_d';}
+      else {liste=TDB;pref='tdb_';accG='acc_tdm_g';accD='acc_tdm_d';}
+      const nl=choisirNL(liste,pint);
+      if(!nl){notes.push(`<span class="warn">⚠ ${esc(nom)} : profondeur trop faible pour une coulisse (prof. utile ${Math.round(pint)} mm).</span>`);return;}
+      add(pref+nl,qte*n,tag(`${qte*n} ${label}, prof. utile ${Math.round(pint)} mm`));
+      add(accG,qte*n,tag(label));add(accD,qte*n,tag(label));
+      add('vis_cyl_35x16',qte*n*12,tag('≈ 12 vis / '+label.replace(/s$/,'')));
+    };
+    if(nt>0){
+      nbTiroirs+=nt*n;
+      coulisse(nt,P.ouverture==='tipon','tiroirs');
+      if(P.ouverture==='poignee') add('poignee',nt*n,tag('tiroirs'));
+      if(c.serrure&&nd===0) add('serrure_tiroir',n,tag('1 / caisson'));
+      const zone=nd>0?H-hP:H, hF=zone/nt;
+      mlChant+=nt*n*2*(hF+L)/1000;
+    }
+    if(etC>0){coulisse(etC,false,'étagères coulissantes');mlChant+=etC*n*L/1000;}
+    // Étagères
+    if(etM>0){add('taquet',etM*4*n,tag(`${etM*n} étagère(s) mobile(s) × 4`));mlChant+=etM*n*L/1000;}
+    // Assemblage
+    const joints=4+etF*2;
+    if(P.assemblage==='vis'){
+      const vpj=Math.max(2,Math.round(Pf/150)+1);
+      add(ep>=18?'vis_4x50':'vis_4x40',joints*vpj*n,tag(`${joints} assemblages × ${vpj} vis`));
+    }else{
+      const lpj=Math.max(2,Math.round(Pf/200));
+      add(ep>=18?'lamelle20':'lamelle10',joints*lpj*n,tag(`${joints} assemblages × ${lpj} lamelles`));
+    }
+    mlChant+=n*(2*H+2*L)/1000+etF*n*L/1000;
+    // Fond
+    const per=2*(H+L);
+    if(P.fond==='vis19') add('vis_4x40',(Math.ceil(per/200)+4)*n,tag('fond vissé, 1 vis / 20 cm'));
+    if(P.fond==='mince') add('vis_tf_35x15',(Math.ceil(per/150)+4)*n,tag('fond mince, 1 vis / 15 cm'));
+    // Pieds
+    if(c.sol&&P.pieds!=='aucun'){
+      const np=4+(L>800?2:0)+(L>1600?2:0);
+      if(P.pieds==='plinthe'){add('pied_plinthe',np*n,tag(np+' pieds'));add('clip_plinthe',2*n,tag('2 clips / caisson'));add('vis_cyl_35x16',np*4*n,tag('4 vis / pied'));}
+      else add('verin',np*n,tag(np+' vérins'));
+    }
+    // Fixation murale
+    if(P.murale){add('equerre',2*n,tag('2 / caisson'));add('cheville6',2*n);add('vis_cyl_45x40',2*n);add('vis_cyl_35x16',2*n,tag('équerres côté caisson'));}
+  });
+
+  if(P.jonctions&&nbCais>1) add('vis_4x35',(nbCais-1)*4,`${nbCais-1} jonction(s) × 4 vis`);
+  if(P.assemblage==='lamelles'){const lam=(need.lamelle20||0)+(need.lamelle10||0);add('colle_vin',Math.max(1,Math.ceil(lam/150)),'≈ 1 kg pour 150 lamelles');}
+  if(P.chants!=='aucun'&&mlChant>0){
+    const ml=Math.ceil(mlChant*1.1);
+    add('chant',ml,'chants visibles + 10 % de chute');
+    if(P.chants==='colle') add('colle_neo',Math.ceil(ml*0.015*10)/10,'≈ 15 ml / mètre de chant (double encollage)');
+  }
+
+  // Notes
+  if(P.ouverture==='tipon'&&nbPortes) notes.push('TIP-ON portes : charnières SANS ressort obligatoires, 1 TIP-ON + 1 support par porte. Pour une porte > 1 300 mm, prévois 2 TIP-ON.');
+  if(P.ouverture==='tipon'&&P.facade==='encastree'&&nbPortes) notes.push('<span class="warn">Charnière sans ressort encastrée (70T3790.TL) non trouvée chez Foussier : réf. à demander.</span>');
+  if(P.gamme==='bas'&&Object.keys(need).some(k=>k.startsWith('tdb_'))) notes.push('Budget bas : Blum ne fait plus de coulisse invisible sans amortisseur, la TANDEM 30 kg reste la moins chère de la gamme.');
+  if(P.pieds==='plinthe') notes.push('Pieds de plinthe : hauteur '+PLINTHE_LABEL[P.hPlinthe]+'. Vendus par jeu de 4.');
+  if(P.facade==='encastree') notes.push('Façades encastrées : la profondeur utile des coulisses tient compte de l\'épaisseur de façade.');
+  notes.push('INSERTA : perçage Ø35 + 2 × Ø8 dans la porte, sans vis. Nombre de charnières : 2 jusqu\'à 900 mm, 3 jusqu\'à 1 600, 4 jusqu\'à 2 000, +1 si porte > 600 mm de large.');
+  notes.push('Poignées et vis de poignées non référencées : à choisir selon le design.');
+  return {need,why,notes,kpi:{nbCais,nbPortes,nbTiroirs,nbCh,mlChant}};
+}
+
+// ══ RENDU ══
+function bindProjet(){
+  document.querySelectorAll('[data-k]').forEach(el=>{
+    const k=el.dataset.k;
+    if(el.type==='checkbox') el.checked=!!S.projet[k]; else el.value=S.projet[k]==null?'':S.projet[k];
+    el.oninput=el.onchange=()=>{S.projet[k]=el.type==='checkbox'?el.checked:el.value;window._isEditing=true;saveSoon();renderResult();setTimeout(()=>window._isEditing=false,900);};
+  });
+}
+function renderCaissons(){
+  const f=(c,i,k,label,attrs)=>`<div class="field"><label>${label}</label><input type="number" inputmode="decimal" value="${esc(c[k])}" ${attrs||''} oninput="setC(${i},'${k}',this.value)"></div>`;
+  document.getElementById('caissons').innerHTML=S.caissons.map((c,i)=>`<div class="cais">
+    <div class="cais-head">
+      <input value="${esc(c.nom)}" oninput="setC(${i},'nom',this.value)" aria-label="Nom du caisson">
+      <button class="icon-btn" onclick="dupC(${i})">Dupliquer</button>
+      <button class="icon-btn del" onclick="delC(${i})">Supprimer</button>
+    </div>
+    <div class="grid">
+      ${f(c,i,'qte','Quantité','min="1"')}${f(c,i,'H','Hauteur')}${f(c,i,'L','Largeur')}${f(c,i,'P','Profondeur')}
+    </div>
+    <div class="grp">Façades</div>
+    <div class="grid">
+      ${f(c,i,'portes','Portes','min="0"')}${f(c,i,'hPorte','Haut. porte','placeholder="auto"')}${f(c,i,'tiroirs','Tiroirs','min="0"')}
+      <label class="check"><input type="checkbox" ${c.serrure?'checked':''} onchange="setC(${i},'serrure',this.checked)">Serrure</label>
+    </div>
+    <div class="grp">Intérieur & pose</div>
+    <div class="grid">
+      ${f(c,i,'etFixes','Étag. fixes','min="0"')}${f(c,i,'etMobiles','Étag. taquets','min="0"')}${f(c,i,'etCoul','Étag. coulissantes','min="0"')}
+      <label class="check"><input type="checkbox" ${c.sol?'checked':''} onchange="setC(${i},'sol',this.checked)">Posé au sol</label>
+    </div>
+  </div>`).join('');
+}
+function setC(i,k,v){S.caissons[i][k]=v;window._isEditing=true;saveSoon();renderResult();clearTimeout(window._edT);window._edT=setTimeout(()=>window._isEditing=false,900);}
+function addCaisson(){S.caissons.push(defCaisson(S.caissons.length+1));save();renderCaissons();renderResult();}
+function dupC(i){const c=JSON.parse(JSON.stringify(S.caissons[i]));c.id=genId();c.nom+=' (copie)';S.caissons.splice(i+1,0,c);save();renderCaissons();renderResult();}
+function delC(i){if(!confirm('Supprimer ce caisson ?'))return;S.caissons.splice(i,1);save();renderCaissons();renderResult();}
+
+let LAST=null;
+function lignes(r){
+  return Object.keys(r.need).map(id=>{
+    const a=art(id), q=r.need[id];
+    const nbC=a.u==='ml'?null:Math.ceil(q/(a.c||1));
+    return {id,a,q,nbC,total:nbC!=null&&a.prix?nbC*a.prix:0,why:(r.why[id]||[])};
+  }).sort((x,y)=>FAM_ORDER.indexOf(x.a.f)-FAM_ORDER.indexOf(y.a.f)||x.a.d.localeCompare(y.a.d));
+}
+function renderResult(){
+  const r=calcul(); const L=lignes(r); LAST={r,L};
+  const P=S.projet;
+  document.getElementById('r-titre').textContent=[P.nom,P.client].filter(Boolean).join(' · ');
+  const totalHT=L.reduce((s,l)=>s+l.total,0), manquePrix=L.some(l=>l.nbC!=null&&l.a.ref&&!l.a.prix);
+  document.getElementById('kpis').innerHTML=[
+    ['Caissons',r.kpi.nbCais],['Portes',r.kpi.nbPortes],['Charnières',r.kpi.nbCh],['Tiroirs',r.kpi.nbTiroirs],['Chant',Math.ceil(r.kpi.mlChant*1.1)+' ml'],
+    ['Total HT',totalHT?fmtE(totalHT)+(manquePrix?'*':''):'—']
+  ].map(([l,v])=>`<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div></div>`).join('');
+  let fam='', html='';
+  L.forEach(l=>{
+    if(l.a.f!==fam){fam=l.a.f;html+=`<tr class="fam"><td colspan="6">${fam}</td></tr>`;}
+    const besoin=(Math.round(l.q*10)/10).toLocaleString('fr-FR')+' '+l.a.u;
+    const cmd=l.nbC==null?'—':(l.a.c>1?`${l.nbC} × ${l.a.c} ${l.a.u}`:`${l.nbC} ${l.a.u}`);
+    html+=`<tr><td>${esc(l.a.d)}<div class="why">${l.why.map(esc).join('<br>')}</div></td>
+      <td class="ref">${esc(l.a.rf||'—')}</td><td class="ref">${esc(l.a.ref||'à trouver')}</td>
+      <td class="num">${besoin}</td><td class="num">${cmd}</td><td class="num">${l.total?fmtE(l.total):'—'}</td></tr>`;
+  });
+  document.getElementById('res-body').innerHTML=html||'<tr><td colspan="6" class="why">Ajoute un caisson pour lancer le calcul.</td></tr>';
+  document.getElementById('res-notes').innerHTML=r.notes.map(n=>'• '+n).join('<br>')+(manquePrix?'<br>* Total partiel : certains prix ne sont pas renseignés dans le catalogue.':'');
+}
+function renderCatalogue(){
+  const ids=Object.keys(CAT).sort((a,b)=>FAM_ORDER.indexOf(CAT[a].f)-FAM_ORDER.indexOf(CAT[b].f));
+  document.getElementById('cat-body').innerHTML=ids.map(id=>{const a=art(id);const o=S.cat[id]||{};return `<tr>
+    <td>${esc(a.d)}</td><td class="ref">${esc(a.rf||'—')}</td>
+    <td><input value="${esc(o.ref!==undefined?o.ref:CAT[id].ref)}" onchange="setCat('${id}','ref',this.value)"></td>
+    <td class="num">${a.c} ${a.u==='ml'?'ml':''}</td>
+    <td><input type="number" step="0.01" min="0" value="${o.prix||''}" placeholder="€" onchange="setCat('${id}','prix',this.value)"></td></tr>`;}).join('');
+}
+function setCat(id,k,v){S.cat[id]=S.cat[id]||{};S.cat[id][k]=v;save();renderResult();}
+
+// ══ ENREGISTREMENT / EXPORT ══
+function saveQuanti(){
+  const P=S.projet;
+  S.saved.unshift({id:genId(),nom:P.nom||'Sans nom',client:P.client||'',date:new Date().toLocaleDateString('fr-FR'),projet:JSON.parse(JSON.stringify(P)),caissons:JSON.parse(JSON.stringify(S.caissons))});
+  save();renderSaved();
+}
+function loadSaved(i){
+  if(!confirm('Remplacer le projet en cours par ce quantitatif ?'))return;
+  const s=S.saved[i];S.projet=Object.assign(defProjet(),s.projet);S.caissons=JSON.parse(JSON.stringify(s.caissons));save();renderAll();window.scrollTo({top:0,behavior:'smooth'});
+}
+function delSaved(i){if(!confirm('Supprimer ce quantitatif enregistré ?'))return;S.saved.splice(i,1);save();renderSaved();}
+function renderSaved(){
+  const el=document.getElementById('saved-list');
+  if(!S.saved.length){el.innerHTML='<div class="why" style="font-size:12px;color:var(--text-light);font-style:italic">Aucun quantitatif enregistré</div>';return;}
+  el.innerHTML=S.saved.map((s,i)=>`<div class="saved-card"><div style="flex:1"><div class="saved-name">${esc(s.nom)}${s.client?' — '+esc(s.client):''}</div><div class="saved-meta">${s.date} · ${s.caissons.length} type(s) de caisson</div></div>
+    <button class="icon-btn" onclick="loadSaved(${i})">Ouvrir</button><button class="icon-btn del" onclick="delSaved(${i})">×</button></div>`).join('');
+}
+function exportCSV(){
+  const {L}=LAST, P=S.projet;
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const rows=[['Projet',P.nom],['Client',P.client],['Date',new Date().toLocaleDateString('fr-FR')],[],
+    ['Famille','Désignation','Marque','Réf. fabricant','Réf. Foussier','Besoin','Unité','Conditionnement','Nb à commander','Prix HT / cond.','Total HT','Détail']];
+  L.forEach(l=>rows.push([l.a.f,l.a.d,l.a.m,l.a.rf,l.a.ref,String(Math.round(l.q*10)/10).replace('.',','),l.a.u,l.a.c,l.nbC==null?'':l.nbC,l.a.prix?String(l.a.prix).replace('.',','):'',l.total?String(Math.round(l.total*100)/100).replace('.',','):'',l.why.join(' | ')]));
+  rows.push([]);LAST.r.notes.forEach(n=>rows.push([n.replace(/<[^>]+>/g,'')]));
+  const csv='﻿'+rows.map(r=>r.map(q).join(';')).join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='Quincaillerie_'+(P.nom||'projet').replace(/[^\wÀ-ÿ-]+/g,'_')+'.csv';
+  document.body.appendChild(a);a.click();a.remove();
+}
+function resetForm(){
+  if(!confirm('Commencer un nouveau projet ? (pense à enregistrer celui-ci avant)'))return;
+  const keep={gamme:S.projet.gamme,ep:S.projet.ep,facade:S.projet.facade,ouverture:S.projet.ouverture,pieds:S.projet.pieds,assemblage:S.projet.assemblage,fond:S.projet.fond,chants:S.projet.chants};
+  S.projet=Object.assign(defProjet(),keep);S.caissons=[defCaisson(1)];save();renderAll();
+}
+
+function renderAll(){bindProjet();renderCaissons();renderResult();renderCatalogue();renderSaved();}
+renderAll();
+</script>
+</body>
+</html>
