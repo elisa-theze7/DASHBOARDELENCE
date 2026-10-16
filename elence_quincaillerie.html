@@ -104,6 +104,7 @@ details summary::-webkit-details-marker{display:none}
       <div class="grid" style="margin-bottom:12px">
         <div class="field"><label>Façades</label><select data-k="facade"><option value="applique">En applique</option><option value="encastree">Encastrées</option></select></div>
         <div class="field"><label>Ouverture</label><select data-k="ouverture"><option value="poignee">Poignées</option><option value="tipon">TIP-ON (sans poignée)</option><option value="aucune">Prise de main usinée</option></select></div>
+        <div class="field" id="f-tipon"><label>Pose des TIP-ON</label><select data-k="tiponMontage"><option value="percage">Perçage direct dans le caisson (Ø10)</option><option value="support">Sur support droit vissé</option></select></div>
         <div class="field"><label>Pieds (caissons au sol)</label><select data-k="pieds"><option value="plinthe">Pieds + plinthe clipsée</option><option value="verins">Vérins de compensation</option><option value="aucun">Rien (posé au sol)</option></select></div>
         <div class="field"><label>Hauteur plinthe</label><select data-k="hPlinthe"><option value="251436">80 à 95 mm</option><option value="251443">100 à 115 mm</option><option value="251450">120 à 135 mm</option><option value="246875">130 à 145 mm</option></select></div>
       </div>
@@ -225,7 +226,7 @@ const FAM_ORDER=['Charnières','Coulisses','Ouverture','Étagères','Serrures','
 const PLINTHE_LABEL={'251436':'80 à 95 mm','251443':'100 à 115 mm','251450':'120 à 135 mm','246875':'130 à 145 mm'};
 
 // ══ ÉTAT ══
-function defProjet(){return {nom:'',client:'',ep:'19',gamme:'haut',facade:'applique',ouverture:'poignee',pieds:'plinthe',hPlinthe:'251436',assemblage:'vis',fond:'vis19',chants:'colle',jonctions:true,murale:true};}
+function defProjet(){return {nom:'',client:'',ep:'19',gamme:'haut',facade:'applique',ouverture:'poignee',tiponMontage:'percage',pieds:'plinthe',hPlinthe:'251436',assemblage:'vis',fond:'vis19',chants:'colle',jonctions:true,murale:true};}
 function defCaisson(n){return {id:genId(),nom:'Caisson '+n,qte:1,H:720,L:600,P:580,portes:2,hPorte:'',tiroirs:0,etFixes:0,etMobiles:1,etCoul:0,serrure:false,sol:true};}
 let S={projet:defProjet(),caissons:[],cat:{},saved:[]};
 function sanitize(c){
@@ -301,7 +302,11 @@ function calcul(){
       add(chId,tot,tag(`${nd*n} porte(s) ${Math.round(hP)}×${Math.round(wP)} → ${cpp}/porte`));
       add('embase',tot,tag(tot+' embases'));
       add('vis_cyl_35x16',tot*2,tag('2 vis / embase'));
-      if(P.ouverture==='tipon'){add('tipon_porte',nd*n,tag('1 / porte'));add('tipon_support',nd*n,tag('1 / porte'));}
+      if(P.ouverture==='tipon'){
+        const tpp=hP>1300?2:1, nbT=nd*n*tpp;
+        add('tipon_porte',nbT,tag(`${nd*n} porte(s) × ${tpp} TIP-ON${tpp>1?' (porte > 1 300 mm)':''}`));
+        if(P.tiponMontage==='support') add('tipon_support',nbT,tag(`1 support / TIP-ON`));
+      }
       if(P.ouverture==='poignee') add('poignee',nd*n,tag('portes'));
       if(c.serrure) add('serrure_porte',n,tag('1 / caisson'));
       mlChant+=nd*n*2*(hP+wP)/1000;
@@ -364,7 +369,7 @@ function calcul(){
   }
 
   // Notes
-  if(P.ouverture==='tipon'&&nbPortes) notes.push('TIP-ON portes : charnières SANS ressort obligatoires, 1 TIP-ON + 1 support par porte. Pour une porte > 1 300 mm, prévois 2 TIP-ON.');
+  if(P.ouverture==='tipon'&&nbPortes) notes.push('TIP-ON portes : charnières SANS ressort obligatoires. 1 TIP-ON par porte, 2 si la porte dépasse 1 300 mm. '+(P.tiponMontage==='support'?'1 support droit par TIP-ON.':'Pose par perçage Ø10 directement dans le côté du caisson, sans support.'));
   if(P.ouverture==='tipon'&&P.facade==='encastree'&&nbPortes) notes.push('<span class="warn">Charnière sans ressort encastrée (70T3790.TL) non trouvée chez Foussier : réf. à demander.</span>');
   if(P.gamme==='bas'&&Object.keys(need).some(k=>k.startsWith('tdb_'))) notes.push('Budget bas : Blum ne fait plus de coulisse invisible sans amortisseur, la TANDEM 30 kg reste la moins chère de la gamme.');
   if(P.pieds==='plinthe') notes.push('Pieds de plinthe : hauteur '+PLINTHE_LABEL[P.hPlinthe]+'. Vendus par jeu de 4.');
@@ -419,6 +424,7 @@ function lignes(r){
   }).sort((x,y)=>FAM_ORDER.indexOf(x.a.f)-FAM_ORDER.indexOf(y.a.f)||x.a.d.localeCompare(y.a.d));
 }
 function renderResult(){
+  const ft=document.getElementById('f-tipon');if(ft)ft.style.display=S.projet.ouverture==='tipon'?'':'none';
   const r=calcul(); const L=lignes(r); LAST={r,L};
   const P=S.projet;
   document.getElementById('r-titre').textContent=[P.nom,P.client].filter(Boolean).join(' · ');
